@@ -1,0 +1,159 @@
+{
+  "data": {
+    "totalItems": 9,
+    "startIndex": 7,
+    "pageIndex": 3,
+    "itemsPerPage": 3,
+    "currentItemCount": 3,
+    "totalPages": 3,
+    "items": [
+      {
+        "uid": "8fjUrkpmagr",
+        "title": "Rivian首席执行官：电动汽车电池短缺迫在眉睫，或比芯片短缺更严重",
+        "summary": "他表示，对于一个试图在十年内将电动汽车销量从现在的几百万辆提高到数千万辆的行业来说，制造足够的电池将是最大障碍之一，从原材料开采到加工，再到制造电池本身，到处都将出现短缺 ... 他还表示：“全世界所有的电池产量加起来还不到我们10年后所需产量的10%” ... 他指出，扰乱汽车行业的半导体短缺是规模相对较小的供需不平衡，而对于电池来说，情况预计会“差一个数量级”。",
+        "createdAt": "2022-04-19T02:59:34.302Z",
+        "siteCount": 5,
+        "siteNameDisplay": "CNBeta",
+        "newsAggList": [
+          {
+            "url": "http://www.techweb.com.cn/world/2022-04-19/2887770.shtml",
+            "title": "Rivian CEO称电动汽车电池可能严重短缺 比芯片短缺更严重",
+            "siteNameDisplay": "TechWeb/CNBeta"
+          },
+          {
+            "url": "https://tech.sina.com.cn/it/2022-04-18/doc-imcwipii5040691.shtml",
+            "title": "Rivian警告：缺芯只是“开胃菜” 电池短缺程度将高出一个数量级",
+            "siteNameDisplay": "新浪科技"
+          },
+          {
+            "url": "https://www.pingwest.com/w/262065",
+            "title": "Rivian首席执行官：电动汽车电池短缺迫在眉睫，或比芯片短缺更严重",
+            "siteNameDisplay": "品玩"
+          },
+          {
+            "url": "https://www.ithome.com/0/613/824.htm",
+            "title": "Rivian CEO 称电动汽车电池将严重短缺，比芯片短缺更严重",
+            "siteNameDisplay": "IT 之家"
+          }
+        ],
+        "up": false,
+        "hasView": true,
+        "timelineId": "8fltxv7au25",
+        "entityList": [],
+        "eventList": [],
+        "tagList": [
+          {
+            "uid": "863u620IofB",
+            "name": "汽车"
+          },
+          {
+            "uid": "863u620ZZoj",
+            "name": "芯片"
+          },
+          {
+            "uid": "863u620ZZol",
+            "name": "新能源汽车"
+          }
+        ]
+      },
+      {
+        "uid": "8fkQ4it05P7",
+        "title": "知乎回应视频部门裁员超 60% 传闻：没有裁员计划",
+        "summary": "今日有消息称“知乎视频部门调整，将裁员超 60%”，对此知乎回应称，视频业务上没有裁员计划，还要欢迎视频业务的优秀人才加入。",
+        "createdAt": "2022-04-19T02:41:30.128Z",
+        "siteCount": 8,
+        "siteNameDisplay": "IT 之家",
+        "newsAggList": [
+          {
+            "url": "https://www.tmtpost.com/nictation/6081694.html",
+            "title": "知乎整个视频团队被调整，视频部门裁员超60%",
+            "siteNameDisplay": "钛媒体"
+          },
+          {
+            "url": "http://www.techweb.com.cn/it/2022-04-19/2887788.shtml",
+            "title": "裁员风波再起 知乎：在视频业务上没有裁员计划",
+            "siteNameDisplay": "TechWeb"
+          },
+          {
+            "url": "https://3g.163.com/dy/article/H5AG4CEF0519U3I5.html",
+            "title": "消息称知乎视频部门裁员超60% 回应：没有裁员计划",
+            "siteNameDisplay": "网易新闻"
+          },
+          {
+            "url": "https://news.pedaily.cn/202204/490448.shtml",
+            "title": "知乎视频迷途",
+            "siteNameDisplay": "投资界"
+          },
+          {
+            "url": "https://www.ithome.com/0/613/777.htm",
+            "title": "知乎回应视频部门裁员超 60% 传闻：没有裁员计划",
+            "siteNameDisplay": "IT 之家"
+          },
+          {
+            "url": "https://3g.163.com/dy/article/H5AB98M305198R91.html",
+            "title": "知乎视频迷途：降权、团队解散、一号位离职",
+            "siteNameDisplay": "网易新闻/TechWeb/界面"
+          }
+        ],
+        "up": false,
+        "hasView": true,
+        "timelineId": "8fkVhgiehOG",
+        "entityList": [],
+        "eventList": [],
+        "tagList": [
+          {
+            "uid": "863u620ZZnD",
+            "name": "社交"
+          },
+          {
+            "uid": "863u620Iofu",
+            "name": "互联网"
+          },
+          {
+            "uid": "863u620IofG",
+            "name": "文娱"
+          }
+        ]
+      },
+      {
+        "uid": "8fkJz6NfS5A",
+        "title": "合成生物学初创公司百福安生物天使轮融资近5000万",
+        "summary": "百福安生物近日已完成近5000万元天使轮融资，本轮融资由红杉中国种子基金领投，合力投资跟投 ... 据悉，本轮融资将用于产品研发、搭建小试生产线以及从克级到公斤级的新工艺验证。此前，百福安生物于今年1月完成了数百万元的种子轮融资。",
+        "createdAt": "2022-04-19T02:14:51.513Z",
+        "siteCount": 3,
+        "siteNameDisplay": "36Kr",
+        "newsAggList": [
+          {
+            "url": "https://www.chinaventure.com.cn/news/80-20220419-368397.html",
+            "title": "合成生物学初创公司百福安生物天使轮融资近5000万",
+            "siteNameDisplay": "投中网"
+          },
+          {
+            "url": "https://36kr.com/p/1699443772670216",
+            "title": "​36氪首发 | 「百福安生物」获近5000万元天使轮融资，将建立批次百公斤级产品制备的微型工厂",
+            "siteNameDisplay": "36Kr"
+          },
+          {
+            "url": "https://news.pedaily.cn/202204/490419.shtml",
+            "title": "百福安生物获近5000万元天使轮融资，红杉中国种子基金领投",
+            "siteNameDisplay": "投资界"
+          }
+        ],
+        "up": false,
+        "hasView": true,
+        "entityList": [],
+        "eventList": [],
+        "tagList": [
+          {
+            "uid": "863u620ZZoh",
+            "name": "投资"
+          },
+          {
+            "uid": "863u620IofD",
+            "name": "医疗健康"
+          }
+        ]
+      }
+    ]
+  }
+}
