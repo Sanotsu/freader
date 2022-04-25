@@ -2,8 +2,11 @@
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:freader/models/readhub_api_result.dart';
+import 'package:freader/utils/platform_util.dart';
 import 'package:freader/views/readhub_category/fetch_readhub_api_result.dart';
+import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class ReadhubTopics extends StatefulWidget {
@@ -51,21 +54,6 @@ class _ReadhubTopicsState extends State<ReadhubTopics> {
     }
   }
 
-// 打开url链接
-  Future<void> _launchInWebViewOrVC(String url) async {
-    if (await canLaunch(url)) {
-      await launch(
-        url,
-        // 这些配置看实际需求，有个url看起来能用
-        forceSafariVC: true,
-        forceWebView: true,
-        headers: <String, String>{'my_header_key': 'my_header_value'},
-      );
-    } else {
-      throw 'Could not launch $url';
-    }
-  }
-
   ///获取最新消息
   // 下拉刷新，也一直是第一页
   Future<List<dynamic>> getItemNews() async {
@@ -77,7 +65,7 @@ class _ReadhubTopicsState extends State<ReadhubTopics> {
     // addAll()里面必须也是一个List<>，而不是一个List<>?
     var temp = response[0].data!.items ?? [];
     acquiredList.addAll(temp);
-    print("最新消息已获取完成.");
+    print("最新消息已获取完成.acquiredList长度: ${acquiredList.length}");
 
     return acquiredList;
   }
@@ -164,6 +152,14 @@ class _ReadhubTopicsState extends State<ReadhubTopics> {
   }
 
   Widget _buildItemCard(BuildContext context, int index, List<dynamic>? data) {
+    ItemsData newsItem = data![index];
+
+    // 获取创建时间，如果是utc，则加8个小时显示成北京时间
+    var createdTime = DateTime.parse(newsItem.createdAt ?? '');
+    if (createdTime.isUtc) {
+      createdTime = createdTime.add(const Duration(hours: 8));
+    }
+
     return Container(
       height: 80,
       color: Colors.white,
@@ -172,30 +168,115 @@ class _ReadhubTopicsState extends State<ReadhubTopics> {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text("$index ---    ${data![index].title}"),
+            // 标题最多也1行显示，缩放为1.0. 目前是点击标题，跳转第newsAggList的第一个链接
             RichText(
+              maxLines: 1,
+              textScaleFactor: 1,
               text: TextSpan(children: [
                 TextSpan(
-                    // 不指定颜色可能默认为白色，看不见，像是没有内容一样
-                    style: Theme.of(context).textTheme.bodyText1,
-                    text: "${data[index].title}",
+                    // 不指定颜色可能默认为白色，看不见，像是没有内容一样(Theme.of()本身返回TextStyle)
+                    // style: Theme.of(context).textTheme.bodyText2,
+                    style: TextStyle(color: Colors.lightBlue, fontSize: 10.sp),
+                    text: "$index --- ${newsItem.title}",
                     recognizer: TapGestureRecognizer()
                       ..onTap = () async {
-                        var url = "${data[index].newsAggList![0].url}";
+                        var url = "${newsItem.newsAggList![0].url}";
+                        // 应用内打开ok，但原文章没有自适应手机的话，看起來就很別扭。
                         if (await canLaunch(url)) {
-                          await launch(url);
+                          await launch(
+                            url,
+                            forceSafariVC: false,
+                            forceWebView: false,
+                          );
                         } else {
                           throw 'Could not launch $url';
                         }
                       }),
               ]),
             ),
-            ElevatedButton(
-              onPressed: () => setState(() {
-                _launched =
-                    _launchInWebViewOrVC("${data[index].newsAggList![0].url}");
-              }),
-              child: const Text('Launch in app'),
+            // 标题和摘要之间的空行
+            SizedBox(
+              height: 6.sp,
+            ),
+            // 摘要
+            Expanded(
+              flex: 1,
+              child: Text(
+                newsItem.summary ?? "",
+
+                ///浏览器...显示异常
+                overflow: PlatformUtil.isWeb
+                    ? TextOverflow.fade
+                    : TextOverflow.ellipsis,
+                // 如果是手机，摘要显示2行
+                maxLines: PlatformUtil.isMobile ? 2 : 5,
+                strutStyle: StrutStyle(
+                  forceStrutHeight: false,
+                  height: 0.1.sp,
+                  leading: 1,
+                ),
+                style: Theme.of(context).textTheme.caption!.copyWith(
+                    letterSpacing: 1.0,
+                    fontSize: 8.sp,
+                    color: Theme.of(context)
+                        .textTheme
+                        .headline6!
+                        .color!
+                        .withOpacity(0.8)),
+              ),
+            ),
+            // 发布时间，其他icon等
+            Row(
+              children: <Widget>[
+                Expanded(
+                  flex: 1,
+                  // 发布时间格式化，加上发布的网站名称
+                  child: Text(
+                    DateFormat('yyyy-MM-dd HH:mm:ss').format(createdTime) +
+                        "    " +
+                        "${newsItem.siteNameDisplay} ",
+                    textScaleFactor: 1.0,
+                    maxLines: 2,
+
+                    ///浏览器...显示异常
+                    overflow: PlatformUtil.isWeb
+                        ? TextOverflow.fade
+                        : TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.caption!.copyWith(
+                          fontSize: 8.sp,
+                        ),
+                  ),
+                ),
+
+                /// 都是預留而已
+                // 分享
+                SmallButtonWidget(
+                  onTap: () => {},
+                  tooltip: "share",
+                  child: Icon(
+                    Icons.share,
+                    size: 10.sp,
+                  ),
+                ),
+                // 更多链接
+                SmallButtonWidget(
+                  onTap: () => {},
+                  tooltip: "link",
+                  child: Icon(
+                    Icons.link,
+                    size: 10.sp,
+                  ),
+                ),
+                // 查看详情web
+                SmallButtonWidget(
+                  onTap: () => {},
+                  tooltip: "detail",
+                  child: Icon(
+                    Icons.details,
+                    size: 10.sp,
+                  ),
+                ),
+              ],
             ),
           ],
         ),
@@ -207,19 +288,56 @@ class _ReadhubTopicsState extends State<ReadhubTopics> {
   Widget _getMoreWidget() {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(10.0),
+        padding: EdgeInsets.all(5.0.sp),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
-          children: const <Widget>[
+          children: <Widget>[
             Text(
               '加载中...',
-              style: TextStyle(fontSize: 16.0),
+              style: TextStyle(fontSize: 8.0.sp),
             ),
-            CircularProgressIndicator(
-              strokeWidth: 1.0,
-            )
+            SizedBox(
+              height: 15.sp,
+              width: 15.sp,
+              child: CircularProgressIndicator(
+                backgroundColor: Colors.grey[200],
+                valueColor: const AlwaysStoppedAnimation(Colors.blue),
+                value: .7,
+              ),
+            ),
+            // CircularProgressIndicator(
+            //   strokeWidth: 1.0.sp,
+            // )
           ],
+        ),
+      ),
+    );
+  }
+}
+
+///  都是預留的打开连接及关联报道Button
+class SmallButtonWidget extends StatelessWidget {
+  final GestureTapCallback onTap;
+  final Widget child;
+  final String tooltip;
+
+  const SmallButtonWidget({
+    Key? key,
+    required this.onTap,
+    required this.child,
+    required this.tooltip,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: tooltip,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: EdgeInsets.all(5.sp),
+          child: child,
         ),
       ),
     );
