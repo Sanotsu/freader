@@ -128,7 +128,10 @@ class _ReadhubTopicsState extends State<ReadhubTopics> {
                     // 如果当前显示的索引小于list的數量，正常显示;否则，显示正在加载新数据
                     return index < data.length
                         ? _buildItemCard(context, index, data)
+                        // ? ExpansionPanelItem(story: data[index], index: index)
                         : _getMoreWidget();
+
+                    // return StoryWidget(story: data[index], index: index);
                   },
                   controller: _scrollController,
                 ),
@@ -161,7 +164,7 @@ class _ReadhubTopicsState extends State<ReadhubTopics> {
     }
 
     return Container(
-      height: 80,
+      height: 180,
       color: Colors.white,
       child: Card(
         child: Column(
@@ -226,58 +229,7 @@ class _ReadhubTopicsState extends State<ReadhubTopics> {
               ),
             ),
             // 发布时间，其他icon等
-            Row(
-              children: <Widget>[
-                Expanded(
-                  flex: 1,
-                  // 发布时间格式化，加上发布的网站名称
-                  child: Text(
-                    DateFormat('yyyy-MM-dd HH:mm:ss').format(createdTime) +
-                        "    " +
-                        "${newsItem.siteNameDisplay} ",
-                    textScaleFactor: 1.0,
-                    maxLines: 2,
-
-                    ///浏览器...显示异常
-                    overflow: PlatformUtil.isWeb
-                        ? TextOverflow.fade
-                        : TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.caption!.copyWith(
-                          fontSize: 8.sp,
-                        ),
-                  ),
-                ),
-
-                /// 都是預留而已
-                // 分享
-                SmallButtonWidget(
-                  onTap: () => {},
-                  tooltip: "share",
-                  child: Icon(
-                    Icons.share,
-                    size: 10.sp,
-                  ),
-                ),
-                // 更多链接
-                SmallButtonWidget(
-                  onTap: () => {},
-                  tooltip: "link",
-                  child: Icon(
-                    Icons.link,
-                    size: 10.sp,
-                  ),
-                ),
-                // 查看详情web
-                SmallButtonWidget(
-                  onTap: () => {},
-                  tooltip: "detail",
-                  child: Icon(
-                    Icons.details,
-                    size: 10.sp,
-                  ),
-                ),
-              ],
-            ),
+            ExpansionPanelItem(story: newsItem, index: index),
           ],
         ),
       ),
@@ -338,6 +290,153 @@ class SmallButtonWidget extends StatelessWidget {
         child: Padding(
           padding: EdgeInsets.all(5.sp),
           child: child,
+        ),
+      ),
+    );
+  }
+}
+
+/// 可展开的item panel widget。
+/// 计划是展开可见关联的新闻链接和來源等。
+class ExpansionPanelItem extends StatefulWidget {
+  final ItemsData story;
+
+  // ignore: prefer_typing_uninitialized_variables
+  final index;
+
+  const ExpansionPanelItem({Key? key, required this.story, required this.index})
+      : super(key: key);
+
+  @override
+  _ExpansionPanelItemState createState() => _ExpansionPanelItemState();
+}
+
+class _ExpansionPanelItemState extends State<ExpansionPanelItem> {
+  bool _expanded = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(children: [
+      ExpansionPanelList(
+        animationDuration: const Duration(milliseconds: 1000),
+        children: [
+          ExpansionPanel(
+            headerBuilder: (context, isExpanded) {
+              return _buildExpansionPanelHeader();
+            },
+            body: _buildExpansionPanelBody(),
+            isExpanded: _expanded,
+            canTapOnHeader: true,
+            backgroundColor: Colors.amber,
+          ),
+        ],
+        dividerColor: Colors.grey,
+        expansionCallback: (panelIndex, isExpanded) {
+          _expanded = !_expanded;
+          setState(() {});
+        },
+      ),
+    ]);
+  }
+
+// 可展开行的 header
+  Widget _buildExpansionPanelHeader() {
+    print(widget);
+
+    // 获取创建时间，如果是utc，则加8个小时显示成北京时间
+    var createdTime = DateTime.parse(widget.story.createdAt ?? '');
+    if (createdTime.isUtc) {
+      createdTime = createdTime.add(const Duration(hours: 8));
+    }
+
+    return Row(
+      children: <Widget>[
+        Expanded(
+          flex: 1,
+          // 发布时间格式化，加上发布的网站名称
+          child: Text(
+            DateFormat('yyyy-MM-dd HH:mm:ss').format(createdTime) +
+                "    " +
+                "${widget.story.siteNameDisplay} ",
+            textScaleFactor: 1.0,
+            maxLines: 1,
+
+            ///浏览器...显示异常
+            overflow:
+                PlatformUtil.isWeb ? TextOverflow.fade : TextOverflow.ellipsis,
+            style: Theme.of(context).textTheme.caption!.copyWith(
+                  fontSize: 8.sp,
+                ),
+          ),
+        ),
+
+        /// 都是預留而已
+        // 分享
+        SmallButtonWidget(
+          onTap: () => {},
+          tooltip: "share",
+          child: Icon(
+            Icons.share,
+            size: 10.sp,
+          ),
+        ),
+        // 更多链接
+        SmallButtonWidget(
+          onTap: () => {},
+          tooltip: "link",
+          child: Icon(
+            Icons.link,
+            size: 10.sp,
+          ),
+        ),
+        // 查看详情web
+        SmallButtonWidget(
+          onTap: () => {},
+          tooltip: "detail",
+          child: Icon(
+            Icons.details,
+            size: 10.sp,
+          ),
+        ),
+      ],
+    );
+  }
+
+// 可展开行的 header
+  Widget _buildExpansionPanelBody() {
+    print(widget);
+
+    List<NewsagglistData> newsAggList = widget.story.newsAggList ?? [];
+
+    List<Widget> list = <Widget>[];
+
+    for (var i = 0; i < newsAggList.length; i++) {
+      list.add(Row(
+        children: [
+          Text(
+            "${newsAggList[i].title}",
+            style: TextStyle(fontSize: 5.sp, color: Colors.red),
+          ),
+          SmallButtonWidget(
+            onTap: () => {},
+            tooltip: "share",
+            child: Text(
+              "${newsAggList[i].siteNameDisplay}",
+              style: TextStyle(fontSize: 5.sp, color: Colors.red),
+            ),
+          ),
+        ],
+      ));
+    }
+    return SingleChildScrollView(
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          minHeight: 60.sp,
+        ),
+        child: SizedBox(
+          height: 50.sp,
+          child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start, children: list),
         ),
       ),
     );
