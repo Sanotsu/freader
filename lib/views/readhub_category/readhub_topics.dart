@@ -128,10 +128,7 @@ class _ReadhubTopicsState extends State<ReadhubTopics> {
                     // 如果当前显示的索引小于list的數量，正常显示;否则，显示正在加载新数据
                     return index < data.length
                         ? _buildItemCard(context, index, data)
-                        // ? ExpansionPanelItem(story: data[index], index: index)
                         : _getMoreWidget();
-
-                    // return StoryWidget(story: data[index], index: index);
                   },
                   controller: _scrollController,
                 ),
@@ -164,7 +161,7 @@ class _ReadhubTopicsState extends State<ReadhubTopics> {
     }
 
     return Container(
-      height: 180,
+      height: 80,
       color: Colors.white,
       child: Card(
         child: Column(
@@ -172,6 +169,37 @@ class _ReadhubTopicsState extends State<ReadhubTopics> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             // 标题最多也1行显示，缩放为1.0. 目前是点击标题，跳转第newsAggList的第一个链接
+            // Expanded(
+            //   child: GestureDetector(
+            //     onTap: () async {
+            //       // 再在应用內打开url
+            //       var url = "${newsItem.newsAggList![0].url}";
+            //       // 应用内打开ok，但原文章没有自适应手机的话，看起來就很別扭。
+            //       if (await canLaunch(url)) {
+            //         await launch(
+            //           url,
+            //           forceSafariVC: true,
+            //           forceWebView: true,
+            //           enableJavaScript: true,
+            //         );
+            //       } else {
+            //         throw 'Could not launch $url';
+            //       }
+            //     },
+            //     child: Text(
+            //       "$index --- ${newsItem.title}",
+            //       softWrap: true,
+            //       textAlign: TextAlign.left,
+            //       overflow: TextOverflow.ellipsis,
+            //       maxLines: 1,
+            //       style: TextStyle(
+            //         color: Colors.lightBlue,
+            //         fontSize: 10.sp,
+            //       ),
+            //     ),
+            //   ),
+            // ),
+            // 效果类似
             RichText(
               maxLines: 1,
               textScaleFactor: 1,
@@ -228,44 +256,209 @@ class _ReadhubTopicsState extends State<ReadhubTopics> {
                         .withOpacity(0.8)),
               ),
             ),
-            // 发布时间，其他icon等
-            ExpansionPanelItem(story: newsItem, index: index),
+            // 发布时间，其他icon等(別想着使用ExpansionPanelList，直接点击展开一个定高的可滚动的列表显示好了。)
+            // ExpansionPanelItem(story: newsItem, index: index),
+            _buildNewsAggListBottomArea(newsItem),
           ],
         ),
       ),
     );
   }
 
-  /// 加载更多时显示的组件,给用户提示
-  Widget _getMoreWidget() {
-    return Center(
-      child: Padding(
-        padding: EdgeInsets.all(5.0.sp),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              '加载中...',
-              style: TextStyle(fontSize: 8.0.sp),
-            ),
-            SizedBox(
-              height: 15.sp,
-              width: 15.sp,
-              child: CircularProgressIndicator(
-                backgroundColor: Colors.grey[200],
-                valueColor: const AlwaysStoppedAnimation(Colors.blue),
-                value: .7,
+// 底部的时间、媒体名、其他操作按钮
+  Widget _buildNewsAggListBottomArea(ItemsData newsItem) {
+    print(widget);
+
+    // 获取创建时间，如果是utc，则加8个小时显示成北京时间
+    var createdTime = DateTime.parse(newsItem.createdAt ?? '');
+    if (createdTime.isUtc) {
+      createdTime = createdTime.add(const Duration(hours: 8));
+    }
+
+    /// 底部弹出其它媒体报道
+    Future<void> _showNewsDialog(BuildContext context) async {
+      await showModalBottomSheet<int>(
+          context: context,
+          isScrollControlled: true,
+          backgroundColor: Theme.of(context).cardColor,
+          builder: (BuildContext context) {
+            return ListView.builder(
+                itemCount:
+                    1, // 点击更多链接是一个新闻一个按钮，但下面的newsAggList有多少，则不定长度，子widget自行生成
+                shrinkWrap: true,
+                itemBuilder: (context, index) => _buildNewsAggList(newsItem));
+          });
+    }
+
+    return Row(
+      children: <Widget>[
+        Expanded(
+          flex: 1,
+          // 发布时间格式化，加上发布的网站名称
+          child: Text(
+            DateFormat('yyyy-MM-dd HH:mm:ss').format(createdTime) +
+                "    " +
+                "${newsItem.siteNameDisplay} ",
+            textScaleFactor: 1.0,
+            maxLines: 1,
+
+            ///浏览器...显示异常
+            overflow:
+                PlatformUtil.isWeb ? TextOverflow.fade : TextOverflow.ellipsis,
+            style: Theme.of(context).textTheme.caption!.copyWith(
+                  fontSize: 8.sp,
+                ),
+          ),
+        ),
+
+        /// 都是預留而已
+        // 分享
+        SmallButtonWidget(
+          onTap: () => {},
+          tooltip: "share",
+          child: Icon(
+            Icons.share,
+            size: 10.sp,
+          ),
+        ),
+        // 更多链接
+        SmallButtonWidget(
+          onTap: () => _showNewsDialog(context),
+          tooltip: 'news agg list',
+          child: Icon(
+            Icons.link,
+            size: 14.sp,
+            color: Colors.lightBlue,
+          ),
+        ),
+        // 查看详情web
+        SmallButtonWidget(
+          onTap: () => {},
+          tooltip: "detail",
+          child: Icon(
+            Icons.details,
+            size: 10.sp,
+          ),
+        ),
+      ],
+    );
+  }
+
+// ItemCard底部显示更多新闻链接
+  Widget _buildNewsAggList(ItemsData newsItem) {
+    List<NewsagglistData> newsAggList = newsItem.newsAggList ?? [];
+
+    List<Widget> list = <Widget>[];
+
+    for (var i = 0; i < newsAggList.length; i++) {
+      list.add(
+          // 橫向排列，title和siteNameDisplay占比为3:1。改为Row，不要direction属性是一样的。
+          Flex(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        direction: Axis.horizontal,
+        children: [
+          Expanded(
+            flex: 3,
+            child: GestureDetector(
+              onTap: () async {
+                // 先关闭_showNewsDialog中创建的 ModalBottomSheet
+                Navigator.pop(context);
+                // 再在应用內打开url
+                var url = "${newsAggList[i].url}";
+                // 应用内打开ok，但原文章没有自适应手机的话，看起來就很別扭。
+                if (await canLaunch(url)) {
+                  await launch(
+                    url,
+                    forceSafariVC: true,
+                    forceWebView: true,
+                    enableJavaScript: true,
+                  );
+                } else {
+                  throw 'Could not launch $url';
+                }
+              },
+              child: SizedBox(
+                height: 30.0.sp,
+                child: Text(
+                  "${newsAggList[i].title}",
+                  softWrap: true,
+                  textAlign: TextAlign.left,
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                  style: TextStyle(
+                    color: Colors.lightBlue,
+                    fontSize: 14.sp,
+                  ),
+                ),
               ),
             ),
-            // CircularProgressIndicator(
-            //   strokeWidth: 1.0.sp,
-            // )
-          ],
+          ),
+          // 不加Expanded，不知道Text的宽度，则不会以省略号显示。
+          Expanded(
+            flex: 1,
+            child: SizedBox(
+              height: 30.0.sp,
+              child: Text(
+                "${newsAggList[i].siteNameDisplay}",
+                softWrap: true,
+                textAlign: TextAlign.left,
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
+                style: TextStyle(
+                  color: Colors.blueGrey,
+                  fontSize: 14.sp,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ));
+    }
+
+// SizedBox指定高度，SingleChildScrollView里面的数据高度大于此，则可以上下滚动查看
+// 不指定，则可能默认是整个屏幕高度。
+    return SizedBox(
+      // height: 200.sp,
+      child: SingleChildScrollView(
+        padding: EdgeInsets.all(16.0.sp),
+        child: Center(
+          child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start, children: list),
         ),
       ),
     );
   }
+}
+
+/// 加载更多时显示的组件,给用户提示
+Widget _getMoreWidget() {
+  return Center(
+    child: Padding(
+      padding: EdgeInsets.all(5.0.sp),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: <Widget>[
+          Text(
+            '加载中...',
+            style: TextStyle(fontSize: 8.0.sp),
+          ),
+          SizedBox(
+            height: 15.sp,
+            width: 15.sp,
+            child: CircularProgressIndicator(
+              backgroundColor: Colors.grey[200],
+              valueColor: const AlwaysStoppedAnimation(Colors.blue),
+              value: .7,
+            ),
+          ),
+          // CircularProgressIndicator(
+          //   strokeWidth: 1.0.sp,
+          // )
+        ],
+      ),
+    ),
+  );
 }
 
 ///  都是預留的打开连接及关联报道Button
@@ -296,6 +489,7 @@ class SmallButtonWidget extends StatelessWidget {
   }
 }
 
+/// -----------------------2022-04-26 暂时不用↓↓↓↓↓↓
 /// 可展开的item panel widget。
 /// 计划是展开可见关联的新闻链接和來源等。
 class ExpansionPanelItem extends StatefulWidget {
@@ -442,3 +636,5 @@ class _ExpansionPanelItemState extends State<ExpansionPanelItem> {
     );
   }
 }
+
+/// -----------------------2022-04-26 暂时不用↑↑↑↑↑↑↑

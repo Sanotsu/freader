@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:freader/views/readhub_category/readhub_daily.dart';
 import 'package:freader/views/readhub_category/readhub_news.dart';
 import 'package:freader/views/readhub_category/readhub_tech.dart';
@@ -22,36 +23,38 @@ class _ReadhubPageState extends State<ReadhubPage> {
             Container(
               height: 20,
               color: Colors.brown, // 用來看位置，不需要的话这个Container可以改为SizedBox
-              child: const TabBar(
+              child: TabBar(
                 indicator: UnderlineTabIndicator(
-                  borderSide: BorderSide(width: 2.0), // 下划线的粗度
+                  borderSide: BorderSide(
+                      width: 3.0.sp, color: Colors.lightBlue), // 下划线的粗度和颜色
                   // 下划线的四边的间距horizontal橫向
-                  insets: EdgeInsets.symmetric(horizontal: 2.0),
+                  insets: EdgeInsets.symmetric(horizontal: 2.0.sp),
                 ),
                 indicatorWeight: 0,
                 indicatorSize: TabBarIndicatorSize.label,
                 tabs: [
                   Tab(
                     child: Text(
-                      "Topics",
-                      style: TextStyle(fontSize: 10),
-                    ),
-                  ),
-                  Tab(
-                    height: 12,
-                    icon: Icon(
-                      Icons.home,
-                      size: 10,
+                      "热门话题",
+                      style: TextStyle(fontSize: 10.sp),
                     ),
                   ),
                   Tab(
                     child: Text(
-                      'Video',
+                      '每日早报',
+                      style: TextStyle(fontSize: 10.sp),
                     ),
                   ),
                   Tab(
                     child: Text(
-                      'Video',
+                      '科技动态',
+                      style: TextStyle(fontSize: 10.sp),
+                    ),
+                  ),
+                  Tab(
+                    child: Text(
+                      '技术资讯',
+                      style: TextStyle(fontSize: 10.sp),
                     ),
                   ),
                 ],
