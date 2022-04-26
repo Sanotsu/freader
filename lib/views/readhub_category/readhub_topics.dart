@@ -3,7 +3,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:freader/models/readhub_api_result.dart';
+import 'package:freader/models/readhub_api_topics_result.dart';
 import 'package:freader/utils/platform_util.dart';
 import 'package:freader/views/readhub_category/fetch_readhub_api_result.dart';
 import 'package:intl/intl.dart';

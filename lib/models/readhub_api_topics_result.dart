@@ -1,17 +1,17 @@
 import 'package:json_annotation/json_annotation.dart';
 
-part 'readhub_api_result.g.dart';
+part 'readhub_api_topics_result.g.dart';
 
 @JsonSerializable(explicitToJson: true)
-class ReadhubApiResult {
+class ReadhubApiTopicsResult {
   ReadhubApiResultData? data;
   int? code;
   int? message;
-  ReadhubApiResult({this.data, this.code, this.message});
+  ReadhubApiTopicsResult({this.data, this.code, this.message});
 
-  factory ReadhubApiResult.fromJson(Map<String, dynamic> json) =>
-      _$ReadhubApiResultFromJson(json);
-  Map<String, dynamic> toJson() => _$ReadhubApiResultToJson(this);
+  factory ReadhubApiTopicsResult.fromJson(Map<String, dynamic> json) =>
+      _$ReadhubApiTopicsResultFromJson(json);
+  Map<String, dynamic> toJson() => _$ReadhubApiTopicsResultToJson(this);
 }
 
 @JsonSerializable(explicitToJson: true)

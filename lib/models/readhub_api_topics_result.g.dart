@@ -1,13 +1,14 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'readhub_api_result.dart';
+part of 'readhub_api_topics_result.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator
 // **************************************************************************
 
-ReadhubApiResult _$ReadhubApiResultFromJson(Map<String, dynamic> json) =>
-    ReadhubApiResult(
+ReadhubApiTopicsResult _$ReadhubApiTopicsResultFromJson(
+        Map<String, dynamic> json) =>
+    ReadhubApiTopicsResult(
       data: json['data'] == null
           ? null
           : ReadhubApiResultData.fromJson(json['data'] as Map<String, dynamic>),
@@ -15,7 +16,8 @@ ReadhubApiResult _$ReadhubApiResultFromJson(Map<String, dynamic> json) =>
       message: json['message'] as int?,
     );
 
-Map<String, dynamic> _$ReadhubApiResultToJson(ReadhubApiResult instance) =>
+Map<String, dynamic> _$ReadhubApiTopicsResultToJson(
+        ReadhubApiTopicsResult instance) =>
     <String, dynamic>{
       'data': instance.data?.toJson(),
       'code': instance.code,
@@ -25,14 +27,14 @@ Map<String, dynamic> _$ReadhubApiResultToJson(ReadhubApiResult instance) =>
 ReadhubApiResultData _$ReadhubApiResultDataFromJson(
         Map<String, dynamic> json) =>
     ReadhubApiResultData(
-      totalItems: json['totalItems'] as int,
-      startIndex: json['startIndex'] as int,
-      pageIndex: json['pageIndex'] as int,
-      itemsPerPage: json['itemsPerPage'] as int,
-      currentItemCount: json['currentItemCount'] as int,
-      totalPages: json['totalPages'] as int,
-      items: (json['items'] as List<dynamic>)
-          .map((e) => ItemsData.fromJson(e as Map<String, dynamic>))
+      totalItems: json['totalItems'] as int?,
+      startIndex: json['startIndex'] as int?,
+      pageIndex: json['pageIndex'] as int?,
+      itemsPerPage: json['itemsPerPage'] as int?,
+      currentItemCount: json['currentItemCount'] as int?,
+      totalPages: json['totalPages'] as int?,
+      items: (json['items'] as List<dynamic>?)
+          ?.map((e) => ItemsData.fromJson(e as Map<String, dynamic>))
           .toList(),
     );
 

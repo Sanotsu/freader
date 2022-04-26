@@ -3,11 +3,11 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:freader/models/readhub_api_result.dart';
+import 'package:freader/models/readhub_api_topics_result.dart';
 import 'package:http/http.dart' as http;
 
 // 后续可能有所谓的延迟加载数据
-Future<List<ReadhubApiResult>> fetchReadhubApiResult(String url) async {
+Future<List<ReadhubApiTopicsResult>> fetchReadhubApiResult(String url) async {
 // url示例：https://api.readhub.cn/topic/list?page=2&size=20
 
   final response = await http.get(Uri.parse(url));
@@ -23,7 +23,7 @@ Future<List<ReadhubApiResult>> fetchReadhubApiResult(String url) async {
 
     // print(resp);
 
-    return resp.map((e) => ReadhubApiResult.fromJson(e)).toList();
+    return resp.map((e) => ReadhubApiTopicsResult.fromJson(e)).toList();
   } else {
     // If the server did not return a 200 OK response,
     // then throw an exception.
