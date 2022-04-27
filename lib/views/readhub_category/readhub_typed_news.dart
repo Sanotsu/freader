@@ -51,10 +51,8 @@ class _ReadhubTypedNewsState extends State<ReadhubTypedNews> {
   @override
   void initState() {
     super.initState();
-    print("--------------${widget.newsType},---${_genUrl(1)}");
     // 初始的时候为第一页开始
-    futureReadhubApiResult = _getItemNews();
-    currentPage = 1;
+    futureReadhubApiResult = _getLatestItemNews();
 
 // 上拉添加监听器（并不是滑倒手机屏幕底部就更新数据，而是当前页的数据加载完之后更新下一頁的数据）
     _scrollController.addListener(_scrollListener);
@@ -68,9 +66,9 @@ class _ReadhubTypedNewsState extends State<ReadhubTypedNews> {
     }
   }
 
-  ///获取最新消息
-  // 下拉刷新，也一直是第一页
-  Future<List<dynamic>> _getItemNews() async {
+  ///下拉刷新
+  // 下拉刷新获取最新的数据，也就是第一页的数据
+  Future<List<dynamic>> _getLatestItemNews() async {
     acquiredList.clear();
 
     print("开始获取最新消息...");
@@ -96,10 +94,11 @@ class _ReadhubTypedNewsState extends State<ReadhubTypedNews> {
 
     print('加载更多  $isLoading');
 
-    // 延迟5秒，看一下加载效果
-    await Future.delayed(const Duration(seconds: 5));
+    // 延迟3秒，看一下加载效果
+    await Future.delayed(const Duration(seconds: 3));
 
-    var response = await fetchReadhubApiCommonResult(_genUrl(currentPage));
+    // 上拉加载更多，则应该是获取当前页的下一页的数据
+    var response = await fetchReadhubApiCommonResult(_genUrl(currentPage + 1));
     // addAll()里面必须也是一个`List<>`，而不是一个`List<>?`。
     var temp = response[0].data!.items ?? [];
     acquiredList.addAll(temp);
@@ -116,7 +115,8 @@ class _ReadhubTypedNewsState extends State<ReadhubTypedNews> {
   @override
   Widget build(BuildContext context) {
     return RefreshIndicator(
-      onRefresh: _getItemNews,
+      // 下拉刷新就是加载最新一页的数据
+      onRefresh: _getLatestItemNews,
       child: FutureBuilder<List<dynamic>>(
         future: futureReadhubApiResult,
         builder: (context, AsyncSnapshot<List<dynamic>> snapshot) {
@@ -178,7 +178,8 @@ class _ReadhubTypedNewsState extends State<ReadhubTypedNews> {
   }
 }
 
-/// ----------------- 以下两个其实可以直接写在 _ReadhubTypedNewsState 作为私有函数------------------
+/// ----------------- 以下几个widget其实可以直接写在 _ReadhubTypedNewsState 作为私有函数------------------
+/// 2022-04-27：目前还未学习到使用class和函数的细致区别
 /// 构建新闻条目卡片底部区域，发布时间、发布媒体、一些预留操作按钮
 ///   需要传入指定新闻信息
 class ItemCardBottomAreaWidget extends StatefulWidget {
