@@ -3,6 +3,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:freader/models/readhub_api_result.dart';
 
 import 'package:freader/utils/platform_util.dart';
 import 'package:freader/views/readhub_category/fetch_readhub_api_result.dart';
@@ -10,12 +11,7 @@ import 'package:freader/views/readhub_category/readhub_common_widgets.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-/// 特別注意，这里的 ItemsData 类不是readhub_api_topics_result的，而是在 readhub_api_common_result 。
-/// 后续应该想办法合二为一。
-///
-import '../../models/readhub_api_common_result.dart';
-
-/// readhub中除了topics之外，其他指定类型的分类。（结构是一样的，只有url的类型不一样而已，可以复用）
+/// readhub中除了daily之外，其他指定类型的分类。
 class ReadhubTypedNews extends StatefulWidget {
   // 需要传入新闻类别
   final String newsType;
@@ -27,8 +23,8 @@ class ReadhubTypedNews extends StatefulWidget {
 
 class _ReadhubTypedNewsState extends State<ReadhubTypedNews> {
   //每次获取的数据列表要展示的数据
-  late Future<List<dynamic>> futureReadhubApiCommonResult;
-  // 已经获取到的数据（readhub_api_common_result 中的 ItemsData,新ItemsData的属性全是required，不必判空）
+  late Future<List<dynamic>> futureReadhubApiResult;
+  // 已经获取到的数据
   List<ItemsData> acquiredList = [];
   // 记录当前页面，下拉或者上拉的时候就要更新
   var currentPage = 1;
@@ -43,8 +39,12 @@ class _ReadhubTypedNewsState extends State<ReadhubTypedNews> {
 
   // 根据传入的新闻类型，构建对应的请求接口
   String _genUrl(int page) {
-    url =
-        "https://api.readhub.cn/news/list?size=$size&type=${widget.newsType}&page=$page";
+    if (widget.newsType == "topics") {
+      url = "https://api.readhub.cn/topic/list?page=$page&size=$size";
+    } else {
+      url =
+          "https://api.readhub.cn/news/list?size=$size&type=${widget.newsType}&page=$page";
+    }
     return url;
   }
 
@@ -53,7 +53,7 @@ class _ReadhubTypedNewsState extends State<ReadhubTypedNews> {
     super.initState();
     print("--------------${widget.newsType},---${_genUrl(1)}");
     // 初始的时候为第一页开始
-    futureReadhubApiCommonResult = _getItemNews();
+    futureReadhubApiResult = _getItemNews();
     currentPage = 1;
 
 // 上拉添加监听器（并不是滑倒手机屏幕底部就更新数据，而是当前页的数据加载完之后更新下一頁的数据）
@@ -80,7 +80,8 @@ class _ReadhubTypedNewsState extends State<ReadhubTypedNews> {
     /// model中设置了 required 的属性，实际取得为null。
 
     // addAll()里面必须也是一个`List<>`，而不是一个`List<>?`。
-    var temp = response[0].data.items;
+    var temp = response[0].data!.items ?? [];
+
     acquiredList.addAll(temp);
     print("最新消息已获取完成.acquiredList长度: ${acquiredList.length}");
 
@@ -100,7 +101,7 @@ class _ReadhubTypedNewsState extends State<ReadhubTypedNews> {
 
     var response = await fetchReadhubApiCommonResult(_genUrl(currentPage));
     // addAll()里面必须也是一个`List<>`，而不是一个`List<>?`。
-    var temp = response[0].data.items;
+    var temp = response[0].data!.items ?? [];
     acquiredList.addAll(temp);
     // 获取完之后，更新當前頁数据
     currentPage++;
@@ -117,7 +118,7 @@ class _ReadhubTypedNewsState extends State<ReadhubTypedNews> {
     return RefreshIndicator(
       onRefresh: _getItemNews,
       child: FutureBuilder<List<dynamic>>(
-        future: futureReadhubApiCommonResult,
+        future: futureReadhubApiResult,
         builder: (context, AsyncSnapshot<List<dynamic>> snapshot) {
           ///正在请求时的视图
           if (snapshot.connectionState == ConnectionState.active ||
@@ -144,7 +145,6 @@ class _ReadhubTypedNewsState extends State<ReadhubTypedNews> {
 
                     // 如果当前显示的索引小于list的數量，正常显示;否则，显示正在加载新数据
                     return index < data.length
-                        // ? _buildItemCard(context, index, data)
                         ? ItemCardWidget(
                             context: context, index: index, data: data)
                         : const LoadingMoreWidget();
@@ -195,9 +195,25 @@ class _ItemCardBottomAreaWidgetState extends State<ItemCardBottomAreaWidget> {
   @override
   Widget build(BuildContext context) {
     // 获取创建时间，如果是utc，则加8个小时显示成北京时间
-    var createdTime = DateTime.parse(widget.newsItem.createdAt);
+    var createdTime = DateTime.parse(widget.newsItem.createdAt ?? "");
     if (createdTime.isUtc) {
       createdTime = createdTime.add(const Duration(hours: 8));
+    }
+
+    /// r如果是热门话题，则可以底部弹出其它媒体报道
+    Future<void> _showNewsDialog(BuildContext context) async {
+      await showModalBottomSheet<int>(
+          context: context,
+          isScrollControlled: true,
+          backgroundColor: Theme.of(context).cardColor,
+          builder: (BuildContext context) {
+            return ListView.builder(
+                itemCount:
+                    1, // 点击更多链接是一个新闻一个按钮，但下面的newsAggList有多少，则不定长度，子widget自行生成
+                shrinkWrap: true,
+                itemBuilder: (context, index) =>
+                    buildNewsAggList(context, widget.newsItem));
+          });
     }
 
     return Row(
@@ -231,15 +247,25 @@ class _ItemCardBottomAreaWidgetState extends State<ItemCardBottomAreaWidget> {
             size: 10.sp,
           ),
         ),
-        // 更多链接
-        SmallButtonWidget(
-          onTap: () => {},
-          tooltip: 'news agg list',
-          child: Icon(
-            Icons.link,
-            size: 14.sp,
-          ),
-        ),
+        // 热门话题有更多链接，其他的就没有
+        widget.newsItem.newsAggList != null
+            ? SmallButtonWidget(
+                onTap: () => _showNewsDialog(context),
+                tooltip: 'news agg list',
+                child: Icon(
+                  Icons.link,
+                  size: 14.sp,
+                  color: Colors.lightBlue,
+                ),
+              )
+            : SmallButtonWidget(
+                onTap: () => {},
+                tooltip: "detail",
+                child: Icon(
+                  Icons.star,
+                  size: 10.sp,
+                ),
+              ),
         // 查看详情web
         SmallButtonWidget(
           onTap: () => {},
@@ -252,6 +278,94 @@ class _ItemCardBottomAreaWidgetState extends State<ItemCardBottomAreaWidget> {
       ],
     );
   }
+}
+
+/// ItemCard底部显示更多新闻链接
+/// 如果是热门话题，则可以点击查看更多的新闻链接。
+Widget buildNewsAggList(context, ItemsData newsItem) {
+  List<NewsagglistData> newsAggList = newsItem.newsAggList ?? [];
+
+  print(">>>>>>>>>>>>>>>>>>>");
+
+  List<Widget> list = <Widget>[];
+
+  for (var i = 0; i < newsAggList.length; i++) {
+    list.add(
+        // 橫向排列，title和siteNameDisplay占比为3:1。改为Row，不要direction属性是一样的。
+        Flex(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      direction: Axis.horizontal,
+      children: [
+        Expanded(
+          flex: 3,
+          child: GestureDetector(
+            onTap: () async {
+              // 先关闭_showNewsDialog中创建的 ModalBottomSheet
+              Navigator.pop(context);
+              // 再在应用內打开url
+              var url = "${newsAggList[i].url}";
+              // 应用内打开ok，但原文章没有自适应手机的话，看起來就很別扭。
+              if (await canLaunch(url)) {
+                await launch(
+                  url,
+                  forceSafariVC: true,
+                  forceWebView: true,
+                  enableJavaScript: true,
+                );
+              } else {
+                throw 'Could not launch $url';
+              }
+            },
+            child: SizedBox(
+              height: 30.0.sp,
+              child: Text(
+                "${newsAggList[i].title}",
+                softWrap: true,
+                textAlign: TextAlign.left,
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
+                style: TextStyle(
+                  color: Colors.lightBlue,
+                  fontSize: 14.sp,
+                ),
+              ),
+            ),
+          ),
+        ),
+        // 不加Expanded，不知道Text的宽度，则不会以省略号显示。
+        Expanded(
+          flex: 1,
+          child: SizedBox(
+            height: 30.0.sp,
+            child: Text(
+              "${newsAggList[i].siteNameDisplay}",
+              softWrap: true,
+              textAlign: TextAlign.left,
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
+              style: TextStyle(
+                color: Colors.blueGrey,
+                fontSize: 14.sp,
+              ),
+            ),
+          ),
+        ),
+      ],
+    ));
+  }
+
+// SizedBox指定高度，SingleChildScrollView里面的数据高度大于此，则可以上下滚动查看
+// 不指定，则可能默认是整个屏幕高度。
+  return SizedBox(
+    // height: 200.sp,
+    child: SingleChildScrollView(
+      padding: EdgeInsets.all(16.0.sp),
+      child: Center(
+        child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start, children: list),
+      ),
+    ),
+  );
 }
 
 /// 构建新闻条目卡片，新闻标题和概要部分直接写，底部區域使用上面个widget。
@@ -296,7 +410,9 @@ class _ItemCardWidgetState extends State<ItemCardWidget> {
                     text: "${widget.index} --- ${newsItem.title}",
                     recognizer: TapGestureRecognizer()
                       ..onTap = () async {
-                        var url = newsItem.url;
+                        // 如果有直接的url属性，则是非热门话题，直接取得；否则就是热门话题，从关联新闻中取第一个
+                        var url =
+                            newsItem.url ?? "${newsItem.newsAggList![0].url}";
                         // 应用内打开ok，但原文章没有自适应手机的话，看起來就很別扭。
                         if (await canLaunch(url)) {
                           await launch(url,
@@ -318,7 +434,7 @@ class _ItemCardWidgetState extends State<ItemCardWidget> {
             Expanded(
               flex: 1,
               child: Text(
-                newsItem.summary,
+                newsItem.summary ?? "",
 
                 ///浏览器...显示异常
                 overflow: PlatformUtil.isWeb

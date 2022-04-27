@@ -30,9 +30,9 @@ readhub api 几个分类返回的结构还不一致，之前并未注意。
 5. ~~ 如果是查询第一页，则不传 lastCursor 参数，但第二页就需要带上第一个最后一条 publishDate 的转化時間戳值。~~
 6. ~~**现在参数名为 publishDate，后续不一定还是一样。**~~
 
-在 models 文件夹下各自区别：
+在 jsons 文件夹下各自区别：
 
-- readhub_api_topics_result
+- readhub_api_topics_result.json
   - 标识和分类： topics 热门话题
   - url 和参数： https://api.readhub.cn/topic/list?page=2&size=10
 - readhub_api_tech_result.json
@@ -41,7 +41,7 @@ readhub api 几个分类返回的结构还不一致，之前并未注意。
 - readhub_api_news_result.json
   - 标识和分类： news 科技动态
   - url 和参数： https://api.readhub.cn/news/list?size=10&type=1&page=1
-- readhub_api_daily_result.json
+- readhub_api_daily_result.json（无）
   - 标识和分类： daily 每日早报
   - url 和参数： 不详
 
@@ -72,9 +72,12 @@ api url 中`https://api.readhub.cn/news/list?size=10&type=2&page=1`中的 type:
 
 没有更新，count 为 0.
 
-所以，现在(2022-04-26)readhub api 返回结构有两个 model:
+~~所以，现在(2022-04-26)readhub api 返回结构有两个 model:~~
 
-- `热门话题`：`ReadhubApiTopicsResult`
-- `科技动态`与`技术资讯`：`ReadhubApiCommonResult`
+- ~~-`热门话题`：`ReadhubApiTopicsResult`~~
+- ~~-`科技动态`与`技术资讯`：`ReadhubApiCommonResult`~~
+
+2022-04-27：  
+已经合并为一个 model: `ReadhubApiResult`
 
 ---

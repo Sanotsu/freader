@@ -1,14 +1,13 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'readhub_api_topics_result.dart';
+part of 'readhub_api_result.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator
 // **************************************************************************
 
-ReadhubApiTopicsResult _$ReadhubApiTopicsResultFromJson(
-        Map<String, dynamic> json) =>
-    ReadhubApiTopicsResult(
+ReadhubApiResult _$ReadhubApiResultFromJson(Map<String, dynamic> json) =>
+    ReadhubApiResult(
       data: json['data'] == null
           ? null
           : ReadhubApiResultData.fromJson(json['data'] as Map<String, dynamic>),
@@ -16,8 +15,7 @@ ReadhubApiTopicsResult _$ReadhubApiTopicsResultFromJson(
       message: json['message'] as int?,
     );
 
-Map<String, dynamic> _$ReadhubApiTopicsResultToJson(
-        ReadhubApiTopicsResult instance) =>
+Map<String, dynamic> _$ReadhubApiResultToJson(ReadhubApiResult instance) =>
     <String, dynamic>{
       'data': instance.data?.toJson(),
       'code': instance.code,
@@ -54,9 +52,10 @@ ItemsData _$ItemsDataFromJson(Map<String, dynamic> json) => ItemsData(
       uid: json['uid'] as String?,
       title: json['title'] as String?,
       summary: json['summary'] as String?,
-      createdAt: json['createdAt'] as String?,
-      siteCount: json['siteCount'] as int?,
       siteNameDisplay: json['siteNameDisplay'] as String?,
+      createdAt: json['createdAt'] as String?,
+      url: json['url'] as String?,
+      siteCount: json['siteCount'] as int?,
       newsAggList: (json['newsAggList'] as List<dynamic>?)
           ?.map((e) => NewsagglistData.fromJson(e as Map<String, dynamic>))
           .toList(),
@@ -74,9 +73,10 @@ Map<String, dynamic> _$ItemsDataToJson(ItemsData instance) => <String, dynamic>{
       'uid': instance.uid,
       'title': instance.title,
       'summary': instance.summary,
-      'createdAt': instance.createdAt,
-      'siteCount': instance.siteCount,
       'siteNameDisplay': instance.siteNameDisplay,
+      'createdAt': instance.createdAt,
+      'url': instance.url,
+      'siteCount': instance.siteCount,
       'newsAggList': instance.newsAggList?.map((e) => e.toJson()).toList(),
       'up': instance.up,
       'hasView': instance.hasView,

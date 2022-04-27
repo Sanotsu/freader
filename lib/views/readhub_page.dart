@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:freader/views/readhub_category/readhub_daily.dart';
 import 'package:freader/views/readhub_category/readhub_typed_news.dart';
-import 'package:freader/views/readhub_category/readhub_topics.dart';
 
 class ReadhubPage extends StatefulWidget {
   const ReadhubPage({Key? key}) : super(key: key);
@@ -64,7 +63,7 @@ class _ReadhubPageState extends State<ReadhubPage> {
               child: TabBarView(
                 children: <Widget>[
                   Center(
-                    child: ReadhubTopics(),
+                    child: ReadhubTypedNews(newsType: 'topics'),
                   ),
                   Center(
                     child: ReadhubDaily(

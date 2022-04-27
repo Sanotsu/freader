@@ -1,17 +1,17 @@
 import 'package:json_annotation/json_annotation.dart';
 
-part 'readhub_api_topics_result.g.dart';
+part 'readhub_api_result.g.dart';
 
 @JsonSerializable(explicitToJson: true)
-class ReadhubApiTopicsResult {
+class ReadhubApiResult {
   ReadhubApiResultData? data;
   int? code;
   int? message;
-  ReadhubApiTopicsResult({this.data, this.code, this.message});
+  ReadhubApiResult({this.data, this.code, this.message});
 
-  factory ReadhubApiTopicsResult.fromJson(Map<String, dynamic> json) =>
-      _$ReadhubApiTopicsResultFromJson(json);
-  Map<String, dynamic> toJson() => _$ReadhubApiTopicsResultToJson(this);
+  factory ReadhubApiResult.fromJson(Map<String, dynamic> json) =>
+      _$ReadhubApiResultFromJson(json);
+  Map<String, dynamic> toJson() => _$ReadhubApiResultToJson(this);
 }
 
 @JsonSerializable(explicitToJson: true)
@@ -41,12 +41,16 @@ class ReadhubApiResultData {
 
 @JsonSerializable(explicitToJson: true)
 class ItemsData {
+  // 热门话题、科技动态、技术咨询的item都有的属性
   String? uid;
   String? title;
   String? summary;
-  String? createdAt;
-  int? siteCount;
   String? siteNameDisplay;
+  String? createdAt;
+  // 科技动态、技术咨询独有的
+  String? url;
+  // 热门话题独有的
+  int? siteCount;
   List<NewsagglistData>? newsAggList;
   bool? up;
   bool? hasView;
@@ -59,9 +63,10 @@ class ItemsData {
     this.uid,
     this.title,
     this.summary,
-    this.createdAt,
-    this.siteCount,
     this.siteNameDisplay,
+    this.createdAt,
+    this.url,
+    this.siteCount,
     this.newsAggList,
     this.up,
     this.hasView,
