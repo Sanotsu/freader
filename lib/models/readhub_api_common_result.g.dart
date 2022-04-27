@@ -11,8 +11,8 @@ ReadhubApiCommonResult _$ReadhubApiCommonResultFromJson(
     ReadhubApiCommonResult(
       data: ReadhubApiCommonResultData.fromJson(
           json['data'] as Map<String, dynamic>),
-      code: json['code'] as int,
-      message: json['message'] as int,
+      code: json['code'] as int?,
+      message: json['message'] as int?,
     );
 
 Map<String, dynamic> _$ReadhubApiCommonResultToJson(

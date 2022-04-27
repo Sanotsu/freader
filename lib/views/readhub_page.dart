@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:freader/views/readhub_category/readhub_daily.dart';
-import 'package:freader/views/readhub_category/readhub_news.dart';
-import 'package:freader/views/readhub_category/readhub_tech.dart';
+import 'package:freader/views/readhub_category/readhub_typed_news.dart';
 import 'package:freader/views/readhub_category/readhub_topics.dart';
 
 class ReadhubPage extends StatefulWidget {
@@ -73,14 +72,10 @@ class _ReadhubPageState extends State<ReadhubPage> {
                     ),
                   ),
                   Center(
-                    child: ReadhubTech(
-                      title: "tech",
-                    ),
+                    child: ReadhubTypedNews(newsType: '1'),
                   ),
                   Center(
-                    child: ReadhubNews(
-                      title: "news",
-                    ),
+                    child: ReadhubTypedNews(newsType: '2'),
                   ),
                 ],
               ),

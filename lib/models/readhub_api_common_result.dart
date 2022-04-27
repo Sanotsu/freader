@@ -4,10 +4,9 @@ part 'readhub_api_common_result.g.dart';
 @JsonSerializable(explicitToJson: true)
 class ReadhubApiCommonResult {
   ReadhubApiCommonResultData data;
-  int code;
-  int message;
-  ReadhubApiCommonResult(
-      {required this.data, required this.code, required this.message});
+  int? code;
+  int? message;
+  ReadhubApiCommonResult({required this.data, this.code, this.message});
 
   factory ReadhubApiCommonResult.fromJson(Map<String, dynamic> json) =>
       _$ReadhubApiCommonResultFromJson(json);

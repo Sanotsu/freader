@@ -60,7 +60,7 @@ class _ReadhubTopicsState extends State<ReadhubTopics> {
     acquiredList.clear();
 
     print("开始获取最新消息...");
-    var response = await fetchReadhubApiResult(_genUrl(1));
+    var response = await fetchReadhubApiTopicsResult(_genUrl(1));
 
     // addAll()里面必须也是一个List<>，而不是一个List<>?
     var temp = response[0].data!.items ?? [];
@@ -81,7 +81,7 @@ class _ReadhubTopicsState extends State<ReadhubTopics> {
     // 延迟5秒，看一下加载效果
     await Future.delayed(const Duration(seconds: 5));
 
-    var response = await fetchReadhubApiResult(_genUrl(currentPage));
+    var response = await fetchReadhubApiTopicsResult(_genUrl(currentPage));
     // addAll()里面必须也是一个List<>，而不是一个List<>?
     var temp = response[0].data!.items ?? [];
     acquiredList.addAll(temp);

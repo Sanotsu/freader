@@ -70,13 +70,24 @@ class _HomePageState extends State<HomePage> {
         bottomNavigationBar: const HomeBottomAppBar(),
         // bottomNavigationBar: const HomeBottomNavigationBar(),
         // 漂浮在body上方的按钮，默认右下角(如果要悬浮按钮和下方导航条一起用，HomeBottomAppBar比HomeBottomNavigationBar好)
-        floatingActionButton: FloatingActionButton(
-          onPressed: _incrementCounter,
-          tooltip: 'Increment',
-          child: const Icon(Icons.add),
+        floatingActionButton: SizedBox(
+          height: 30.0.sp,
+          width: 30.0.sp,
+          child: FittedBox(
+            child: FloatingActionButton(
+              onPressed: _incrementCounter,
+              tooltip: 'Increment',
+              child: Icon(
+                Icons.add,
+                size: 20.sp,
+              ),
+            ),
+          ),
         ),
+
         // 悬浮按钮底部居中
-        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+        floatingActionButtonLocation:
+            FloatingActionButtonLocation.miniEndDocked,
       ),
     );
   }
@@ -269,25 +280,30 @@ class _HomeBottomAppBarState extends State<HomeBottomAppBar> {
     return BottomAppBar(
       color: Colors.white,
       shape: const CircularNotchedRectangle(), // 底部导航栏打一个圆形的洞
-      child: Row(
-        children: [
-          IconButton(
-            icon: Icon(
-              Icons.home,
-              color: _iconHomeColor,
+      child: SizedBox(
+        height: 30.sp,
+        child: Row(
+          children: [
+            IconButton(
+              icon: Icon(
+                Icons.home,
+                color: _iconHomeColor,
+                size: 20.sp,
+              ),
+              onPressed: _onHomeItemPressed,
             ),
-            onPressed: _onHomeItemPressed,
-          ),
-          const SizedBox(), //中间位置空出
-          IconButton(
-            icon: Icon(
-              Icons.business,
-              color: _iconColor,
+            const SizedBox(), //中间位置空出
+            IconButton(
+              icon: Icon(
+                Icons.business,
+                color: _iconColor,
+                size: 20.sp,
+              ),
+              onPressed: _onItemPressed,
             ),
-            onPressed: _onItemPressed,
-          ),
-        ],
-        mainAxisAlignment: MainAxisAlignment.spaceAround, //均分底部导航栏横向空间
+          ],
+          mainAxisAlignment: MainAxisAlignment.spaceAround, //均分底部导航栏横向空间
+        ),
       ),
     );
   }
