@@ -7,9 +7,11 @@
 
 更多 json to model 查看官方教程[JSON 和序列化数据](https://flutter.cn/docs/development/data-and-backend/json)
 
-## 注意事项
+---
 
-### 2022-04-26
+## readhub 相关 model 和 url 说明
+
+### 旧的接口 2022-04-26
 
 readhub api 几个分类返回的结构还不一致，之前并未注意。
 
@@ -45,19 +47,51 @@ readhub api 几个分类返回的结构还不一致，之前并未注意。
   - 标识和分类： daily 每日早报
   - url 和参数： 不详
 
-api url 中`https://api.readhub.cn/news/list?size=10&type=2&page=1`中的 type:  
-**1 科技动态  
+---
+
+### readhub api 说明（2022-04-27 时自行整理）：
+
+**一：分类的数据请求:**  
+热门话题：`https://api.readhub.cn/topic/list?page=2&size=10`  
+其他类别：`https://api.readhub.cn/news/list?size=10&type=2&page=1`
+
+其中 type 的值：  
+**0 或者 1 科技动态  
 2 技术资讯  
 3 区块链 blockchain  
-经过测试，0 4 5 也有数据，但不清楚是什么分类。**
+经过测试，4 5 也有数据，但不清楚是什么分类。**
 
 因为 url 都一样，返回结构一致，除了 topics 热门资讯外。
 
 其实最好的，还是把所有的 api 返回的数据中通用数据整理成一个公用的 model。
 
-**检查是否有更新：**
+~~所以，现在(2022-04-26)readhub api 返回结构有两个 model:~~
 
-`https://api.readhub.cn/topic/list/update_check?last_topic_id=8fwLwlcAGSj`  
+- ~~-`热门话题`：`ReadhubApiTopicsResult`~~
+- ~~-`科技动态`与`技术资讯`：`ReadhubApiCommonResult`~~
+
+2022-04-27：  
+已经合并为一个 model: `ReadhubApiResult`
+
+---
+
+**二：热门话题的详情：**  
+`https://api.readhub.cn/topic/xxxxxx`
+
+其中最后的 xxxxxx 为【热门话题】的 topicId。  
+示例：`https://api.readhub.cn/topic/8fxcBjoRnWX`
+
+注意：如果 xxxx 不是【热门话题】的 topicId，返回结果则为`{}`。  
+例如：`https://api.readhub.cn/topic/8fybjJpVpxi`
+
+详情中个人感兴趣的有`事件追踪`，数据结构有变化，所以单独 model：`ReadhubApiTopicDetail`。
+
+---
+
+**三：检查是否有更新：**
+
+`https://api.readhub.cn/topic/list/update_check?last_topic_id=8fwLwlcAGSj`
+
 其中`last_topic_id`为目前最新的文章 uid。
 
 如果有更新，返回结构：
@@ -72,12 +106,17 @@ api url 中`https://api.readhub.cn/news/list?size=10&type=2&page=1`中的 type:
 
 没有更新，count 为 0.
 
-~~所以，现在(2022-04-26)readhub api 返回结构有两个 model:~~
+---
 
-- ~~-`热门话题`：`ReadhubApiTopicsResult`~~
-- ~~-`科技动态`与`技术资讯`：`ReadhubApiCommonResult`~~
+**四：关键字搜索**
 
-2022-04-27：  
-已经合并为一个 model: `ReadhubApiResult`
+`https://search.readhub.cn/api/entity/news?page=1&size=20&query=xxxxx&type=hot`
+
+参数说明：
+
+- page: 页数, 拉取到的数据中可以看到 totalPages
+- size：一次请求拉取的话题数目
+- query: 关键字, 就是搜索的内容
+- type: hot,热门话题, 还有一个 all, 我舍弃掉了
 
 ---

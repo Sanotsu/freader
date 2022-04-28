@@ -4,10 +4,13 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:freader/models/readhub_api_result.dart';
+import 'package:freader/models/readhub_api_topic_detail.dart';
 
 import 'package:freader/utils/platform_util.dart';
 import 'package:freader/views/readhub_category/fetch_readhub_api_result.dart';
 import 'package:freader/views/readhub_category/readhub_common_widgets.dart';
+import 'package:freader/views/readhub_category/readhub_topic_detail_dialog.dart';
+// import 'package:freader/views/readhub_category/readhub_topic_detail_route.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -201,7 +204,7 @@ class _ItemCardBottomAreaWidgetState extends State<ItemCardBottomAreaWidget> {
       createdTime = createdTime.add(const Duration(hours: 8));
     }
 
-    /// r如果是热门话题，则可以底部弹出其它媒体报道
+    /// 如果是热门话题，则可以底部弹出其它媒体报道
     Future<void> _showNewsDialog(BuildContext context) async {
       await showModalBottomSheet<int>(
           context: context,
@@ -214,6 +217,28 @@ class _ItemCardBottomAreaWidgetState extends State<ItemCardBottomAreaWidget> {
                 shrinkWrap: true,
                 itemBuilder: (context, index) =>
                     buildNewsAggList(context, widget.newsItem));
+          });
+    }
+
+    /// 如果是热门话题，则可以弹窗显示其新闻细节
+    Future<void> _showTopicDetailDialog(BuildContext context, topicId) async {
+      _genUrl() {
+        return "https://api.readhub.cn/topic/$topicId";
+      }
+
+      print("开始获取详情...${_genUrl()}");
+      var response = await fetchReadhubTopicDetailResult(_genUrl());
+
+      /// 如果出现 type 'null' is not a subtype of type 'int' in type cast 然后 无法直接打印response，可能就是
+      /// model中设置了 required 的属性，实际取得为null。
+      ReadhubApiTopicDetailData topicDetail = response[0];
+
+      await showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return ReadhubTopicDetailDialog(
+              topicDetail: topicDetail,
+            );
           });
     }
 
@@ -259,23 +284,31 @@ class _ItemCardBottomAreaWidgetState extends State<ItemCardBottomAreaWidget> {
                   color: Colors.lightBlue,
                 ),
               )
-            : SmallButtonWidget(
-                onTap: () => {},
+            : Container(),
+        // 查看详情web
+        // 热门话题有更多链接，其他的就没有
+        widget.newsItem.newsAggList != null
+            ? SmallButtonWidget(
+                // 路由跳转
+                // onTap: () {
+                //   Navigator.push(
+                //     context,
+                //     MaterialPageRoute(
+                //       builder: (context) =>
+                //           const ReadhubTopicDetailRoute(todo: Todo("zhangsan", "lisi")),
+                //     ),
+                //   );
+                // },
+                onTap: () =>
+                    _showTopicDetailDialog(context, widget.newsItem.uid),
                 tooltip: "detail",
                 child: Icon(
-                  Icons.star,
+                  Icons.details,
                   size: 10.sp,
+                  color: Colors.lightBlue,
                 ),
-              ),
-        // 查看详情web
-        SmallButtonWidget(
-          onTap: () => {},
-          tooltip: "detail",
-          child: Icon(
-            Icons.details,
-            size: 10.sp,
-          ),
-        ),
+              )
+            : Container(),
       ],
     );
   }

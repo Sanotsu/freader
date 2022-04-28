@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:freader/views/readhub_category/readhub_daily.dart';
 import 'package:freader/views/readhub_category/readhub_typed_news.dart';
 
 class ReadhubPage extends StatefulWidget {
@@ -39,12 +38,6 @@ class _ReadhubPageState extends State<ReadhubPage> {
                   ),
                   Tab(
                     child: Text(
-                      '每日早报',
-                      style: TextStyle(fontSize: 10.sp),
-                    ),
-                  ),
-                  Tab(
-                    child: Text(
                       '科技动态',
                       style: TextStyle(fontSize: 10.sp),
                     ),
@@ -52,6 +45,12 @@ class _ReadhubPageState extends State<ReadhubPage> {
                   Tab(
                     child: Text(
                       '技术资讯',
+                      style: TextStyle(fontSize: 10.sp),
+                    ),
+                  ),
+                  Tab(
+                    child: Text(
+                      '区块链',
                       style: TextStyle(fontSize: 10.sp),
                     ),
                   ),
@@ -66,15 +65,13 @@ class _ReadhubPageState extends State<ReadhubPage> {
                     child: ReadhubTypedNews(newsType: 'topics'),
                   ),
                   Center(
-                    child: ReadhubDaily(
-                      title: "daily",
-                    ),
-                  ),
-                  Center(
                     child: ReadhubTypedNews(newsType: '1'),
                   ),
                   Center(
                     child: ReadhubTypedNews(newsType: '2'),
+                  ),
+                  Center(
+                    child: ReadhubTypedNews(newsType: '3'),
                   ),
                 ],
               ),
