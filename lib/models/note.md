@@ -120,3 +120,36 @@ readhub api 几个分类返回的结构还不一致，之前并未注意。
 - type: hot,热门话题, 还有一个 all, 我舍弃掉了
 
 ---
+
+## 一言 （hitokoto） 相关 model 和 url 说明
+
+[一言开发者中心官方文档](https://developer.hitokoto.cn/sentence/)
+
+### 请求地址
+
+| 地址                         | 协议  | 方法 | QPS | 限制 | 线路 |
+| ---------------------------- | ----- | ---- | --- | ---- | ---- |
+| v1.hitokoto.cn               | HTTPS | Any  | 3.5 | 全球 |
+| international.v1.hitokoto.cn | HTTPS | Any  | 10  | 国外 |
+
+常用 url 示例 : `https://v1.hitokoto.cn/?c=k&c=i&c=d`
+
+### 句子类型（参数）
+
+- a 动画
+- b 漫画
+- c 游戏
+- d 文学
+- e 原创
+- f 来自网络
+- g 其他
+- h 影视
+- i 诗词
+- j 网易云
+- k 哲学
+- l 抖机灵
+- 其他 作为 动画 类型处理
+
+返回结构，在 jsons 文件夹下：
+
+- hitokoto_result.json

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:freader/layout/image_page.dart';
 import 'package:freader/layout/news_page.dart';
+import 'package:freader/widgets/hitokoto_sentence.dart';
 
 ///
 /// 2022-04-21
@@ -232,6 +233,7 @@ class HomeDrawer extends StatelessWidget {
                     leading: Icon(Icons.settings),
                     title: Text('Manage accounts'),
                   ),
+                  HitokotoSentence(),
                 ],
               ),
             ),
