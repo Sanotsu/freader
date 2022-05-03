@@ -242,6 +242,9 @@ class _ItemCardBottomAreaWidgetState extends State<ItemCardBottomAreaWidget> {
           });
     }
 
+    /// 已收藏的文章，用于下面图标标星
+    var staredArticleList = ["111", "8fBKiuLOUyn"];
+
     return Row(
       children: <Widget>[
         Expanded(
@@ -272,6 +275,14 @@ class _ItemCardBottomAreaWidgetState extends State<ItemCardBottomAreaWidget> {
             Icons.share,
             size: 10.sp,
           ),
+        ),
+        // 收藏
+        SmallButtonWidget(
+          onTap: () => {},
+          tooltip: "star",
+          child: staredArticleList.contains(widget.newsItem.uid)
+              ? Icon(Icons.star, size: 10.sp, color: Colors.lightBlue)
+              : Icon(Icons.star, size: 10.sp),
         ),
         // 热门话题有更多链接，其他的就没有
         widget.newsItem.newsAggList != null
@@ -342,9 +353,9 @@ Widget buildNewsAggList(context, ItemsData newsItem) {
               if (await canLaunch(url)) {
                 await launch(
                   url,
-                  forceSafariVC: true,
-                  forceWebView: true,
-                  enableJavaScript: true,
+                  forceSafariVC: false,
+                  forceWebView: false,
+                  // enableJavaScript: false,
                 );
               } else {
                 throw 'Could not launch $url';
@@ -449,11 +460,13 @@ class _ItemCardWidgetState extends State<ItemCardWidget> {
                             newsItem.url ?? "${newsItem.newsAggList![0].url}";
                         // 应用内打开ok，但原文章没有自适应手机的话，看起來就很別扭。
                         if (await canLaunch(url)) {
-                          await launch(url,
-                              forceSafariVC: true,
-                              forceWebView: true,
-                              enableDomStorage: true,
-                              enableJavaScript: true);
+                          await launch(
+                            url,
+                            forceSafariVC: false,
+                            forceWebView: false,
+                            // enableDomStorage: true,
+                            // enableJavaScript: true
+                          );
                         } else {
                           throw 'Could not launch $url';
                         }

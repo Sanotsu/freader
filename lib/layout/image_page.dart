@@ -1,66 +1,71 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:freader/views/image_page_demo.dart';
+import 'package:freader/views/pexels_image_page.dart';
 
-class ImagePage extends StatelessWidget {
+class ImagePage extends StatefulWidget {
   const ImagePage({Key? key}) : super(key: key);
 
   @override
+  State<ImagePage> createState() => _ImagePageState();
+}
+
+class _ImagePageState extends State<ImagePage> {
+  @override
   Widget build(BuildContext context) {
-    return GridView.count(
-      // 横轴子元素的数量。
-      crossAxisCount: 2,
-      padding: EdgeInsets.all(5.sp),
-      // 子元素在横轴长度和主轴长度的比例。
-      childAspectRatio: 8.0 / 6.0,
-      children: _buildGridCards(10),
-    );
-  }
-
-  List<Card> _buildGridCards(int count) {
-// 创建List中用到的图片地址字串(List当前索引与10的余数)
-    List imageUrlList = List.generate(
-        count, (value) => "images/image_page_demo/demo${value % 10}.jpg");
-
-    List<Card> cards = List.generate(
-      count,
-      (int index) => Card(
+    return DefaultTabController(
+      length: 2,
+      child: Center(
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            AspectRatio(
-              aspectRatio: 16.0 / 9.0, // 宽高比
-              child: Image.asset(imageUrlList[index]),
-            ),
-            Padding(
-              padding: EdgeInsets.fromLTRB(5.sp, 4.sp, 5.sp, 2.3.sp),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Text(
-                    "demo $index 标题",
-                    style: TextStyle(
-                      color: Colors.blue,
-                      fontSize: 6.sp,
-                      height: 1.2,
+            Container(
+              height: 25,
+              color: Colors.blue, // 用來看位置，不需要的话这个Container可以改为SizedBox
+              child: const TabBar(
+                indicator: UnderlineTabIndicator(
+                  borderSide: BorderSide(width: 2.0), // 下划线的粗度
+                  // 下划线的四边的间距horizontal橫向
+                  insets: EdgeInsets.symmetric(horizontal: 2.0),
+                ),
+                indicatorWeight: 0,
+                indicatorSize: TabBarIndicatorSize.label,
+                tabs: [
+                  Tab(
+                    child: Text(
+                      "DemoImage",
+                      style: TextStyle(
+                          fontFamily: "BarlowBold",
+                          fontSize: 10,
+                          color: Colors.black),
                     ),
                   ),
-                  SizedBox(height: 3.sp),
-                  Text(
-                    'demo $index 描述',
-                    style: TextStyle(
-                      color: Colors.blue,
-                      fontSize: 6.sp,
-                      height: 1.2,
+                  Tab(
+                    // height: 12,
+                    child: Text(
+                      "Pexels",
+                      style: TextStyle(
+                          fontFamily: "BarlowBold",
+                          fontSize: 10,
+                          color: Colors.black),
                     ),
                   ),
                 ],
               ),
             ),
+            const Expanded(
+              child: TabBarView(
+                children: <Widget>[
+                  Center(
+                    child: ImagePageDemo(),
+                  ),
+                  Center(
+                    child: PexelsImagePage(),
+                  ),
+                ],
+              ),
+            )
           ],
         ),
       ),
     );
-
-    return cards;
   }
 }

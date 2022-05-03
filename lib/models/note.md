@@ -153,3 +153,87 @@ readhub api 几个分类返回的结构还不一致，之前并未注意。
 返回结构，在 jsons 文件夹下：
 
 - hitokoto_result.json
+
+---
+
+## pexels api 说明
+
+[pexels api 官方文档](https://www.pexels.com/zh-cn/api/documentation/)
+
+**注意：需要先注冊账号，获取 API key ，每次请求都要在 header 的 `Authorization`中带上。**
+
+**(By default, the API is rate-limited to 200 requests per hour and 20,000 requests per month. )**
+
+### 图片请求地址
+
+- 1 搜索 `GET https://api.pexels.com/v1/search`
+  - 参数
+    - `query` string | required
+      - The search query. Ocean, Tigers, Pears, etc.
+    - `orientation` string | optional
+      - Desired photo orientation. The current supported orientations are: landscape, portrait or square.
+    - `size` string | optional
+      - Minimum photo size. The current supported sizes are: large(24MP), medium(12MP) or small(4MP).
+    - `color` string | optional
+      - Desired photo color. Supported colors: red, orange, yellow, green, turquoise, blue, violet, pink, brown, black, gray, white or any hexidecimal color code (eg. #ffffff).
+    - `locale` string | optional
+      - The locale of the search you are performing. The current supported locales are: 'en-US' 'pt-BR' 'es-ES' 'ca-ES' 'de-DE' 'it-IT' 'fr-FR' 'sv-SE' 'id-ID' 'pl-PL' 'ja-JP' 'zh-TW' 'zh-CN' 'ko-KR' 'th-TH' 'nl-NL' 'hu-HU' 'vi-VN' 'cs-CZ' 'da-DK' 'fi-FI' 'uk-UA' 'el-GR' 'ro-RO' 'nb-NO' 'sk-SK' 'tr-TR' 'ru-RU'.
+    - `page` integer | optional
+      - The page number you are requesting. Default: 1
+    - `per_page` integer | optional
+      - The number of results you are requesting per page. Default: 15 Max: 80
+  - 响应
+    - `photos` array of Photo
+      - An array of Photo objects.
+    - `page` integer
+      - The current page number.
+    - `per_page` integer
+      - The number of results returned with each page.
+    - `total_results` integer
+      - The total number of results for the request.
+    - `prev_page` string | optional
+      - URL for the previous page of results, if applicable.
+    - `next_page` string | optional
+      - URL for the next page of results, if applicable.
+- 2 获取指定图片详情 `GET https://api.pexels.com/v1/photos/:id` 通过其 ID 检索特定的 Photo。
+
+  - 参数
+    - `id` integer | required
+      - The id of the photo you are requesting.
+  - 响应
+    - Returns a Photo object
+
+- 3 获取编辑精选图片 `GET https://api.pexels.com/v1/curated?page=1&per_page=80` Pexels 团队精心挑选的实时图片。每小时至少添加一张新图片。
+  - 参数
+    - `page` integer | optional
+      - The page number you are requesting. Default: 1
+    - `per_page` integer | optional
+      - The number of results you are requesting per page. Default: 15 Max: 80
+  - 响应
+    - 和`1 搜索`接口一致。
+
+示例：一次查询中国地区的“cat”的 80 张图片。（尽可能多，然后本地缓存数据，因为 api 请求有限制。）
+
+`https://api.pexels.com/v1/search/?page=1&per_page=80&query=cat&locale=zh-CN`
+
+### 请求统计数据
+
+你可以根据 Pexels API 返回的成功请求查看每月配额还剩多少请求，它们包含三个 HTTP 标头：
+
+```
+Response Header	        Meaning
+X-Ratelimit-Limit	      你的月度总请求限额
+X-Ratelimit-Remaining	  还剩多少请求
+X-Ratelimit-Reset	      当前月翻转的UNIX时间戳
+```
+
+注意: 这些响应标头只在(2xx)成功响应下返回。它们不随其他响应返回，包括 429 Too Many Requests，后者指示你超出速率限制。
+
+请确保跟踪 X-Ratelimit-Remaining 和 X-Ratelimit-Reset 以免超出请求限额。
+
+温馨提示：图片注意带上作者和网站标志。统计數量可能有延迟。不要滥用 Pexels API。
+
+返回结构，在 jsons 文件夹下：
+
+- pexels_api_image_curated.json
+- pexels_api_image.json
