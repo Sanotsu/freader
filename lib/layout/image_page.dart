@@ -13,8 +13,8 @@ class ImagePage extends StatefulWidget {
 }
 
 class _ImagePageState extends State<ImagePage> with TickerProviderStateMixin {
-// 弹出对话框
-  void showConfirmDialog(int newIndex) {
+// 弹出对话框(区分点击tab标签或者下方滑动屏幕切换tabview的索引)
+  void showConfirmDialog(int newIndex, {bool isTap = true}) {
     showDialog<bool>(
       context: context,
       barrierDismissible: false, // user must tap button!
@@ -43,7 +43,13 @@ class _ImagePageState extends State<ImagePage> with TickerProviderStateMixin {
             TextButton(
               child: const Text('取消'),
               onPressed: () {
-                Navigator.of(context).pop();
+                if (isTap) {
+                  Navigator.of(context).pop();
+                } else {
+                  // 索引0是本地demo图片tabview。
+                  _tabController.index = 0;
+                  Navigator.pop(context);
+                }
               },
             ),
             // 点击确认，则跳转到新的tab
@@ -65,7 +71,22 @@ class _ImagePageState extends State<ImagePage> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 2, vsync: this)
+      ..addListener(() {
+        setState(() {
+          if (_tabController.indexIsChanging) {
+            print("11111111111111111当前的tab index is ${_tabController.index}");
+          }
+          // 外层的判断避免使用tab切换是触发两次。（区分tab点击和滑动切换了tabview的index。）
+          if (_tabController.index.toDouble() ==
+              _tabController.animation!.value) {
+            if (_tabController.index == 1) {
+              showConfirmDialog(_tabController.index, isTap: false);
+              // _tabController.index = _tabController.previousIndex;
+            }
+          }
+        });
+      });
   }
 
   @override
@@ -87,17 +108,17 @@ class _ImagePageState extends State<ImagePage> with TickerProviderStateMixin {
                   indicatorWeight: 0,
                   indicatorSize: TabBarIndicatorSize.label,
                   controller: _tabController,
-                  // 点击tap的操作
-                  onTap: (index) {
-                    // 如果点击的index是1，现在为pexels tab，则弹窗提示是否继续
-                    if (index == 1) {
-                      showConfirmDialog(_tabController.index);
-                      // set TabBar index to previous one(this will allow TabBar to stay on the same tab):
-                      // 在dialog中点击确认，则修改tab的index，取消就保留在当前tab
-                      _tabController.index = _tabController.previousIndex;
-                    }
-                    print("图片tabBar 当前的index是 $index");
-                  },
+                  // 点击tap的操作（如果有tabController侦听器，可以不使用onTap侦听了。因为前者tap和滑动切换了index都可以监听到）
+                  // onTap: (index) {
+                  //   // 如果点击的index是1，现在为pexels tab，则弹窗提示是否继续
+                  //   if (index == 1) {
+                  //     showConfirmDialog(_tabController.index);
+                  //     // set TabBar index to previous one(this will allow TabBar to stay on the same tab):
+                  //     // 在dialog中点击确认，则修改tab的index，取消就保留在当前tab
+                  //     _tabController.index = _tabController.previousIndex;
+                  //   }
+                  //   print("图片tabBar 当前的index是 $index");
+                  // },
                   tabs: [
                     Tab(
                       child: Text(
@@ -137,6 +158,12 @@ class _ImagePageState extends State<ImagePage> with TickerProviderStateMixin {
             ],
           ),
         ));
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
   }
 }
 
