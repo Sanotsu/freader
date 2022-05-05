@@ -5,7 +5,13 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:freader/models/pexels_api_images_result.dart';
 import 'package:freader/views/pexels_image_widget/fetch_pexels_api_result.dart';
+import 'package:freader/views/pexels_image_widget/pexels_image_detail_page.dart';
 import 'package:freader/views/readhub_category/readhub_common_widgets.dart';
+
+/// 2022-05-05
+/// 为了简单方便，pexels图片，默认进来就只加载80张编辑精选
+/// 输入框有值，则为条件查询，上拉下拉加载輸入框关键字的内容。
+/// 輸入框没有值，则查询编辑精选，上拉下来查询编辑精选图片。
 
 class PexelsImagePage extends StatefulWidget {
   const PexelsImagePage({Key? key}) : super(key: key);
@@ -29,9 +35,6 @@ class _PexelsImagePageState extends State<PexelsImagePage> {
 // 关键字輸入框的焦点
   final FocusNode _keyWordFocus = FocusNode();
 
-  // 定义一个子widget FormTestRoute 使用的全局key
-  final _childKey = GlobalKey<_FormTestRouteState>();
-
   @override
   void initState() {
     super.initState();
@@ -50,73 +53,83 @@ class _PexelsImagePageState extends State<PexelsImagePage> {
   }
 
   ///下拉刷新
-  // 下拉刷新获取最新的数据，也就是第一页的数据
+  ///根据查询搜索框是否有内容来区分默认精选还是查询，但都是第一页
   Future<List<PhotosData>> _getLatestItemNews() async {
-    print("，开始获取json...");
-    var response = await getLocalPexelsApiImageJson(1);
+    // 清空已有数据，重置页码
+    acquiredList.clear();
+    currentPage = 1;
 
-    /// 如果出现 type 'null' is not a subtype of type 'int' in type cast 然后 无法直接打印response，可能就是
-    /// model中设置了 required 的属性，实际取得为null。
+    print("开始获取pexel最新图片...");
+    List<PhotosData> response;
+    if (_queryTextController.text != "") {
+      var queryParams =
+          "?page=$currentPage&per_page=80&query=${_queryTextController.text}";
+      response = await fetchPexelsApiImageQueryResult(queryParams);
+    } else {
+      response = await fetchPexelsApiImageCuratedResult(currentPage);
+    }
 
-    // addAll()里面必须也是一个`List<>`，而不是一个`List<>?`。
-    var temp = response ?? [];
-
-    print(temp.length);
-    print("----------");
-    acquiredList.addAll(temp);
+    print("---------- 获取的最新图片數量 ${response.length}");
+    acquiredList.addAll(response);
 
     return acquiredList;
   }
 
-// 上拉加载更多
+  /// 上拉加载更多
+  /// 根据查询搜索框是否有内容来区分默认精选还是查询，但都是第一页
   Future _getMoreItemNews() async {
     setState(() {
       isLoading = true;
     });
 
-    print('加载更多  $isLoading');
-
-    // 延迟3秒，看一下加载效果
-    await Future.delayed(const Duration(seconds: 3));
+    print('开始加载更多, loading is $isLoading');
 
     // 上拉加载更多，则应该是获取当前页的下一页的数据
-    var response = await getLocalPexelsApiImageJson(currentPage + 1);
-    // addAll()里面必须也是一个`List<>`，而不是一个`List<>?`。
-    var temp = response ?? [];
-    acquiredList.addAll(temp);
-    // 获取完之后，更新當前頁数据
-    currentPage++;
+    List<PhotosData> response;
+    if (_queryTextController.text != "") {
+      var queryParams =
+          "?page=${currentPage + 1}&per_page=80&query=${_queryTextController.text}";
+      response = await fetchPexelsApiImageQueryResult(queryParams);
+    } else {
+      response = await fetchPexelsApiImageCuratedResult(currentPage + 1);
+    }
 
     setState(() {
+      acquiredList.addAll(response);
+      // 获取完之后，更新當前頁数据
+      currentPage++;
       isLoading = false;
+      print('加载完成  $isLoading');
     });
-
-    print('加载完成  $isLoading');
   }
 
   /// 关键字查询图片
+  /// 关键字查询则会清空现在已有的列表，重置页码为1
   Future _getQueryItems(String photoKeyWord) async {
     setState(() {
       isLoading = true;
       acquiredList.clear();
+      currentPage = 1;
     });
 
-    print('加载更多  $isLoading , 关键字 $photoKeyWord');
-
-    // 延迟3秒，看一下加载效果
-    await Future.delayed(const Duration(seconds: 3));
+    print('开始关键字查询, loading is: $isLoading , 关键字为: $photoKeyWord');
 
     // 上拉加载更多，则应该是获取当前页的下一页的数据
-    var response = await getLocalPexelsApiImageJson(4);
-    // addAll()里面必须也是一个`List<>`，而不是一个`List<>?`。
-    var temp = response ?? [];
+    List<PhotosData> response;
+    if (_queryTextController.text != "") {
+      var queryParams =
+          "?page=$currentPage&per_page=80&query=${_queryTextController.text}";
+      response = await fetchPexelsApiImageQueryResult(queryParams);
+    } else {
+      response = await fetchPexelsApiImageCuratedResult(currentPage);
+    }
 
     setState(() {
       isLoading = false;
-      acquiredList.addAll(temp);
+      acquiredList.addAll(response);
       // 获取完之后，更新當前頁数据
       currentPage++;
-      print('加载完成  $isLoading');
+      print('----------关键字查询加载完成  $isLoading,获取的关键字查询图片數量 ${response.length}"');
     });
   }
 
@@ -186,8 +199,8 @@ class _PexelsImagePageState extends State<PexelsImagePage> {
           Padding(
             padding: EdgeInsets.all(5.0.sp),
             child: SizedBox(
-              width: 0.2.sw, // <-- Your width
-              height: 20.sp, // <-- Your height
+              width: 0.2.sw,
+              height: 20.sp,
               child: ElevatedButton(
                 child: Text(
                   "查询",
@@ -210,7 +223,6 @@ class _PexelsImagePageState extends State<PexelsImagePage> {
     return Column(
       children: <Widget>[
         _buildQueryRow(),
-        // FormTestRoute(key: _childKey, getLatest: _getQueryItems),
         Expanded(child: fb),
       ],
     );
@@ -225,14 +237,8 @@ class _PexelsImagePageState extends State<PexelsImagePage> {
     _queryTextController.dispose();
   }
 
-// 构建图片列表 GridView（使用中）
+// 构建图片列表 GridView
   Widget _buildGridView(data) {
-    // var size = MediaQuery.of(context).size;
-
-    /*24 is for notification bar on Android*/
-    // final double itemHeight = (size.height - kToolbarHeight - 24) / 3;
-    // final double itemWidth = size.width / 3;
-
     return Center(
       child: GridView.builder(
         physics: const ScrollPhysics(),
@@ -262,7 +268,7 @@ class _PexelsImagePageState extends State<PexelsImagePage> {
   }
 }
 
-/// 构建单个图片Card 第二种
+/// 构建单个图片Card
 class PhotoCardWidget extends StatefulWidget {
   // 注意：这是上层widget得context，不要和子widget的context搞混了。
   final BuildContext context;
@@ -284,15 +290,12 @@ class _PhotoCardWidgetState extends State<PhotoCardWidget> {
   @override
   Widget build(BuildContext context) {
     PhotosData pd = widget.data[widget.index];
+    // 首页预览用小图片地址，详情页用中图片地址
     var smallSrc = pd.src?.small ?? "";
 
+    // 如果获取的图片没有大小，则默认为130*145.sp
     var pdwidth = pd.width ?? 130.sp;
     var pdheight = pd.height ?? 145.sp;
-
-    print(pdwidth);
-    print(pdheight);
-    print(pdwidth / pdheight);
-    print("${pdheight / (pdwidth / 130)}=====================");
 
     final imageWidget = AspectRatio(
       aspectRatio: pdwidth / pdheight,
@@ -328,7 +331,7 @@ class _PhotoCardWidgetState extends State<PhotoCardWidget> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => PhotoDetailPage(photoData: pd),
+                  builder: (context) => PexelsImageDetailPage(photoData: pd),
                 ),
               );
             },
@@ -366,148 +369,6 @@ class _PhotoCardWidgetState extends State<PhotoCardWidget> {
                   ),
                 ),
               ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// 点击指定图片跳转的详情页
-class PhotoDetailPage extends StatelessWidget {
-  final PhotosData photoData;
-  const PhotoDetailPage({Key? key, required this.photoData}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    var src = photoData.src?.medium;
-
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('照片详情 ✌️'),
-      ),
-      body: Column(
-        children: [
-          AspectRatio(
-            aspectRatio: 1,
-            child: SizedBox(
-              width: double.infinity,
-              child: src != ""
-                  ? Image(
-                      image: NetworkImage("$src"),
-                    )
-                  : const Icon(Icons.no_accounts),
-            ),
-          ),
-          Text(
-            "描述： ${photoData.alt}",
-            maxLines: 3,
-            style: TextStyle(
-              fontSize: 14.sp,
-              height: 1.2,
-            ),
-          ),
-          Container(
-            margin: EdgeInsets.all(5.0.sp),
-            child: Text(
-              "作者：${photoData.photographer}",
-              style: TextStyle(fontSize: 14.sp),
-            ),
-          ),
-          // 预留的照片详情的操作按鈕
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              SmallButtonWidget(
-                onTap: () => {},
-                tooltip: "share",
-                child: Icon(
-                  Icons.share,
-                  size: 14.sp,
-                ),
-              ),
-              SmallButtonWidget(
-                onTap: () => {},
-                tooltip: "star",
-                child: Icon(
-                  Icons.star,
-                  size: 14.sp,
-                ),
-              ),
-              SmallButtonWidget(
-                onTap: () => {},
-                tooltip: "download",
-                child: Icon(
-                  Icons.download,
-                  size: 14.sp,
-                ),
-              ),
-            ],
-          )
-        ],
-      ),
-    );
-  }
-}
-
-/// form表单输入查询关键字，点击确认提交后查询
-class FormTestRoute extends StatefulWidget {
-  final Function getLatest;
-
-  const FormTestRoute({Key? key, required this.getLatest}) : super(key: key);
-
-  @override
-  _FormTestRouteState createState() => _FormTestRouteState();
-}
-
-class _FormTestRouteState extends State<FormTestRoute> {
-  final TextEditingController _unameController = TextEditingController();
-
-  late String textValue = "";
-
-  @override
-  Widget build(BuildContext context) {
-    return Form(
-      autovalidateMode: AutovalidateMode.onUserInteraction,
-      child: Row(
-        children: <Widget>[
-          Expanded(
-            child: SizedBox(
-              width: 100.sp,
-              child: TextFormField(
-                autofocus: true,
-                controller: _unameController,
-                decoration: const InputDecoration(
-                  icon: Icon(Icons.person),
-                ),
-              ),
-            ),
-          ),
-
-          // 登录按钮
-          Expanded(
-            child: Padding(
-              padding: EdgeInsets.only(left: 8.0.sp),
-              child: Row(
-                children: <Widget>[
-                  Expanded(
-                    child: ElevatedButton(
-                      child: Padding(
-                        padding: EdgeInsets.all(1.0.sp),
-                        child: const Text("查询"),
-                      ),
-                      onPressed: () {
-                        print("点击查询   ${_unameController.text}");
-                        setState(() {
-                          textValue = _unameController.text;
-                        });
-                        widget.getLatest();
-                      },
-                    ),
-                  ),
-                ],
-              ),
             ),
           ),
         ],
