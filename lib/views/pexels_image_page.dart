@@ -24,6 +24,13 @@ class _PexelsImagePageState extends State<PexelsImagePage> {
   bool isLoading = false;
   //listview的控制器，侦听上拉加载更多数据
   final ScrollController _scrollController = ScrollController();
+  // 文字輸入框的控制器
+  final _queryTextController = TextEditingController();
+// 关键字輸入框的焦点
+  final FocusNode _keyWordFocus = FocusNode();
+
+  // 定义一个子widget FormTestRoute 使用的全局key
+  final _childKey = GlobalKey<_FormTestRouteState>();
 
   @override
   void initState() {
@@ -87,54 +94,138 @@ class _PexelsImagePageState extends State<PexelsImagePage> {
     print('加载完成  $isLoading');
   }
 
+  /// 关键字查询图片
+  Future _getQueryItems(String photoKeyWord) async {
+    setState(() {
+      isLoading = true;
+      acquiredList.clear();
+    });
+
+    print('加载更多  $isLoading , 关键字 $photoKeyWord');
+
+    // 延迟3秒，看一下加载效果
+    await Future.delayed(const Duration(seconds: 3));
+
+    // 上拉加载更多，则应该是获取当前页的下一页的数据
+    var response = await getLocalPexelsApiImageJson(4);
+    // addAll()里面必须也是一个`List<>`，而不是一个`List<>?`。
+    var temp = response ?? [];
+
+    setState(() {
+      isLoading = false;
+      acquiredList.addAll(temp);
+      // 获取完之后，更新當前頁数据
+      currentPage++;
+      print('加载完成  $isLoading');
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<PhotosData>>(
-      future: futurePhotos,
-      builder: (context, AsyncSnapshot<List<dynamic>> snapshot) {
-        ///正在请求时的视图
-        if (snapshot.connectionState == ConnectionState.active ||
-            snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(
-            child: Text("loading..."),
-          );
-        }
-
-        /// 已经加载完成
-        if (snapshot.connectionState == ConnectionState.done) {
-          print("snapshot.data!.length");
-          // 如果正常获取数据，且数据不为空
-          if (snapshot.hasData &&
-              snapshot.data != null &&
-              snapshot.data!.isNotEmpty) {
-            // 这里snapshot.data就是acquiredList
-            List? data = snapshot.data;
-            return _buildGridView(data);
-          } else if (snapshot.hasError) {
-            /// 如果请求数据有错，显示错误信息
-            return Text('${snapshot.error}');
-          } else {
-            // 如果正常获取数据，但数据为空
+    var fb = RefreshIndicator(
+      // 下拉刷新就是加载最新一页的数据
+      onRefresh: _getLatestItemNews,
+      child: FutureBuilder<List<PhotosData>>(
+        future: futurePhotos,
+        builder: (context, AsyncSnapshot<List<dynamic>> snapshot) {
+          ///正在请求时的视图
+          if (snapshot.connectionState == ConnectionState.active ||
+              snapshot.connectionState == ConnectionState.waiting) {
             return const Center(
-              child: Text("empty or null data"),
+              child: Text("loading..."),
             );
           }
-        }
 
-        // By default, show a loading spinner.
-        return const CircularProgressIndicator();
-      },
+          /// 已经加载完成
+          if (snapshot.connectionState == ConnectionState.done) {
+            print("snapshot.data!.length");
+            // 如果正常获取数据，且数据不为空
+            if (snapshot.hasData &&
+                snapshot.data != null &&
+                snapshot.data!.isNotEmpty) {
+              // 这里snapshot.data就是acquiredList
+              List? data = snapshot.data;
+              return _buildGridView(data);
+            } else if (snapshot.hasError) {
+              /// 如果请求数据有错，显示错误信息
+              return Text('${snapshot.error}');
+            } else {
+              // 如果正常获取数据，但数据为空
+              return const Center(
+                // child: Text("empty or null data"),
+                child: Text("loading..."),
+              );
+            }
+          }
+
+          // By default, show a loading spinner.
+          return const CircularProgressIndicator();
+        },
+      ),
+    );
+
+    /// 搜素查询行
+    Widget _buildQueryRow() {
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          SizedBox(
+            height: 20.sp,
+            width: 0.7.sw,
+            child: TextField(
+              controller: _queryTextController, // 控制器
+              focusNode: _keyWordFocus, // 輸入框焦点
+              decoration: InputDecoration(
+                prefixIcon: Icon(
+                  Icons.search,
+                  size: 14.sp,
+                ),
+              ),
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.all(5.0.sp),
+            child: SizedBox(
+              width: 0.2.sw, // <-- Your width
+              height: 20.sp, // <-- Your height
+              child: ElevatedButton(
+                child: Text(
+                  "查询",
+                  style: TextStyle(fontSize: 10.sp),
+                ),
+                onPressed: () {
+                  print("_queryTextController ${_queryTextController.text}");
+                  _getQueryItems(_queryTextController.text);
+                  // 点击查询之后，清空輸入框文字，并失去焦点
+                  // _queryTextController.text = ""; // 如果考虑用户要看查询内容，则不清空，组件銷毀时会清空。
+                  _keyWordFocus.unfocus();
+                },
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+
+    return Column(
+      children: <Widget>[
+        _buildQueryRow(),
+        // FormTestRoute(key: _childKey, getLatest: _getQueryItems),
+        Expanded(child: fb),
+      ],
     );
   }
 
 // 因为加了个监听,在组件卸载掉的时候记得移除这个监听
   @override
   void dispose() {
+    // Clean up the controller when the widget is disposed.
     super.dispose();
     _scrollController.dispose();
+    _queryTextController.dispose();
   }
 
-// 构建图片列表 GridView
+// 构建图片列表 GridView（使用中）
   Widget _buildGridView(data) {
     // var size = MediaQuery.of(context).size;
 
@@ -152,7 +243,7 @@ class _PexelsImagePageState extends State<PexelsImagePage> {
           crossAxisCount: 3,
           // 横向间隙
           mainAxisSpacing: 10.0.sp,
-          // grid每个child在主轴方向的长度（默认175.sp）。如果为null，使用childAspectRatio代替。
+          // grid每个child在主轴方向的长度（默认180.sp）。如果为null，使用childAspectRatio代替。
           mainAxisExtent: 180.sp,
           // 纵向间隙
           crossAxisSpacing: 10.0.sp,
@@ -224,7 +315,8 @@ class _PhotoCardWidgetState extends State<PhotoCardWidget> {
     );
 
     /// card的高度，就是在GridView.builder中设置的主轴长度
-    /// 200 为预设的图片显示最高高度
+    /// (2022-05-05 GestureDetector会占用多少不清楚，图片和文字为145+30，card的父級设定180吧)
+    /// 130和 145 为预设的图片显示最高宽度 和 高度
     var smallPhtotHeight = (pdheight / (pdwidth / 130)).sp;
     var smallPhotoWidth = (pdwidth / (pdheight / 145)).sp;
 
@@ -244,7 +336,7 @@ class _PhotoCardWidgetState extends State<PhotoCardWidget> {
               /// 预览图使用small的size，但只有固定宽度130，则对应比例的高度为: pdheight / (pdwidth / 130)
               /// 但可能出现高度大于预设高度，那就需要根据高度调整宽度
               width: smallPhtotHeight < 145 ? 130.sp : smallPhotoWidth,
-              height: smallPhtotHeight < 145 ? smallPhtotHeight : 145,
+              height: smallPhtotHeight < 145 ? smallPhtotHeight : 145.sp,
               child: imageWidget,
             ),
           ),
@@ -266,6 +358,7 @@ class _PhotoCardWidgetState extends State<PhotoCardWidget> {
                 SizedBox(height: 3.sp),
                 Text(
                   'photographer: ${pd.photographer}',
+                  maxLines: 1,
                   style: TextStyle(
                     color: Colors.blue,
                     fontSize: 6.sp,
@@ -352,6 +445,71 @@ class PhotoDetailPage extends StatelessWidget {
               ),
             ],
           )
+        ],
+      ),
+    );
+  }
+}
+
+/// form表单输入查询关键字，点击确认提交后查询
+class FormTestRoute extends StatefulWidget {
+  final Function getLatest;
+
+  const FormTestRoute({Key? key, required this.getLatest}) : super(key: key);
+
+  @override
+  _FormTestRouteState createState() => _FormTestRouteState();
+}
+
+class _FormTestRouteState extends State<FormTestRoute> {
+  final TextEditingController _unameController = TextEditingController();
+
+  late String textValue = "";
+
+  @override
+  Widget build(BuildContext context) {
+    return Form(
+      autovalidateMode: AutovalidateMode.onUserInteraction,
+      child: Row(
+        children: <Widget>[
+          Expanded(
+            child: SizedBox(
+              width: 100.sp,
+              child: TextFormField(
+                autofocus: true,
+                controller: _unameController,
+                decoration: const InputDecoration(
+                  icon: Icon(Icons.person),
+                ),
+              ),
+            ),
+          ),
+
+          // 登录按钮
+          Expanded(
+            child: Padding(
+              padding: EdgeInsets.only(left: 8.0.sp),
+              child: Row(
+                children: <Widget>[
+                  Expanded(
+                    child: ElevatedButton(
+                      child: Padding(
+                        padding: EdgeInsets.all(1.0.sp),
+                        child: const Text("查询"),
+                      ),
+                      onPressed: () {
+                        print("点击查询   ${_unameController.text}");
+                        setState(() {
+                          textValue = _unameController.text;
+                        });
+                        widget.getLatest();
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ],
       ),
     );

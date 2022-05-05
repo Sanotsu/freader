@@ -604,6 +604,13 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "0.27.3"
+  search_page:
+    dependency: "direct main"
+    description:
+      name: search_page
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "2.0.0+1"
   shared_preferences:
     dependency: "direct main"
     description:
