@@ -2,17 +2,23 @@
 
 import 'dart:convert';
 import 'package:flutter/services.dart' show rootBundle;
+import 'package:freader/common/personal/constants.dart';
 import 'package:freader/models/pexels_api_images_result.dart';
 import 'package:http/http.dart' as http;
 
 /// 2022-05-05 后续这些地址，可以整理一下，统一放置
+
+/// 2022-05-06 pexels请求需要带Authorization的token才能请求。
+Map<String, String> requestHeaders = {
+  'Authorization': GlobalConstants.pexelsAuthorization
+};
 
 /// 获取pexels 编辑精选图片
 Future<List<PhotosData>> fetchPexelsApiImageCuratedResult(int page) async {
   // 默认就80张，反正就耗费用户流量
   var url = "https://api.pexels.com/v1/curated?page=$page&per_page=80";
 
-  final response = await http.get(Uri.parse(url));
+  final response = await http.get(Uri.parse(url), headers: requestHeaders);
 
   // 1 响应成功，获取到返回的json字符串
   if (response.statusCode == 200) {
@@ -21,9 +27,6 @@ Future<List<PhotosData>> fetchPexelsApiImageCuratedResult(int page) async {
 
     // 2.转成 List<PexelsApiImagesResult>
     List jsonResult = jsonDecode(jsonString);
-
-    // print("<<<<<<<<<<<<<<<<<");
-    // print(JsonResult);
 
     // 3 获取其中photos数组即可 ，jsonResult就1个值而已(photos不存在，就空数组)
     return (jsonResult
@@ -46,10 +49,10 @@ Future<List<PhotosData>> fetchPexelsApiImageQueryResult(
   // 调用者传递条件即可
   var url = "https://api.pexels.com/v1/search/?$queryParams";
 
-  final response = await http.get(Uri.parse(url));
+  final response = await http.get(Uri.parse(url), headers: requestHeaders);
 
-  print("******************************");
-  print(response);
+  // print("******************************");
+  // print(response);
 
   // 1 响应成功，获取到返回的json字符串
   if (response.statusCode == 200) {

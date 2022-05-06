@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+/// 图片大模塊的占位（pexels级别）
+
 class ImagePageDemo extends StatefulWidget {
   const ImagePageDemo({Key? key}) : super(key: key);
 
@@ -11,13 +13,29 @@ class ImagePageDemo extends StatefulWidget {
 class _ImagePageDemoState extends State<ImagePageDemo> {
   @override
   Widget build(BuildContext context) {
-    return GridView.count(
-      // 横轴子元素的数量。
-      crossAxisCount: 2,
-      padding: EdgeInsets.all(5.sp),
-      // 子元素在横轴长度和主轴长度的比例。
-      childAspectRatio: 8.0 / 6.0,
-      children: _buildGridCards(10),
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("ImagePageDemo"),
+        // 2022-05-06 后续可参看 lib\_demos\search_on_app_bar.dart 做readhub的新闻查询。
+        actions: <Widget>[
+          IconButton(
+            iconSize: 20.sp,
+            icon: const Icon(
+              Icons.search,
+              semanticLabel: 'search', // icon的语义标签。
+            ),
+            onPressed: () {},
+          ),
+        ],
+      ),
+      body: GridView.count(
+        // 横轴子元素的数量。
+        crossAxisCount: 2,
+        padding: EdgeInsets.all(5.sp),
+        // 子元素在横轴长度和主轴长度的比例。
+        childAspectRatio: 8.0 / 6.0,
+        children: _buildGridCards(10),
+      ),
     );
   }
 

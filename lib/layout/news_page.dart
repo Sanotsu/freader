@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:freader/views/news_page_demo.dart';
 import 'package:freader/views/readhub_page.dart';
+
+/// 2022-05-05
+/// 目前支持或计划支持的开源的新闻api，就会放到这个titles中，点击对应的card，跳转到具体网站的页面，查看详情内容
 
 class NewsPage extends StatefulWidget {
   const NewsPage({Key? key}) : super(key: key);
@@ -9,62 +13,61 @@ class NewsPage extends StatefulWidget {
 }
 
 class _NewsPageState extends State<NewsPage> {
+  // 新闻站点
+  final titles = ["Readhub", "NewsData", "So on"];
+  // 站点简述
+  final subtitles = [
+    "每天三分钟的科技新闻聚合阅读.",
+    "Here is list 2 subtitle",
+    "Here is list 3 subtitle"
+  ];
+  // 站点图标
+  final icons = [Icons.ac_unit, Icons.access_alarm, Icons.access_time];
+
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: 2,
-      child: Center(
-        child: Column(
-          children: <Widget>[
-            Container(
-              height: 25,
-              color: Colors.blue, // 用來看位置，不需要的话这个Container可以改为SizedBox
-              child: const TabBar(
-                indicator: UnderlineTabIndicator(
-                  borderSide: BorderSide(width: 2.0), // 下划线的粗度
-                  // 下划线的四边的间距horizontal橫向
-                  insets: EdgeInsets.symmetric(horizontal: 2.0),
+    return ListView.separated(
+        separatorBuilder: (BuildContext context, int index) => const Divider(),
+        itemCount: titles.length,
+        itemBuilder: (context, index) {
+          return GestureDetector(
+            onTap: () => _onCardTap(context, index),
+            child: Card(
+              child: ListTile(
+                title: Text(titles[index]),
+                subtitle: Text(subtitles[index]),
+                leading: const CircleAvatar(
+                  backgroundImage: AssetImage("images/avatar.png"),
                 ),
-                indicatorWeight: 0,
-                indicatorSize: TabBarIndicatorSize.label,
-                tabs: [
-                  Tab(
-                    child: Text(
-                      "NewData",
-                      style: TextStyle(
-                          fontFamily: "BarlowBold",
-                          fontSize: 10,
-                          color: Colors.black),
-                    ),
-                  ),
-                  Tab(
-                    // height: 12,
-                    child: Text(
-                      "Readhub",
-                      style: TextStyle(
-                          fontFamily: "BarlowBold",
-                          fontSize: 10,
-                          color: Colors.black),
-                    ),
-                  ),
-                ],
+                trailing: Icon(icons[index]),
               ),
             ),
-            const Expanded(
-              child: TabBarView(
-                children: <Widget>[
-                  Center(
-                    child: Text('imagination coming soon'),
-                  ),
-                  Center(
-                    child: ReadhubPage(),
-                  ),
-                ],
-              ),
-            )
-          ],
-        ),
-      ),
-    );
+          );
+        });
   }
+}
+
+_onCardTap(BuildContext context, int index) {
+  Widget screen;
+  switch (index) {
+    case 0:
+      screen = const ReadhubPage();
+      break;
+    case 1:
+      screen = const NewsPageDemo();
+      break;
+    case 2:
+      screen = const NewsPageDemo();
+      break;
+    default:
+      screen = const ReadhubPage();
+  }
+
+  Navigator.of(context).push(
+    MaterialPageRoute(
+      builder: (BuildContext context) {
+        return screen;
+      },
+    ),
+  );
 }
