@@ -12,71 +12,87 @@ class ReadhubPage extends StatefulWidget {
 class _ReadhubPageState extends State<ReadhubPage> {
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: 4,
-      child: Center(
-        child: Column(
-          children: <Widget>[
-            Container(
-              height: 20,
-              color: Colors.brown, // 用來看位置，不需要的话这个Container可以改为SizedBox
-              child: TabBar(
-                indicator: UnderlineTabIndicator(
-                  borderSide: BorderSide(
-                      width: 3.0.sp, color: Colors.lightBlue), // 下划线的粗度和颜色
-                  // 下划线的四边的间距horizontal橫向
-                  insets: EdgeInsets.symmetric(horizontal: 2.0.sp),
-                ),
-                indicatorWeight: 0,
-                indicatorSize: TabBarIndicatorSize.label,
-                tabs: [
-                  Tab(
-                    child: Text(
-                      "热门话题",
-                      style: TextStyle(fontSize: 10.sp),
-                    ),
-                  ),
-                  Tab(
-                    child: Text(
-                      '科技动态',
-                      style: TextStyle(fontSize: 10.sp),
-                    ),
-                  ),
-                  Tab(
-                    child: Text(
-                      '技术资讯',
-                      style: TextStyle(fontSize: 10.sp),
-                    ),
-                  ),
-                  Tab(
-                    child: Text(
-                      '区块链',
-                      style: TextStyle(fontSize: 10.sp),
-                    ),
-                  ),
-                ],
-              ),
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Readhub"),
+        // 2022-05-06 后续可参看 lib\_demos\search_on_app_bar.dart 做readhub的新闻查询。
+        actions: <Widget>[
+          IconButton(
+            iconSize: 20,
+            icon: const Icon(
+              Icons.search,
+              semanticLabel: 'search', // icon的语义标签。
             ),
-            const Expanded(
-              // 虽然是四个页面，但可以抽出通用的小组件复用
-              child: TabBarView(
-                children: <Widget>[
-                  Center(
-                    child: ReadhubTypedNews(newsType: 'topics'),
+            onPressed: () {},
+          ),
+        ],
+      ),
+      body: DefaultTabController(
+        length: 4,
+        child: Center(
+          child: Column(
+            children: <Widget>[
+              Container(
+                height: 20,
+                color: Colors.brown, // 用來看位置，不需要的话这个Container可以改为SizedBox
+                child: TabBar(
+                  indicator: UnderlineTabIndicator(
+                    borderSide: BorderSide(
+                        width: 3.0.sp, color: Colors.lightBlue), // 下划线的粗度和颜色
+                    // 下划线的四边的间距horizontal橫向
+                    insets: EdgeInsets.symmetric(horizontal: 2.0.sp),
                   ),
-                  Center(
-                    child: ReadhubTypedNews(newsType: '1'),
-                  ),
-                  Center(
-                    child: ReadhubTypedNews(newsType: '2'),
-                  ),
-                  Center(
-                    child: ReadhubTypedNews(newsType: '3'),
-                  ),
-                ],
+                  indicatorWeight: 0,
+                  indicatorSize: TabBarIndicatorSize.label,
+                  tabs: [
+                    Tab(
+                      child: Text(
+                        "热门话题",
+                        style: TextStyle(fontSize: 10.sp),
+                      ),
+                    ),
+                    Tab(
+                      child: Text(
+                        '科技动态',
+                        style: TextStyle(fontSize: 10.sp),
+                      ),
+                    ),
+                    Tab(
+                      child: Text(
+                        '技术资讯',
+                        style: TextStyle(fontSize: 10.sp),
+                      ),
+                    ),
+                    Tab(
+                      child: Text(
+                        '区块链',
+                        style: TextStyle(fontSize: 10.sp),
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            )
-          ],
+              const Expanded(
+                // 虽然是四个页面，但可以抽出通用的小组件复用
+                child: TabBarView(
+                  children: <Widget>[
+                    Center(
+                      child: ReadhubTypedNews(newsType: 'topics'),
+                    ),
+                    Center(
+                      child: ReadhubTypedNews(newsType: '1'),
+                    ),
+                    Center(
+                      child: ReadhubTypedNews(newsType: '2'),
+                    ),
+                    Center(
+                      child: ReadhubTypedNews(newsType: '3'),
+                    ),
+                  ],
+                ),
+              )
+            ],
+          ),
         ),
       ),
     );

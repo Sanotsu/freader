@@ -63,5 +63,21 @@ qps 有限制，每次请求 80 条，慢慢展示。
 
 考虑有一个全局状态，记录现在激活的页面时那一個，这样对应服务进行数据查询和渲染。
 
+打包 apk 命令:`flutter build apk --split-per-abi`
 
-打包apk命令:`flutter build apk --split-per-abi`
+---
+
+## 重构 layout 思路
+
+```
+|----------layout---------|------views------|------widget------
+app
+    home_page                                       DefaultTabController->Scaffold
+        image_page                                     ListView
+                            pexels_image_page              Scaffold
+                            image_page_demo                Scaffold
+        news_page                                      ListView
+                            readhub_page                   Scaffold
+                            news_page_demo                 Scaffold
+
+```

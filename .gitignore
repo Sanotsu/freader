@@ -44,3 +44,9 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# 存放例如需要第三方服务的token，就不要上传了,类似:
+#   class GlobalConstants {
+#       static String pexels_authorization="xxx";
+#   }
+lib/common/personal
