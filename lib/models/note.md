@@ -237,3 +237,22 @@ X-Ratelimit-Reset	      当前月翻转的UNIX时间戳
 
 - pexels_api_image_curated.json
 - pexels_api_image.json
+
+---
+
+## 知乎日报 api 说明
+
+[別人收集的接口地址](https://gist.github.com/ameizi/f3f320a512030292362d)
+
+简单对比发现，最新的日报，也可以直接输入 【**该天日期+1**】 进行查询，这样和历史日期的日报，在返回的 json 格式上就一致了。
+
+### 日报请求地址
+
+- `GET https://news-at.zhihu.com/api/3/news/before/<当天日期+1>`
+  - 其中`<当天日期+1>`形式为 `YYYYMMDD`.
+    - 假如今天为`20220506`，明天为`20220507`，要看今天的日报，输入`20220507`甚至之后的日期都行；
+    - 同理，要查看`2022-05-04`的日报，就要传入`20220505`。注意 before 的含义。
+
+返回结构，在 jsons 文件夹下：
+
+- zhihu_daily_result.json

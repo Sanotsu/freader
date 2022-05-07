@@ -57,6 +57,8 @@ dependencies:
   permission_handler: ^9.2.0
   image_gallery_saver: '^1.7.1'
   fluttertoast: ^8.0.9
+  date_format: ^2.0.6
+  flutter_datetime_picker: ^1.5.1
 
 dev_dependencies:
   flutter_test:

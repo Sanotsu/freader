@@ -1,0 +1,77 @@
+{
+  "date": "20220506",
+  "stories": [
+    {
+      "image_hue": "0xb39e7d",
+      "title": "颜色对人的食欲有影响吗？",
+      "url": "https://daily.zhihu.com/story/9748320",
+      "hint": "丁香医生 · 2 分钟阅读",
+      "ga_prefix": "050607",
+      "images": [
+        "https://pic1.zhimg.com/v2-86bd3660a20d436677682d5298795cb1.jpg?source=8673f162"
+      ],
+      "type": 0,
+      "id": 9748320
+    },
+    {
+      "image_hue": "0xa4b37d",
+      "title": "如何评价美剧《月光骑士》第六集（大结局）《众神与怪物》？",
+      "url": "https://daily.zhihu.com/story/9748321",
+      "hint": "MrBlueOwO · 7 分钟阅读",
+      "ga_prefix": "050607",
+      "images": [
+        "https://pica.zhimg.com/v2-906929b3ff85fa811abd8f02f70e4449.jpg?source=8673f162"
+      ],
+      "type": 0,
+      "id": 9748321
+    },
+    {
+      "image_hue": "0x586346",
+      "title": "为什么有的人喜欢阳光，每次有阳光的时候就会感到心情好，舒畅 ， 就好像没有了任何烦恼，很开心？",
+      "url": "https://daily.zhihu.com/story/9748328",
+      "hint": "耗子领袖 · 2 分钟阅读",
+      "ga_prefix": "050607",
+      "images": [
+        "https://pica.zhimg.com/v2-fabad689a1c17ad98f6b4c33d2052502.jpg?source=8673f162"
+      ],
+      "type": 0,
+      "id": 9748328
+    },
+    {
+      "image_hue": "0xb3a47d",
+      "title": "怎么提高读书的效率呢？",
+      "url": "https://daily.zhihu.com/story/9748335",
+      "hint": "韩叙 · 9 分钟阅读",
+      "ga_prefix": "050607",
+      "images": [
+        "https://pica.zhimg.com/v2-26cfea20d90d3a8272f2e07db1441ccb.jpg?source=8673f162"
+      ],
+      "type": 0,
+      "id": 9748335
+    },
+    {
+      "image_hue": "0x517195",
+      "title": "中国有哪些鲜为人知的地缘优势？",
+      "url": "https://daily.zhihu.com/story/9748344",
+      "hint": "龙牙 · 5 分钟阅读",
+      "ga_prefix": "050607",
+      "images": [
+        "https://pic3.zhimg.com/v2-a33ce98a6e16f0ae4e8bbeff69fbdeb5.jpg?source=8673f162"
+      ],
+      "type": 0,
+      "id": 9748344
+    },
+    {
+      "image_hue": "0xb37d95",
+      "title": "瞎扯 · 如何正确地吐槽",
+      "url": "https://daily.zhihu.com/story/9748312",
+      "hint": "VOL.2914",
+      "ga_prefix": "050606",
+      "images": [
+        "https://pica.zhimg.com/v2-e6dab46aa35894d51ae5b27657cb205b.jpg?source=8673f162"
+      ],
+      "type": 0,
+      "id": 9748312
+    }
+  ]
+}
