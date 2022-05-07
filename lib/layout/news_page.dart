@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:freader/views/news_page_demo.dart';
 import 'package:freader/views/readhub_page.dart';
 import 'package:freader/views/zhihu_page.dart';
@@ -15,20 +16,27 @@ class NewsPage extends StatefulWidget {
 
 class _NewsPageState extends State<NewsPage> {
   // 新闻站点
-  final titles = ["Readhub", "ZhiHu", "NewsData", "So on"];
+  final titles = ["Readhub", "知乎日报", "NewsData", "So on"];
   // 站点简述
   final subtitles = [
     "每天三分钟的科技新闻聚合阅读.",
-    "Here is list 2 subtitle",
+    "每天三次，每次七分钟.",
     "Here is list 2 subtitle",
     "Here is list 3 subtitle"
   ];
+
+  final siteLogos = [
+    "images/site_logos/readhub_logo.png",
+    "images/site_logos/zhihu_daily_logo.png",
+    "images/avatar.png",
+    "images/avatar.png"
+  ];
   // 站点图标
   final icons = [
-    Icons.ac_unit,
-    Icons.access_alarm,
-    Icons.access_time,
-    Icons.access_time
+    Icons.newspaper,
+    Icons.newspaper,
+    Icons.newspaper,
+    Icons.newspaper,
   ];
 
   @override
@@ -43,8 +51,9 @@ class _NewsPageState extends State<NewsPage> {
               child: ListTile(
                 title: Text(titles[index]),
                 subtitle: Text(subtitles[index]),
-                leading: const CircleAvatar(
-                  backgroundImage: AssetImage("images/avatar.png"),
+                leading: SizedBox(
+                  width: 60.0.sp,
+                  child: Image.asset(siteLogos[index]),
                 ),
                 trailing: Icon(icons[index]),
               ),

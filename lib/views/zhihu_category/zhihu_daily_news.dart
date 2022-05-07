@@ -2,6 +2,7 @@
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+// import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:freader/models/zhihu_api_daily_result.dart';
 import 'package:date_format/date_format.dart';
@@ -61,6 +62,27 @@ class _ZhihuDailyNewsState extends State<ZhihuDailyNews> {
     return acquiredList;
   }
 
+  /// 指定日期查询周报
+  /// 关键字查询则会清空现在已有的列表(都只有一个日期的日报显示)
+  Future _getQueryItems(String dateString) async {
+    setState(() {
+      isLoading = true;
+      acquiredList.clear();
+    });
+
+    print('<指定日期+1>为: $dateString');
+
+    var response = await fetchZhihuDailyResult(dateString);
+
+    setState(() {
+      isLoading = false;
+      acquiredList.addAll(response.stories);
+      // 获取完之后，更新當前頁数据
+      dailyDate = response.date;
+      print('----------指定日期日报查询完成');
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     var ri = RefreshIndicator(
@@ -103,9 +125,13 @@ class _ZhihuDailyNewsState extends State<ZhihuDailyNews> {
               /// 如果请求数据有错，显示错误信息
               return Text('${snapshot.error}');
             } else {
-              // 如果正常获取数据，但数据为空
-              return const Center(
-                child: Text("empty or null data"),
+              // 如果正常获取数据，
+              //  還在加载中，显示loading
+              //  已经加载完了还是没有数据，显示 empty
+              return Center(
+                child: isLoading
+                    ? const Text("loading ...")
+                    : const Text("empty or null data"),
               );
             }
           }
@@ -120,16 +146,60 @@ class _ZhihuDailyNewsState extends State<ZhihuDailyNews> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: EdgeInsets.only(left: 5.sp, top: 10.sp, bottom: 5.sp),
-            child: Text(
-              dailyDate,
-              style: TextStyle(
-                fontSize: 14.sp,
-                fontWeight: FontWeight.bold,
-                color: Colors.blue,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                dailyDate,
+                style: Theme.of(context).textTheme.headlineSmall, // 使用预设主题的一些样式
+                // style: TextStyle(
+                //   fontSize: 14.sp,
+                //   fontWeight: FontWeight.bold,
+                //   color: Colors.blue,
+                // ),
               ),
-            ),
+
+              /// 2022-05-07 使用 flutter_datetime_picker 其库本身会报 Warning:
+              ///  Operand of null-aware operation '??' has type 'Color' which excludes null.
+              /// 等修复后再用。
+              // TextButton(
+              //   onPressed: () {
+              //     DatePicker.showDatePicker(context,
+              //         showTitleActions: true,
+              //         minTime: DateTime(2018, 3, 5),
+              //         maxTime: DateTime(2019, 6, 7), onChanged: (date) {
+              //       print('change $date');
+              //     }, onConfirm: (date) {
+              //       print('confirm $date');
+              //     }, currentTime: DateTime.now(), locale: LocaleType.zh);
+              //   },
+              //   child: const Text(
+              //     ' picker (Chinese)',
+              //     style: TextStyle(color: Colors.blue),
+              //   ),
+              // ),
+              /// 2022-05-07 先用原本的datePicker，为了显示中文，则需要国际化支持
+              /// https://juejin.cn/post/6844904094289641485
+              /// https://flutter.cn/docs/development/accessibility-and-localization/internationalization
+              TextButton(
+                child: const Text("选择日期"),
+                onPressed: () async {
+                  var result = await showDatePicker(
+                    context: context,
+                    locale: const Locale('zh'),
+                    initialDate: DateTime.now(),
+                    firstDate: DateTime(2018),
+                    lastDate: DateTime.now(),
+                  );
+                  // 牢记查询的接口是指定日期+1。
+                  var dateString = formatDate(
+                      result!.add(const Duration(days: 1)), [yyyy, mm, dd]);
+
+                  // 该函数中去setState
+                  _getQueryItems(dateString);
+                },
+              )
+            ],
           ),
           const Divider(),
           Expanded(

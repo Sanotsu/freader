@@ -3,6 +3,8 @@ import 'package:freader/layout/home_page.dart';
 
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import 'package:flutter_localizations/flutter_localizations.dart';
+
 class FreaderApp extends StatelessWidget {
   const FreaderApp({Key? key}) : super(key: key);
 
@@ -16,6 +18,16 @@ class FreaderApp extends StatelessWidget {
       builder: (_) {
         return MaterialApp(
           title: 'freader',
+          localizationsDelegates: const [
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: const [
+            Locale('zh', 'CH'),
+            Locale('en', 'US'),
+          ],
+          locale: const Locale('zh'),
           theme: ThemeData(
             // This is the theme of your application.
             //

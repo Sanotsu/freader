@@ -18,17 +18,21 @@ class _ImagePageState extends State<ImagePage> with TickerProviderStateMixin {
   // 站点简述
   final subtitles = [
     "demo image page",
-    "Free stock photos & videos you can use everywhere. Browse millions of high-quality royalty free stock images & copyright free pictures.",
+    "Free stock photos & videos you can use everywhere.",
     "Here is list 2 subtitle",
     "Here is list 3 subtitle"
   ];
+
   // 站点图标
-  final icons = [
-    Icons.ac_unit,
-    Icons.access_alarm,
-    Icons.access_time,
-    Icons.image
+  final siteLogos = [
+    "images/avatar.png",
+    "images/site_logos/pexels_logo.png",
+    "images/avatar.png",
+    "images/avatar.png"
   ];
+
+  // 分类图标
+  final icons = [Icons.image, Icons.image, Icons.image, Icons.image];
 
   @override
   Widget build(BuildContext context) {
@@ -42,8 +46,9 @@ class _ImagePageState extends State<ImagePage> with TickerProviderStateMixin {
               child: ListTile(
                 title: Text(titles[index]),
                 subtitle: Text(subtitles[index]),
-                leading: const CircleAvatar(
-                  backgroundImage: AssetImage("images/avatar.png"),
+                leading: SizedBox(
+                  width: 60.0.sp,
+                  child: Image.asset(siteLogos[index]),
                 ),
                 trailing: Icon(icons[index]),
               ),

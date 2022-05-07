@@ -163,10 +163,13 @@ class _PexelsImagePageState extends State<PexelsImagePage> {
               /// 如果请求数据有错，显示错误信息
               return Text('${snapshot.error}');
             } else {
-              // 如果正常获取数据，但数据为空
-              return const Center(
-                // child: Text("empty or null data"),
-                child: Text("loading..."),
+              // 如果正常获取数据，
+              //  還在加载中，显示loading
+              //  已经加载完了还是没有数据，显示 empty
+              return Center(
+                child: isLoading
+                    ? const Text("loading ...")
+                    : const Text("empty or null data"),
               );
             }
           }
