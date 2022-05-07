@@ -40,7 +40,7 @@ class _PexelsImageDetailPageState extends State<PexelsImageDetailPage> {
     var pd = widget.photoData;
     var viewSrc = pd.src?.medium;
     // 下载使用原图途径和pexels的该图片id作为名称
-    var downloadSrc = pd.src?.original;
+    var downloadSrcList = [pd.src?.original, pd.src?.large2x, pd.src?.large];
     var photoName = "pexels_${pd.id}";
 
     return Scaffold(
@@ -96,29 +96,90 @@ class _PexelsImageDetailPageState extends State<PexelsImageDetailPage> {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              SmallButtonWidget(
-                onTap: () => {},
-                tooltip: "share",
-                child: Icon(
-                  Icons.share,
-                  size: 20.sp,
+              Expanded(
+                flex: 2,
+                child: Row(
+                  children: [
+                    SmallButtonWidget(
+                      onTap: () => {},
+                      tooltip: "share",
+                      child: Icon(
+                        Icons.share,
+                        size: 20.sp,
+                      ),
+                    ),
+                    SmallButtonWidget(
+                      onTap: () => {},
+                      tooltip: "star",
+                      child: Icon(
+                        Icons.star,
+                        size: 20.sp,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              SmallButtonWidget(
-                onTap: () => {},
-                tooltip: "star",
-                child: Icon(
-                  Icons.star,
-                  size: 20.sp,
+              Expanded(
+                flex: 1,
+                child: Row(
+                  children: [
+                    Text(
+                      "原图",
+                      style: TextStyle(fontSize: 14.sp),
+                    ),
+                    SmallButtonWidget(
+                      onTap: () => _downloadImage(
+                          downloadSrcList[0] ?? "", "${photoName}_origin"),
+                      tooltip: "download",
+                      child: Icon(
+                        Icons.download,
+                        color: Colors.lightBlue,
+                        size: 20.sp,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              SmallButtonWidget(
-                onTap: () => _downloadImage(downloadSrc!, photoName),
-                tooltip: "download",
-                child: Icon(
-                  Icons.download,
-                  color: Colors.lightBlue,
-                  size: 20.sp,
+              Expanded(
+                flex: 1,
+                child: Row(
+                  children: [
+                    Text(
+                      "高清",
+                      style: TextStyle(fontSize: 14.sp),
+                    ),
+                    SmallButtonWidget(
+                      onTap: () => _downloadImage(
+                          downloadSrcList[1] ?? "", "${photoName}_large2x"),
+                      tooltip: "download",
+                      child: Icon(
+                        Icons.download,
+                        color: Colors.lightBlue,
+                        size: 20.sp,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(
+                flex: 1,
+                child: Row(
+                  children: [
+                    Text(
+                      "大图",
+                      style: TextStyle(fontSize: 14.sp),
+                    ),
+                    SmallButtonWidget(
+                      onTap: () => _downloadImage(
+                          downloadSrcList[2] ?? "", "${photoName}_large"),
+                      tooltip: "download",
+                      child: Icon(
+                        Icons.download,
+                        color: Colors.lightBlue,
+                        size: 20.sp,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
@@ -137,6 +198,11 @@ class _PexelsImageDetailPageState extends State<PexelsImageDetailPage> {
 
   // 下载图片到相册（默认Download文件夹）
   _downloadImage(String url, String name) async {
+    if (downloading) {
+      _toastInfo("图片下载中，请先等待下载完成。");
+      return;
+    }
+
     _toastInfo("开始下载图片……");
     setState(() {
       downloading = true;
@@ -177,6 +243,7 @@ class _PexelsImageDetailPageState extends State<PexelsImageDetailPage> {
 
   // 透明小弹窗显示信息
   _toastInfo(String info) {
-    Fluttertoast.showToast(msg: info, toastLength: Toast.LENGTH_LONG);
+    // Fluttertoast.showToast(msg: info, toastLength: Toast.LENGTH_LONG);
+    Fluttertoast.showToast(msg: info, toastLength: Toast.LENGTH_SHORT);
   }
 }
