@@ -30,6 +30,12 @@ class _PickLocalPdfFileState extends State<PickLocalPdfFile> {
   // 用户是否中止文件选择
   bool _userAborted = false;
 
+  @override
+  void initState() {
+    super.initState();
+    _pickFiles();
+  }
+
   /// 选择文件的操作
   void _pickFiles() async {
     _resetState();
@@ -79,71 +85,68 @@ class _PickLocalPdfFileState extends State<PickLocalPdfFile> {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: EdgeInsets.only(left: 10.0.sp, right: 10.0.sp),
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Padding(
-                padding: EdgeInsets.only(top: 10.0.sp, bottom: 5.0.sp),
-                child: Column(
-                  children: <Widget>[
-                    ElevatedButton(
-                      onPressed: () => _pickFiles(),
-                      child: const Text('选择pdf文件'),
-                    ),
-                  ],
-                ),
-              ),
-              Builder(
-                builder: (BuildContext context) => _isLoading
-                    ? const Padding(
-                        padding: EdgeInsets.only(bottom: 10.0),
-                        child: CircularProgressIndicator(),
-                      )
-                    : _userAborted
-                        ? const Padding(
-                            padding: EdgeInsets.only(bottom: 10.0),
-                            child: Text(
-                              '您已经中止了文件选择,关闭了弹窗.',
-                            ),
-                          )
-                        : _filePickerResultList != null
-                            ? GestureDetector(
-                                onTap: () => {
-                                  Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                      builder: (BuildContext context) {
-                                        return PDFScreen(
-                                          title: _fileName,
-                                          file: File(
-                                              _filePickerResultList![0].path ??
-                                                  ""),
-                                        );
-                                      },
-                                    ),
-                                  )
-                                },
-                                child: Card(
-                                  color: Colors.amber,
-                                  child: Center(
-                                      child: ListTile(
-                                    title: Text(
-                                      _fileName ?? '...',
-                                    ),
-                                    subtitle: Text(
-                                        _filePickerResultList![0].path ?? ""),
-                                  )),
-                                ),
-                              )
-                            : const SizedBox(),
-              ),
-            ],
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        const Divider(),
+        SizedBox(
+          height: 20.sp,
+          child: Padding(
+            padding: EdgeInsets.only(left: 10.sp),
+            child: Text(
+              "自选PDF文件",
+              style: TextStyle(fontSize: 12.sp),
+            ),
           ),
         ),
-      ),
+        _isLoading
+            ? const SizedBox(
+                child: CircularProgressIndicator(),
+              )
+            : _userAborted
+                ? const SizedBox(
+                    child: Text(
+                      '您已经中止了文件选择,关闭了弹窗.',
+                    ),
+                  )
+                : _filePickerResultList != null
+                    ? Expanded(
+                        child: GridView.count(
+                          childAspectRatio: 4 / 2, // item的宽高比
+                          crossAxisCount: 3,
+                          children: <Widget>[
+                            GestureDetector(
+                              onTap: () => {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (BuildContext context) {
+                                      return PDFScreen(
+                                        title: _fileName,
+                                        file: File(
+                                            _filePickerResultList![0].path ??
+                                                ""),
+                                      );
+                                    },
+                                  ),
+                                )
+                              },
+                              child: SizedBox(
+                                child: Card(
+                                    color: Colors.amber,
+                                    child: Center(
+                                      child: Text(
+                                        _fileName ?? '...',
+                                        maxLines: 3,
+                                        style: TextStyle(fontSize: 8.sp),
+                                      ),
+                                    )),
+                              ),
+                            )
+                          ],
+                        ),
+                      )
+                    : const SizedBox()
+      ],
     );
   }
 }

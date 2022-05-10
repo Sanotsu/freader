@@ -1,7 +1,11 @@
+// ignore_for_file: avoid_print
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:freader/views/pdf_viewer/embedded_pdf_list_widget.dart';
 import 'package:freader/views/pdf_viewer/pdf_screen.dart';
 import 'package:freader/views/pdf_viewer/pick_local_pdf_file_widget.dart';
+import 'package:freader/views/pdf_viewer/scan_local_pdf_list_widget.dart';
 
 /// 显示書籍信息卡片，点击之后进入该書籍pdf阅读画面
 ///
@@ -13,64 +17,95 @@ class PdfViewerPage extends StatefulWidget {
 }
 
 class _PdfViewerPageState extends State<PdfViewerPage> {
-  final List<IconData> _icons = []; //保存Icon数据
+  // app预计内置的pdf书籍
+  final List<String> embeddedPdfList = [];
+
+// 是否显示设备中文件（通过此值判断是否点击了【全盤扫描】按钮）
+  bool isShowDeviceFileList = false;
+
+  // 是否显示打开文件夹选择的文件（通过此值判断是否点击了【打开本地文件】按钮）
+  bool isShowPickFileList = false;
 
   @override
   void initState() {
     super.initState();
     // 初始化数据
-    _retrieveIcons();
+    isShowDeviceFileList = false;
+    isShowPickFileList = false;
   }
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Expanded(
-          child: SizedBox(
-            height: 100.sp,
-            child: const PickLocalPdfFile(),
-          ),
-        ),
-        Expanded(
-          child: GridView.builder(
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 3,
-            ),
-            itemCount: 10, // 文件的数量
-            itemBuilder: (BuildContext context, int index) {
-              return GestureDetector(
-                onTap: () => _onPdfCardTap(context, index),
-                child: Card(
-                  color: Colors.amber,
-                  child: Center(
-                    child: Text('$index'),
+        SizedBox(
+          height: 60.sp,
+          child: Expanded(
+            child: Row(
+              children: [
+                // 2022-05-10 注意，这里都只是按鈕点击了一次之后就无法使用了，因为setState都固定
+                Expanded(
+                  flex: 1,
+                  child: Container(),
+                ),
+                Expanded(
+                  flex: 4,
+                  child: ElevatedButton(
+                    onPressed: () => {
+                      setState(() {
+                        isShowPickFileList = true;
+                      })
+                    },
+                    child: Text(
+                      '打开本地指定pdf',
+                      style: TextStyle(fontSize: 12.sp),
+                    ),
                   ),
                 ),
-              );
-            },
+                Expanded(
+                  flex: 1,
+                  child: Container(),
+                ),
+                Expanded(
+                  flex: 4,
+                  child: ElevatedButton(
+                    onPressed: () => {
+                      setState(() {
+                        isShowDeviceFileList = true;
+                      })
+                    },
+                    child: Text(
+                      '全盘扫描本地pdf',
+                      style: TextStyle(fontSize: 12.sp),
+                    ),
+                  ),
+                ),
+                Expanded(
+                  flex: 1,
+                  child: Container(),
+                ),
+              ],
+            ),
           ),
-        )
+        ),
+        isShowPickFileList
+            ? const Expanded(
+                child: PickLocalPdfFile(),
+              )
+            : Container(),
+        const Divider(),
+        isShowDeviceFileList
+            ? const Expanded(
+                child: ScanLocalPdfListWidget(),
+              )
+            : Container(),
+        const EmbeddedPdfListWidget(),
       ],
     );
   }
 
   /// 模拟异步获取数据
-  /// 获取pdf數量及位置数据等
-  void _retrieveIcons() {
-    Future.delayed(const Duration(milliseconds: 200)).then((e) {
-      setState(() {
-        _icons.addAll([
-          Icons.ac_unit,
-          Icons.airport_shuttle,
-          Icons.all_inclusive,
-          Icons.beach_access,
-          Icons.cake,
-          Icons.free_breakfast,
-        ]);
-      });
-    });
-  }
+
 }
 
 /// 点击卡片，进行页面跳转

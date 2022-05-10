@@ -94,8 +94,8 @@ flutter:
     - images/image_page_demo/
     - images/site_logos/
     - assets/
-    - assets//jsons/
-    - assets//pdfs/
+    - assets/jsons/
+    - assets/pdfs/
     # - assets/jsons/pexels_api_images.json
 
   # An image asset can refer to one or more resolution-specific "variants", see
