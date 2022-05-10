@@ -50,3 +50,6 @@ app.*.map.json
 #       static String pexels_authorization="xxx";
 #   }
 lib/common/personal
+
+## pdf viewer测试的文档，没有版权，不要传播
+assets/pdfs

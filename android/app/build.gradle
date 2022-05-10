@@ -51,7 +51,9 @@ android {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId "com.example.freader"
         // minSdkVersion flutter.minSdkVersion
-        minSdkVersion 20
+        // minSdkVersion 20
+        // advance_pdf_viewer 插件要求最低21
+        minSdkVersion 21
         targetSdkVersion flutter.targetSdkVersion
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
