@@ -7,6 +7,11 @@
 
 更多 json to model 查看官方教程[JSON 和序列化数据](https://flutter.cn/docs/development/data-and-backend/json)
 
+2022-05-11
+
+`app_embedded`文件夹下的 model 是 app 内部逻辑的一些类，就不是那些 api 返回的 json 转化的 model 了，  
+一般是内部持久化逻辑的东西。例如`pdf viewer`存放所有的 pdf 文件列表，及其对应阅读记录？
+
 ---
 
 ## readhub 相关 model 和 url 说明
