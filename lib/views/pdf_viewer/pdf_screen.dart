@@ -2,6 +2,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:freader/common/utils/sqlite_sql_statements.dart';
+import 'package:freader/models/app_embedded/pdf_state.dart';
 import 'package:freader/utils/platform_util.dart';
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 
@@ -13,12 +15,9 @@ import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 /// 不好搞的地方：记录阅读的進度和历史记录
 ///
 class PDFScreen extends StatefulWidget {
-  final String? path;
-  final String? title;
-  final File? file;
+  final PdfState pdfState;
 
-  const PDFScreen({Key? key, this.path, this.title, this.file})
-      : super(key: key);
+  const PDFScreen({Key? key, required this.pdfState}) : super(key: key);
 
   @override
   _PDFScreenState createState() => _PDFScreenState();
@@ -37,7 +36,8 @@ class _PDFScreenState extends State<PDFScreen> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
-    print("path is ${widget.path},title is ${widget.title}");
+    print(
+        "path is ${widget.pdfState.filepath},title is ${widget.pdfState.filename}");
     _pdfViewerController = PdfViewerController();
     scrollDirection = PdfScrollDirection.vertical;
   }
@@ -58,33 +58,34 @@ class _PDFScreenState extends State<PDFScreen> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    var filePath = widget.path ?? "";
-
     return Scaffold(
       appBar: AppBar(
-        title: Text('${widget.title}'),
+        title: Text(widget.pdfState.filename),
       ),
-      // body: SfPdfViewer.network(
-      //   'https://cdn.syncfusion.com/content/PDFViewer/flutter-succinctly.pdf',
-      //   controller: _pdfViewerController, // pdfviewer的控制器
-      //   key: _pdfViewerKey,
-      //   scrollDirection: PdfScrollDirection.horizontal, // 切换滚动方向
-      //   enableDoubleTapZooming: false, // 启动双击放大縮小
-      // ),
-      body: widget.file != null
-          ? SfPdfViewer.file(
-              widget.file!,
+      // 如果是内嵌的要用asset，否则读文件
+      /// 后续可以把内嵌的，放到app安装时默认生产的文件夹下去，然后再读，进行统一。此处仅用于学习接口
+      body: widget.pdfState.source == PdfStateSource.embedded.toString()
+          ? SfPdfViewer.asset(
+              widget.pdfState.filepath,
               controller: _pdfViewerController, // pdfviewer的控制器
               key: _pdfViewerKey, // 指定的pdfviewer对应的key
               scrollDirection: scrollDirection, // 切换滚动方向
               enableDoubleTapZooming: false, // 启动双击放大縮小
+              onDocumentLoadFailed: (detail) {
+                print("asset pdf loadFailed: ${detail.error}");
+                _showPdfLoadFailedDialog(context, detail.error);
+              },
             )
-          : SfPdfViewer.asset(
-              filePath,
+          : SfPdfViewer.file(
+              File(widget.pdfState.filepath),
               controller: _pdfViewerController, // pdfviewer的控制器
               key: _pdfViewerKey, // 指定的pdfviewer对应的key
               scrollDirection: scrollDirection, // 切换滚动方向
               enableDoubleTapZooming: false, // 启动双击放大縮小
+              onDocumentLoadFailed: (detail) {
+                print("file pdf loadFailed: ${detail.error}");
+                _showPdfLoadFailedDialog(context, detail.error);
+              },
             ),
       bottomNavigationBar: _buildBottomNavigationBar(),
     );
@@ -168,5 +169,33 @@ class _PDFScreenState extends State<PDFScreen> with WidgetsBindingObserver {
         ),
       ),
     );
+  }
+
+  /// 如果是热门话题，则可以弹窗显示其新闻细节
+  Future<void> _showPdfLoadFailedDialog(
+      BuildContext context, String errMsg) async {
+    await showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          // 后续这些dialog等通用配置可以单独列，不要这样到处size都不同
+          return AlertDialog(
+            title: Text(
+              'PDF加载失败',
+              style: TextStyle(fontSize: 18.sp),
+            ),
+            content: Text(errMsg),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: Text(
+                  '确定',
+                  style: TextStyle(fontSize: 14.sp),
+                ),
+              ),
+            ],
+          );
+        });
   }
 }
