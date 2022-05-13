@@ -34,12 +34,12 @@ class _MyAppState extends State<MyApp> {
         corruptedPathPDF = f.path;
       });
     });
-    fromAsset('assets/pdfs/demo-link.pdf', 'demo.pdf').then((f) {
+    fromAsset('assets/pdfs/demo.pdf', 'demo.pdf').then((f) {
       setState(() {
         pathPDF = f.path;
       });
     });
-    fromAsset('assets/pdfs/demo-landscape.pdf', 'landscape.pdf').then((f) {
+    fromAsset('assets/pdfs/demo.pdf', 'landscape.pdf').then((f) {
       setState(() {
         landscapePathPdf = f.path;
       });

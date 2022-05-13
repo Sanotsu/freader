@@ -29,8 +29,8 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
   final List<String> embeddedPdfList = [];
 
 // ---------------------
-  // 要扫描的文件夹
-  String rootDir = '/storage/emulated/0/';
+  // 要扫描的文件夹(在实机上扫不出来)
+  String rootDir = '/storage/emulated/0';
   // 其中不扫描的文件夹
   String noPermissionDir = '/storage/emulated/0/Android';
   // 指定文件后缀
@@ -38,6 +38,12 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
 
   // 扫描到的文件（可用于展示扫描的数量）
   List scanPdfList = [];
+
+  // 是否扫描中
+  bool sacnLoading = false;
+  // 当前扫描文件夹和文件
+  var currentDir = "";
+  var currentFile = "";
 
 // ---------------------
   // 文件选取的结果
@@ -51,8 +57,10 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
   @override
   void initState() {
     super.initState();
+
+    _databaseHelper.deleteDb();
+
     _getAllPdfs();
-    // _databaseHelper.deleteDb();
   }
 
   /// 获取数据库中已有的文件
@@ -66,7 +74,13 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
 
   /// 1 获取设备本地已有的pdf文件
   void _scanAllLocalPdfs() async {
-    //ask for permission
+    setState(() {
+      sacnLoading = true;
+      currentDir = "";
+      currentFile = "";
+    });
+
+    // 获取存储权限
     var status = await Permission.manageExternalStorage.status;
     if (status.isDenied) {
       await Permission.manageExternalStorage.request();
@@ -79,57 +93,74 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
 
     print("$status <---> $storageStatus");
 
-    // 获取所有第一级文件夹
-    var dir = Directory(rootDir);
-    var allFolderList = dir.listSync();
+    // 获取所有第一级文件夹(allRootFileSystemEntityList)
+    var allRootFSEList = Directory(rootDir).listSync();
     // 存放pdf信息的数据列表
     List<PdfState> pdfStateList = [];
 
     // 临时获取所有文件夹的所有文件
     List<FileSystemEntity> tempList = [];
     // 因为 /storage/emulated/0/Android 没有权限掃描，所以其他的再递归掃描
-    for (var folder in allFolderList) {
-      if (folder.path != noPermissionDir) {
-        tempList.addAll(Directory(folder.path).listSync(recursive: true));
+    for (var fse in allRootFSEList) {
+      // 为了方便看清楚，才延迟显示1秒
+      // await Future.delayed(const Duration(seconds: 1));
+
+      // 如果是根文件夹下的文件，则直接加入list
+      if (fse.runtimeType.toString() == "_File") {
+        tempList.add(fse);
+      }
+
+      // 如果是文件夹，且不为没权限扫描的文件夹,则递归便利其文件夹，把文件加入list，不是文件则忽略
+      if (fse.runtimeType.toString() == "_Directory" &&
+          fse.path != noPermissionDir) {
+        await Directory(fse.path).list(recursive: true).forEach((f) {
+          setState(() {
+            currentDir = fse.path;
+            currentFile = f.path;
+          });
+
+          if (f.runtimeType.toString() == "_File") {
+            tempList.add(f);
+          }
+        });
+      }
+      // 其他的例如link，就不管了
+    }
+
+    // 重新扫描时，先清空
+    scanPdfList = [];
+
+    // 筛选满足后缀条件的文件
+    for (var file in tempList) {
+      if (p.extension(file.path).toLowerCase() == fileExtension) {
+        // 构建数据实例
+        var pdfState = PdfState(
+          filename: file.path.split("/").last,
+          filepath: file.path,
+          source: PdfStateSource.scanned.toString(),
+          readProgress: 0, // 新扫描到進度都为0
+        );
+        pdfStateList.add(pdfState);
+
+        scanPdfList.add(file);
       }
     }
 
-    setState(() {
-      // 重新扫描时，先清空
-      scanPdfList = [];
-
-      // 筛选满足后缀条件的文件
-      for (var element in tempList) {
-        if (p.extension(element.path).toLowerCase() == fileExtension) {
-          // 构建数据实例
-          var pdfState = PdfState(
-            filename: element.path.split("/").last,
-            filepath: element.path,
-            source: PdfStateSource.scanned.toString(),
-            readProgress: 0.8,
-          );
-          pdfStateList.add(pdfState);
-
-          scanPdfList.add(element);
-        }
-      }
-    });
-
     // 添加到数据库(如果数据库中已有同名、且同位置的，则不新增/// 其实应该不会存在这样的文件了)
-    for (var element in pdfStateList) {
+    for (var pdfFile in pdfStateList) {
       var alreadyList =
-          await _databaseHelper.queryPdfStateByFilename(element.filename);
+          await _databaseHelper.queryPdfStateByFilename(pdfFile.filename);
 
       var alreadyFlag = false;
       for (var ele in alreadyList) {
-        if (element.filepath == ele.filepath) {
+        if (pdfFile.filepath == ele.filepath) {
           alreadyFlag = true;
           break;
         }
       }
 
       if (!alreadyFlag) {
-        await _databaseHelper.insertPdfState(element);
+        await _databaseHelper.insertPdfState(pdfFile);
       }
     }
 
@@ -137,6 +168,7 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
     var tempPdfStateList = await _databaseHelper.readPdfStateList();
     setState(() {
       allDirExtensionFiles = tempPdfStateList;
+      sacnLoading = false;
     });
   }
 
@@ -306,6 +338,7 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
   @override
   Widget build(BuildContext context) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           children: [
@@ -345,6 +378,28 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
             ),
           ],
         ),
+        Text(
+          "pdf viwer使用的是 syncfusion_flutter_pdfviewer 库,内置功能很多,但加载很慢,bug很多,比较卡顿.",
+          style: TextStyle(fontSize: 8.sp),
+        ),
+        sacnLoading
+            ? LinearProgressIndicator(
+                backgroundColor: Colors.grey[200],
+                valueColor: const AlwaysStoppedAnimation(Colors.blue),
+                semanticsValue: "sdsdsd")
+            : Container(),
+        sacnLoading
+            ? Text(
+                currentDir,
+                style: TextStyle(fontSize: 12.sp),
+              )
+            : Container(),
+        sacnLoading
+            ? Text(
+                currentFile,
+                style: TextStyle(fontSize: 12.sp),
+              )
+            : Container(),
         _buildPdfGriwView(allDirExtensionFiles),
       ],
     );
@@ -383,7 +438,7 @@ _buildPdfGriwView(List<PdfState> pdfStateList) {
           child: SizedBox(
             height: 30.sp,
             child: Card(
-              color: Colors.amber,
+              color: Colors.lightGreen,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -391,7 +446,7 @@ _buildPdfGriwView(List<PdfState> pdfStateList) {
                   Text(
                     pdfStateList[index].filename,
                     maxLines: 3,
-                    style: TextStyle(fontSize: 8.sp),
+                    style: TextStyle(fontSize: 10.sp),
                   ),
                   Divider(
                     height: 5.sp,
@@ -399,7 +454,7 @@ _buildPdfGriwView(List<PdfState> pdfStateList) {
                   Text(
                     pdfStateList[index].filepath,
                     maxLines: 3,
-                    style: TextStyle(fontSize: 6.sp),
+                    style: TextStyle(fontSize: 8.sp),
                   ),
                   Divider(
                     height: 5.sp,
