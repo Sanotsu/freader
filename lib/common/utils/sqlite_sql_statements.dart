@@ -16,13 +16,15 @@ class SqliteSqlStatements {
   ///  filepath       文件路径
   ///  source         来源（目前3种：內嵌 embedded 、扫描本机所有有权限的文件夹 scanned 、自行打开文件夹选择 picked）
   ///  readProgress   阅读进度,默认为0
+  ///  lastReadDatetime   上次阅读的时间
   static const String createTable4PdfState = """
     CREATE TABLE pdf_state (
     id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, 
     filename TEXT, 
     filepath TEXT,
     source TEXT, 
-    readProgress TEXT);
+    readProgress TEXT,
+    lastReadDatetime TEXT);
     """;
 
   /// 记录一言获取记录

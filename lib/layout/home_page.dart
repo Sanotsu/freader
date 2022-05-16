@@ -58,9 +58,11 @@ class _HomePageState extends State<HomePage> {
     return DefaultTabController(
       length: 3,
       child: Scaffold(
-        appBar: PreferredSize(
-            preferredSize: Size.fromHeight(0.1.sh), // here the desired height
-            child: const HomeAppBar()),
+        // appBar: PreferredSize(
+        //     preferredSize: Size.fromHeight(0.1.sh), // here the desired height
+        //     child: const HomeAppBar()),
+        // 2022-05-14 使用默认样式大小
+        appBar: _buildAppBar(),
         body: const TabBarView(
           children: [
             NewsPage(),
@@ -188,6 +190,75 @@ class _HomeAppBarState extends State<HomeAppBar> {
       ),
     );
   }
+}
+
+/// 2022-5-14 主页的appBar
+/// 使用默认样式
+_buildAppBar() {
+  return AppBar(
+    title: Text(
+      "Let's freader",
+      style: TextStyle(fontFamily: "BarlowBold", fontSize: 20.sp),
+    ),
+    actions: <Widget>[
+      IconButton(
+        iconSize: 20,
+        icon: const Icon(
+          Icons.search,
+          semanticLabel: 'search', // icon的语义标签。
+        ),
+        onPressed: () {},
+      ),
+      IconButton(
+        iconSize: 20,
+        icon: const Icon(
+          Icons.scanner,
+          semanticLabel: 'scanner',
+        ),
+        onPressed: () {},
+      ),
+    ],
+    bottom: TabBar(
+      // // 可以使得tab的文本自适应显示长度，很长的内容都会显示完整。
+      // isScrollable: true,
+      // // 标签左右空10dp，上下无空
+      // labelPadding: EdgeInsets.symmetric(horizontal: 10.0),
+      /// TabBar 的下划线的样式
+      indicator: UnderlineTabIndicator(
+        borderSide: BorderSide(width: 2.0.sp), // 下划线的粗度
+        // 下划线的四边的间距horizontal橫向
+        insets: EdgeInsets.symmetric(horizontal: 2.0.sp),
+      ),
+      // 出现在被选择的Tab下面的线的厚度。
+      indicatorWeight: 1.sp,
+      indicatorSize: TabBarIndicatorSize.label,
+      tabs: [
+        Tab(
+          child: Text(
+            "新闻",
+            style: TextStyle(
+                fontFamily: "BarlowBold", fontSize: 10.sp, color: Colors.black),
+          ),
+        ),
+        Tab(
+          // height: 12,
+          child: Text(
+            "图片",
+            style: TextStyle(
+                fontFamily: "BarlowBold", fontSize: 10.sp, color: Colors.black),
+          ),
+        ),
+        Tab(
+          // height: 12,
+          child: Text(
+            "PDF viewer",
+            style: TextStyle(
+                fontFamily: "BarlowBold", fontSize: 10.sp, color: Colors.black),
+          ),
+        ),
+      ],
+    ),
+  );
 }
 
 // 主页的左侧抽屉drawer

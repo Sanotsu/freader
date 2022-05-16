@@ -2,9 +2,11 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:freader/common/utils/sqlite_helper.dart';
 import 'package:freader/common/utils/sqlite_sql_statements.dart';
 import 'package:freader/models/app_embedded/pdf_state.dart';
 import 'package:freader/utils/platform_util.dart';
+import 'package:intl/intl.dart';
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 
 /// 传入pdf所在的地址（文件名等），展示阅读器畫面
@@ -33,19 +35,69 @@ class _PDFScreenState extends State<PDFScreen> with WidgetsBindingObserver {
   // viewer滚动显示方向对应的功能按钮图标
   var _directIcon = Icons.horizontal_distribute;
 
+  final DatabaseHelper _databaseHelper = DatabaseHelper();
+
   @override
   void initState() {
     super.initState();
     print(
         "path is ${widget.pdfState.filepath},title is ${widget.pdfState.filename}");
+
     _pdfViewerController = PdfViewerController();
     scrollDirection = PdfScrollDirection.vertical;
+  }
+
+// 等待pdf文件加载完之后，再跳转到已读进度的页面
+  initReadProgress() {
+    print("pdf加载完后的数据");
+    print(_pdfViewerController.pageCount);
+    print(_pdfViewerController.pageNumber);
+    print(widget.pdfState.readProgress);
+
+    // 2022-05-14 初始时跳转到指定已读位置(readProgress 是0-100表示進度，所以這里要先除以100)
+    // 如果是0，那从1开始，否则就是原始比例值
+    var tempReadPage = ((_pdfViewerController.pageCount) *
+            (widget.pdfState.readProgress / 100))
+        .round();
+    var readPage = tempReadPage == 0 ? 1 : tempReadPage;
+
+    _pdfViewerController.jumpToPage(readPage.round());
+  }
+
+// 保存阅读进度，在返回前要更新
+  saveReadProgress() async {
+    // 2022-05-14 推出前记录已读的数据
+
+    // 进度0-100表示0-100%
+    var tempReadProgress = double.parse(
+            (_pdfViewerController.pageNumber / _pdfViewerController.pageCount)
+                .toStringAsFixed(4)) *
+        100;
+
+    var tempPdfState = PdfState(
+      id: widget.pdfState.id,
+      filename: widget.pdfState.filename,
+      filepath: widget.pdfState.filepath,
+      source: widget.pdfState.source,
+      readProgress: tempReadProgress,
+      // 简单转换显示时间，不一定对，但逻辑肯定不全，只是为了省事
+      lastReadDatetime: DateFormat('yyyy-MM-dd HH:mm:ss').format(
+          (DateTime.now().toLocal()).isUtc
+              ? DateTime.now()
+              : DateTime.now().add(const Duration(hours: 8))),
+    );
+
+    await _databaseHelper.updatePdfState(tempPdfState);
+
+    print("离开时的数据");
+    print(_pdfViewerController.pageCount);
+    print(_pdfViewerController.pageNumber);
+    print(tempReadProgress);
   }
 
   // 切换滚动显示方向
   void _switchPdfScrollDirection() {
     setState(() {
-      print(scrollDirection);
       if (scrollDirection == PdfScrollDirection.horizontal) {
         scrollDirection = PdfScrollDirection.vertical;
         _directIcon = Icons.horizontal_distribute;
@@ -61,32 +113,57 @@ class _PDFScreenState extends State<PDFScreen> with WidgetsBindingObserver {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.pdfState.filename),
+        // leading的返回按钮，是点击上方默认的路由返回按钮会触发，也能传值。优先级高于willPopScope
+        // leading: BackButton(
+        //   onPressed: () => Navigator.pop(context, "child route data"),
+        // ),
       ),
-      // 如果是内嵌的要用asset，否则读文件
-      /// 后续可以把内嵌的，放到app安装时默认生产的文件夹下去，然后再读，进行统一。此处仅用于学习接口
-      body: widget.pdfState.source == PdfStateSource.embedded.toString()
-          ? SfPdfViewer.asset(
-              widget.pdfState.filepath,
-              controller: _pdfViewerController, // pdfviewer的控制器
-              key: _pdfViewerKey, // 指定的pdfviewer对应的key
-              scrollDirection: scrollDirection, // 切换滚动方向
-              enableDoubleTapZooming: false, // 启动双击放大縮小
-              onDocumentLoadFailed: (detail) {
-                print("asset pdf loadFailed: ${detail.error}");
-                _showPdfLoadFailedDialog(context, detail.error);
-              },
-            )
-          : SfPdfViewer.file(
-              File(widget.pdfState.filepath),
-              controller: _pdfViewerController, // pdfviewer的控制器
-              key: _pdfViewerKey, // 指定的pdfviewer对应的key
-              scrollDirection: scrollDirection, // 切换滚动方向
-              enableDoubleTapZooming: false, // 启动双击放大縮小
-              onDocumentLoadFailed: (detail) {
-                print("file pdf loadFailed: ${detail.error}");
-                _showPdfLoadFailedDialog(context, detail.error);
-              },
-            ),
+      // 202-05-16 WillPopScope 在点击默认返回的简单图标或者下方的返回按钮，都能触发，并传递值到上一个router
+      // 如果没有上面的 AppBar -> leading 的返回，则上方默认返回箭头或者返回键都会触发此。
+      body: WillPopScope(
+        onWillPop: () async {
+          // 点击appbar返回按钮或者返回键时，先保持已读的进度
+          await saveReadProgress();
+          Navigator.pop(context);
+          // Navigator.pop(context, "data you want return");
+          return false;
+        },
+        // 如果是内嵌的要用asset，否则读文件
+        /// 后续可以把内嵌的，放到app安装时默认生产的文件夹下去，然后再读，进行统一。此处仅用于学习接口
+        child: widget.pdfState.source == PdfStateSource.embedded.toString()
+            ? SfPdfViewer.asset(
+                widget.pdfState.filepath,
+                controller: _pdfViewerController, // pdfviewer的控制器
+                key: _pdfViewerKey, // 指定的pdfviewer对应的key
+                scrollDirection: scrollDirection, // 切换滚动方向
+                enableDoubleTapZooming: false, // 启动双击放大縮小
+                onDocumentLoadFailed: (detail) {
+                  print("asset pdf loadFailed: ${detail.error}");
+                  _showPdfLoadFailedDialog(context, detail.error);
+                },
+                onDocumentLoaded: (PdfDocumentLoadedDetails details) {
+                  setState(() {
+                    initReadProgress();
+                  });
+                },
+              )
+            : SfPdfViewer.file(
+                File(widget.pdfState.filepath),
+                controller: _pdfViewerController, // pdfviewer的控制器
+                key: _pdfViewerKey, // 指定的pdfviewer对应的key
+                scrollDirection: scrollDirection, // 切换滚动方向
+                enableDoubleTapZooming: false, // 启动双击放大縮小
+                onDocumentLoadFailed: (detail) {
+                  print("file pdf loadFailed: ${detail.error}");
+                  _showPdfLoadFailedDialog(context, detail.error);
+                },
+                onDocumentLoaded: (PdfDocumentLoadedDetails details) {
+                  setState(() {
+                    initReadProgress();
+                  });
+                },
+              ),
+      ),
       bottomNavigationBar: _buildBottomNavigationBar(),
     );
   }

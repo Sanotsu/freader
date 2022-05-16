@@ -57,9 +57,6 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
   @override
   void initState() {
     super.initState();
-
-    _databaseHelper.deleteDb();
-
     _getAllPdfs();
   }
 
@@ -70,6 +67,13 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
     setState(() {
       allDirExtensionFiles = tempPdfStateList;
     });
+  }
+
+// 这里其实是出现了sqlite 数据丟失或者db损坏等问题，导致无法显示或者扫描pdf list
+// 那就只能重新加载数据了，删除db，一切归零
+  _emergencyHandle() {
+    _databaseHelper.deleteDb();
+    _getAllPdfs();
   }
 
   /// 1 获取设备本地已有的pdf文件
@@ -85,13 +89,10 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
     if (status.isDenied) {
       await Permission.manageExternalStorage.request();
     }
-
     var storageStatus = await Permission.storage.status;
     if (!storageStatus.isGranted) {
       await Permission.storage.request();
     }
-
-    print("$status <---> $storageStatus");
 
     // 获取所有第一级文件夹(allRootFileSystemEntityList)
     var allRootFSEList = Directory(rootDir).listSync();
@@ -139,6 +140,7 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
           filepath: file.path,
           source: PdfStateSource.scanned.toString(),
           readProgress: 0, // 新扫描到進度都为0
+          lastReadDatetime: "-",
         );
         pdfStateList.add(pdfState);
 
@@ -217,9 +219,6 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
     // 所以把文件复制到这里面，也是无法打开的。
     var appSupDir = (await getExternalStorageDirectory())!.path;
 
-    print((await getExternalStorageDirectory())!.path);
-    print("xxxxxxxxxxxxxxxxxxxxxx $appSupDir");
-
     // 目标文件夹，不存在要创建
     var appSupPdfDir = appSupDir + "/pdfs";
     if (!(await Directory(appSupPdfDir).exists())) {
@@ -264,6 +263,8 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
           filename: fname,
           filepath: f.path,
           source: PdfStateSource.picked.toString(),
+          readProgress: 0.0,
+          lastReadDatetime: "-",
         );
         await _databaseHelper.insertPdfState(tempPdfState);
       }
@@ -323,6 +324,8 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
           filename: filePath.split("/").last,
           filepath: filePath,
           source: PdfStateSource.embedded.toString(),
+          readProgress: 0.0,
+          lastReadDatetime: "-",
         );
         await _databaseHelper.insertPdfState(tempPdfState);
       }
@@ -353,7 +356,7 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
                 onPressed: () => _pickAndSaveOnePdf(),
                 child: Text(
                   '自选单个pdf  ${pickedFileList.length}',
-                  style: TextStyle(fontSize: 12.sp),
+                  style: TextStyle(fontSize: 10.sp),
                 ),
               ),
             ),
@@ -364,12 +367,24 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
             Expanded(
               flex: 4,
               child: ElevatedButton(
-                // 这个过程可以显示扫描过程，或者简单一个进度条？
                 onPressed: () => _scanAllLocalPdfs(),
                 child: Text(
                   '扫描全盘pdf  ${scanPdfList.length}',
-                  style: TextStyle(fontSize: 12.sp),
+                  style: TextStyle(fontSize: 10.sp),
                 ),
+              ),
+            ),
+            Expanded(
+              flex: 1,
+              child: Container(),
+            ),
+            Expanded(
+              flex: 1,
+              child: IconButton(
+                onPressed: () => _emergencyHandle(),
+                iconSize: 16.sp,
+                icon: const Icon(Icons.emergency),
+                color: Colors.red,
               ),
             ),
             Expanded(
@@ -378,9 +393,17 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
             ),
           ],
         ),
-        Text(
-          "pdf viwer使用的是 syncfusion_flutter_pdfviewer 库,内置功能很多,但加载很慢,bug很多,比较卡顿.",
-          style: TextStyle(fontSize: 8.sp),
+        // widget居中
+        Center(
+          child: Text(
+            '''
+pdf viwer使用的是 syncfusion_flutter_pdfviewer 库,内置功能很多,但加载很慢,bug很多,比较卡顿.
+不要轻易点击emergency 图标,除非出现已有的pdf列表突然变为空,全盘扫描失效.
+如果还是不行,则只能清空用户数据或者重装app.两者皆会丟失阅读记录.
+          ''',
+            textAlign: TextAlign.center, // 文本内容居中
+            style: TextStyle(fontSize: 8.sp),
+          ),
         ),
         sacnLoading
             ? LinearProgressIndicator(
@@ -400,7 +423,7 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
                 style: TextStyle(fontSize: 12.sp),
               )
             : Container(),
-        _buildPdfGriwView(allDirExtensionFiles),
+        _buildPdfGriwView(allDirExtensionFiles, _getAllPdfs),
       ],
     );
   }
@@ -410,7 +433,8 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
 }
 
 /// 点击卡片，进行页面跳转
-_onPdfCardTap(PdfState pdfState, BuildContext context) {
+_onPdfCardTap(
+    PdfState pdfState, BuildContext context, Function refreshData) async {
   // 非特殊情況，跳转到指定页面
   Navigator.of(context).push(
     MaterialPageRoute(
@@ -420,49 +444,135 @@ _onPdfCardTap(PdfState pdfState, BuildContext context) {
         );
       },
     ),
-  );
+  ).then((value) {
+    print("这是跳转路由后返回的数据： $value");
+    // 在pdf viewer页面返回后，重新获取pdf list，更新阅读进度
+    refreshData();
+  });
 }
 
 // 构建pdf griw列表
-_buildPdfGriwView(List<PdfState> pdfStateList) {
+_buildPdfGriwView(List<PdfState> pdfStateList, Function _getAllPdfs) {
+  var _mainTextSize = TextStyle(fontSize: 7.sp);
   return Expanded(
     child: GridView.builder(
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        childAspectRatio: 4 / 3, // item的宽高比
-        crossAxisCount: 3,
+        childAspectRatio: 4 / 2, // item的宽高比
+        crossAxisCount: 2,
       ),
       itemCount: pdfStateList.length, // 文件的数量
       itemBuilder: (BuildContext context, int index) {
         return GestureDetector(
-          onTap: () => _onPdfCardTap(pdfStateList[index], context),
+          onTap: () => _onPdfCardTap(pdfStateList[index], context, _getAllPdfs),
           child: SizedBox(
-            height: 30.sp,
             child: Card(
               color: Colors.lightGreen,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    pdfStateList[index].filename,
-                    maxLines: 3,
-                    style: TextStyle(fontSize: 10.sp),
+                  Row(
+                    children: [
+                      // 2022-05-10 注意，这里都只是按鈕点击了一次之后就无法使用了，因为setState都固定
+                      Expanded(
+                        flex: 1,
+                        child: Text(
+                          "文件名称",
+                          style: _mainTextSize,
+                        ),
+                      ),
+                      Expanded(
+                        flex: 4,
+                        child: Text(
+                          pdfStateList[index].filename,
+                          maxLines: 3,
+                          style: TextStyle(fontSize: 10.sp),
+                        ),
+                      ),
+                    ],
                   ),
                   Divider(
                     height: 5.sp,
                   ),
-                  Text(
-                    pdfStateList[index].filepath,
-                    maxLines: 3,
-                    style: TextStyle(fontSize: 8.sp),
+                  Row(
+                    children: [
+                      // 2022-05-10 注意，这里都只是按鈕点击了一次之后就无法使用了，因为setState都固定
+                      Expanded(
+                        flex: 1,
+                        child: Text(
+                          "文件路径",
+                          style: _mainTextSize,
+                        ),
+                      ),
+                      Expanded(
+                        flex: 4,
+                        child: Text(
+                          pdfStateList[index].filepath,
+                          maxLines: 3,
+                          style: _mainTextSize,
+                        ),
+                      ),
+                    ],
                   ),
                   Divider(
                     height: 5.sp,
                   ),
-                  Text(
-                    pdfStateList[index].source,
-                    maxLines: 1,
-                    style: TextStyle(fontSize: 6.sp),
+                  Row(
+                    children: [
+                      // 2022-05-10 注意，这里都只是按鈕点击了一次之后就无法使用了，因为setState都固定
+                      Expanded(
+                        flex: 1,
+                        child: Text(
+                          "文件来源",
+                          style: _mainTextSize,
+                        ),
+                      ),
+                      Expanded(
+                        flex: 4,
+                        child: Text(
+                          pdfStateList[index].source,
+                          style: _mainTextSize,
+                        ),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      // 2022-05-10 注意，这里都只是按鈕点击了一次之后就无法使用了，因为setState都固定
+                      Expanded(
+                        flex: 1,
+                        child: Text(
+                          "阅读进度",
+                          style: _mainTextSize,
+                        ),
+                      ),
+                      Expanded(
+                        flex: 4,
+                        child: Text(
+                          "${pdfStateList[index].readProgress}%",
+                          style: _mainTextSize,
+                        ),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      // 2022-05-10 注意，这里都只是按鈕点击了一次之后就无法使用了，因为setState都固定
+                      Expanded(
+                        flex: 1,
+                        child: Text(
+                          "上次阅读",
+                          style: _mainTextSize,
+                        ),
+                      ),
+                      Expanded(
+                        flex: 4,
+                        child: Text(
+                          pdfStateList[index].lastReadDatetime,
+                          style: _mainTextSize,
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),

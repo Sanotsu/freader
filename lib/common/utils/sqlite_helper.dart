@@ -94,6 +94,10 @@ class DatabaseHelper {
     var result = await db.update(
       SqliteSqlStatements.tableNameOfPdfState,
       pdfState.toMap(),
+      // 确保Id存在.
+      where: 'id = ?',
+      // 传递 pdfState 的id作为whereArg，以防止SQL注入。
+      whereArgs: [pdfState.id],
     );
     return result;
   }
@@ -126,6 +130,7 @@ class DatabaseHelper {
         filepath: maps[i]['filepath'],
         source: maps[i]['source'],
         readProgress: double.parse(maps[i]['readProgress']),
+        lastReadDatetime: maps[i]['lastReadDatetime'],
       );
     });
   }
@@ -147,6 +152,7 @@ class DatabaseHelper {
         filepath: maps[i]['filepath'],
         source: maps[i]['source'],
         readProgress: double.parse(maps[i]['readProgress']),
+        lastReadDatetime: maps[i]['lastReadDatetime'],
       );
     });
   }
