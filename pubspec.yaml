@@ -99,6 +99,7 @@ flutter:
     - assets/
     - assets/jsons/
     - assets/pdfs/
+    - assets/txts/
     # - assets/jsons/pexels_api_images.json
 
   # An image asset can refer to one or more resolution-specific "variants", see

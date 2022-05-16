@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:freader/layout/image_page.dart';
 import 'package:freader/layout/news_page.dart';
 import 'package:freader/layout/pdf_viewer_page.dart';
+import 'package:freader/layout/txt_viewer_page.dart';
 import 'package:freader/widgets/hitokoto_sentence.dart';
 
 ///
@@ -56,7 +57,7 @@ class _HomePageState extends State<HomePage> {
     print(_counter);
 
     return DefaultTabController(
-      length: 3,
+      length: 4,
       child: Scaffold(
         // appBar: PreferredSize(
         //     preferredSize: Size.fromHeight(0.1.sh), // here the desired height
@@ -68,6 +69,7 @@ class _HomePageState extends State<HomePage> {
             NewsPage(),
             ImagePage(),
             PdfViewerPage(),
+            TxtViewerPage(),
           ],
         ),
         // 主页侧边抽屉组件
@@ -252,6 +254,13 @@ _buildAppBar() {
           // height: 12,
           child: Text(
             "PDF viewer",
+            style: TextStyle(
+                fontFamily: "BarlowBold", fontSize: 10.sp, color: Colors.black),
+          ),
+        ),
+        Tab(
+          child: Text(
+            "TXT viewer",
             style: TextStyle(
                 fontFamily: "BarlowBold", fontSize: 10.sp, color: Colors.black),
           ),
