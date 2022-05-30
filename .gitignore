@@ -45,13 +45,15 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
+# 2022-05-30 不管了，反正是私有仓库，后续有需要开源再說
+
 # 存放例如需要第三方服务的token，就不要上传了,类似:
 #   class GlobalConstants {
 #       static String pexels_authorization="xxx";
 #   }
-lib/common/personal
+# lib/common/personal
 
 ## pdf viewer测试的文档，没有版权，不要传播
-assets/pdfs
+# assets/pdfs
 # 同上
-assets/txts
+# assets/txts

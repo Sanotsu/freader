@@ -6,7 +6,6 @@ list(APPEND FLUTTER_PLUGIN_LIST
   permission_handler_windows
   syncfusion_pdfviewer_windows
   url_launcher_windows
-  window_size
 )
 
 set(PLUGIN_BUNDLED_LIBRARIES)

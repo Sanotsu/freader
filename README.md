@@ -81,3 +81,21 @@ app
                             news_page_demo                 Scaffold
 
 ```
+
+## txt reader
+
+- 目前仅考虑内嵌文本
+- 先分章节把文本內容存入 db
+  - txt_data_info?
+- 读取每章文字数量，使用 pageView 分页显示
+  - 毎章多少字、一页显示多少字、一章多少页，存入 db
+    - txt_data_info?
+- 用户滚动到第几章第几页，在退出阅读頁面时保存到 db
+  - 计算已读的页数和总页数，计算大概的進度
+    - user_txt_state?
+- 因为调整显示文字大小會改變页数，會影響数据库數據，暂时不让改
+- 書簽关联页码等，先不弄跳轉，只是读取数据库中章节信息而已
+
+實現主要参考`lib\_demos\multi_list_text_demo.dart`，后续可能加上分页指示器，例如`https://pub.dev/packages/dots_indicator`
+
+或者[loop_page_view](https://pub.dev/packages/loop_page_view)

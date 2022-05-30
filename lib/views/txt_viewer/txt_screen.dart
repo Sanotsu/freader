@@ -77,24 +77,34 @@ class _TxtScreenState extends State<TxtScreen> {
       ),
       body: txtLoading
           ? buildLoadingWidget()
-          : ListView(
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        children: [
-                          // 因为是demo，這個字符串得好几兆，加载自然是慢的
-                          Text(
-                            txtFullContent,
-                            style: TextStyle(fontSize: 14.sp),
-                          )
-                        ],
-                      ),
-                    )
-                  ],
-                )
-              ],
+          : NotificationListener<ScrollUpdateNotification>(
+              child: ListView(
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          children: [
+                            // 因为是demo，這個字符串得好几兆，加载自然是慢的
+                            Text(
+                              txtFullContent,
+                              style: TextStyle(fontSize: 14.sp),
+                            )
+                          ],
+                        ),
+                      )
+                    ],
+                  )
+                ],
+              ),
+              onNotification: (notification) {
+                //How many pixels scrolled from pervious frame
+                print(notification.scrollDelta);
+
+                //List scroll position
+                print(notification.metrics.pixels);
+                return false;
+              },
             ),
       bottomNavigationBar: _buildBottomNavigationBar(),
     );

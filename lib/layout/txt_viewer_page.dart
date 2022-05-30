@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 
 // import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:freader/common/utils/sqlite_helper.dart';
+import 'package:freader/views/txt_viewer/handle_asset_txt_to_db.dart';
 import 'package:freader/views/txt_viewer/txt_screen.dart';
 
 /// 相较于pdf viewer，这个就简单弄个demo
@@ -19,6 +21,8 @@ class TxtViewerPage extends StatefulWidget {
 }
 
 class _TxtViewerPageState extends State<TxtViewerPage> {
+  final DatabaseHelper _databaseHelper = DatabaseHelper();
+
   var txtList = [
     "A Dream of Red Mansions",
     "The Journey to the West",
@@ -43,11 +47,28 @@ class _TxtViewerPageState extends State<TxtViewerPage> {
   //   });
   // }
 
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   loadTxtData();
-  // }
+  loadData() async {
+    // _databaseHelper.deleteDb();
+    // 如果db中txtstate不违空，就判断為已有數據了
+    var tempList = await _databaseHelper.readTxtStateList();
+
+    // 其实应该大于120*3+100+4個引子的数量（464）就可以判断為重复倒入了
+    if (tempList.isEmpty || tempList.length > 470) {
+      _databaseHelper.deleteAllTxtState();
+      handleAssetTxt2Db("红楼梦");
+      handleAssetTxt2Db("三国演义");
+      handleAssetTxt2Db("西游记");
+      handleAssetTxt2Db("水浒传");
+    } else {
+      print("数据都已经存在数据库了");
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    loadData();
+  }
 
   @override
   Widget build(BuildContext context) {

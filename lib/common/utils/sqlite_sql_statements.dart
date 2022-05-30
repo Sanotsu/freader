@@ -9,6 +9,10 @@ class SqliteSqlStatements {
   // 表名
   static String tableNameOfPdfState = 'pdf_state';
   static String tableNameOfHitokoto = 'hitokoto';
+  // txt viewer相关
+  static String tableNameOfTxtState = 'txt_state';
+  static String tableNameOfTxtChapterState = 'txt_chapter_state';
+  static String tableNameOfUserTxtState = 'user_txt_state';
 
   /// 记录pdf状态
   ///  id             编号
@@ -40,5 +44,39 @@ class SqliteSqlStatements {
     hitokoto TEXT NOT NULL, 
     author TEXT,
     literature TEXT);
+    """;
+
+  /// txt正文內容
+  static const String createTable4TxtState = """
+    CREATE TABLE txt_state (
+    txtId TEXT NOT NULL, 
+    txtName TEXT NOT NULL, 
+    chapterId TEXT NOT NULL, 
+    chapterName TEXT NOT NULL,
+    chapterContent TEXT NOT NULL,
+    chapterContentLength INTEGER NOT NULL
+    );
+    """;
+
+  /// txt章节元数据
+  static const String createTable4TxtChapterState = """
+    CREATE TABLE txt_chapter_state (
+    txtId TEXT NOT NULL, 
+    chapterId TEXT NOT NULL, 
+    txtFontSize INTEGER NOT NULL, 
+    perPageAverageWordCount INTEGER NOT NULL,
+    chapterPageCount INTEGER NOT NULL
+    );
+    """;
+
+  /// txt用户阅读进度
+  static const String createTable4UserTxtState = """
+    CREATE TABLE user_txt_state (
+    txtId TEXT NOT NULL, 
+    currentChapterId TEXT NOT NULL, 
+    currentChapterPageNumber INTEGER NOT NULL, 
+    totalReadProgress TEXT NOT NULL,
+    lastReadDatetime TEXT NOT NULL
+    );
     """;
 }

@@ -5,6 +5,7 @@ import 'dart:io';
 
 import 'package:freader/common/utils/sqlite_sql_statements.dart';
 import 'package:freader/models/app_embedded/pdf_state.dart';
+import 'package:freader/models/app_embedded/txt_state.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -39,8 +40,14 @@ class DatabaseHelper {
 
   // 创建表
   void _createDb(Database db, int newVersion) async {
+    // pdf viewer相关
     await db.execute(SqliteSqlStatements.createTable4PdfState);
+    // 一言相关
     await db.execute(SqliteSqlStatements.createTable4Hitokoto);
+    // txt viewer相關
+    await db.execute(SqliteSqlStatements.createTable4TxtState);
+    await db.execute(SqliteSqlStatements.createTable4TxtChapterState);
+    await db.execute(SqliteSqlStatements.createTable4UserTxtState);
   }
 
   // 关闭数据库
@@ -77,7 +84,7 @@ class DatabaseHelper {
     print("------------1111");
   }
 
-  ///================ 数据库表值对应的操作（为了简单，都是Row级别）
+  ///================pdfState 数据库表值对应的操作（为了简单，都是Row级别）
   // pdfState 插入数据
   Future<int> insertPdfState(PdfState pdfState) async {
     Database db = await database;
@@ -152,6 +159,220 @@ class DatabaseHelper {
         filepath: maps[i]['filepath'],
         source: maps[i]['source'],
         readProgress: double.parse(maps[i]['readProgress']),
+        lastReadDatetime: maps[i]['lastReadDatetime'],
+      );
+    });
+  }
+
+  ///================ TxtState 数据库表值对应的操作（为了简单，都是Row级别）
+  // 插入数据
+  Future<int> insertTxtState(TxtState txtState) async {
+    Database db = await database;
+    var result = await db.insert(
+      SqliteSqlStatements.tableNameOfTxtState,
+      txtState.toMap(),
+    );
+    return result;
+  }
+
+  // 修改数据
+  Future<int> updateTxtState(TxtState txtState) async {
+    Database db = await database;
+    var result = await db.update(
+      SqliteSqlStatements.tableNameOfTxtState,
+      txtState.toMap(),
+      // 确保Id存在.
+      where: 'txtId = ? and chapterId =? ', // 不一定是这样写的。。。。。。。
+      // 传递 的id作为whereArg，以防止SQL注入。
+      whereArgs: [txtState.txtId, txtState.chapterId],
+    );
+    return result;
+  }
+
+  //  删除数据(指定txt指定章节)
+  Future<int> deleteTxtState(String txtId, String chapterId) async {
+    Database db = await database;
+    var result = await db.delete(
+      SqliteSqlStatements.tableNameOfTxtState,
+      where: 'txtId = ? and chapterId = ? ',
+      whereArgs: [txtId, chapterId],
+    );
+    return result;
+  }
+
+  //  删除所有数据
+  Future<int> deleteAllTxtState() async {
+    Database db = await database;
+    var result = await db.delete(
+      SqliteSqlStatements.tableNameOfTxtState,
+    );
+    return result;
+  }
+
+  //  查询指定txt指定章节的正文，传入兩個id
+  Future<List<TxtState>> queryTxtStateByIds(
+      String txtId, String chapterId) async {
+    Database db = await database;
+    List<Map<String, dynamic>> maps = await db.query(
+      SqliteSqlStatements.tableNameOfTxtState,
+      where: 'txtId = ? and chapterId = ? ',
+      whereArgs: [txtId, chapterId],
+    );
+
+    return List.generate(maps.length, (i) {
+      return TxtState(
+        txtId: maps[i]['txtId'],
+        txtName: maps[i]['txtName'],
+        chapterId: maps[i]['chapterId'],
+        chapterName: maps[i]['chapterName'],
+        chapterContent: maps[i]['chapterContent'],
+        chapterContentLength: maps[i]['chapterContentLength'],
+      );
+    });
+  }
+
+  // 获取 TxtState 表中的所有数据
+  Future<List<TxtState>> readTxtStateList() async {
+    final db = await database;
+
+    final List<Map<String, dynamic>> maps =
+        await db.query(SqliteSqlStatements.tableNameOfTxtState);
+
+    //将 List<Map<String, dynamic> 转换成 List<PdfState> 数据类型
+    return List.generate(maps.length, (i) {
+      return TxtState(
+        txtId: maps[i]['txtId'],
+        txtName: maps[i]['txtName'],
+        chapterId: maps[i]['chapterId'],
+        chapterName: maps[i]['chapterName'],
+        chapterContent: maps[i]['chapterContent'],
+        chapterContentLength: maps[i]['chapterContentLength'],
+      );
+    });
+  }
+
+  ///================ TxtChapterState 数据库表值对应的操作（为了简单，都是Row级别）
+  // 插入数据
+  Future<int> insertTxtChapterState(TxtChapterState txtChapterState) async {
+    Database db = await database;
+    var result = await db.insert(
+      SqliteSqlStatements.tableNameOfTxtChapterState,
+      txtChapterState.toMap(),
+    );
+    return result;
+  }
+
+  //  删除数据(指定txt指定章节)
+  Future<int> deleteTxtChapterState(String txtId, String chapterId) async {
+    Database db = await database;
+    var result = await db.delete(
+      SqliteSqlStatements.tableNameOfTxtChapterState,
+      where: 'txtId = ? and chapterId = ? ',
+      whereArgs: [txtId, chapterId],
+    );
+    return result;
+  }
+
+  //  查询指定txt指定章节的元数据，传入兩個id
+  Future<List<TxtChapterState>> queryTxtChapterStateByIds(
+      String txtId, String chapterId) async {
+    Database db = await database;
+    List<Map<String, dynamic>> maps = await db.query(
+      SqliteSqlStatements.tableNameOfTxtChapterState,
+      where: 'txtId = ? and chapterId =? ',
+      whereArgs: [txtId, chapterId],
+    );
+
+    return List.generate(maps.length, (i) {
+      return TxtChapterState(
+        txtId: maps[i]['txtId'],
+        chapterId: maps[i]['chapterId'],
+        txtFontSize: maps[i]['txtFontSize'],
+        perPageAverageWordCount: maps[i]['perPageAverageWordCount'],
+        chapterPageCount: maps[i]['chapterPageCount'],
+      );
+    });
+  }
+
+  // 获取 TxtChapterState 表中的所有数据
+  Future<List<TxtChapterState>> readTxtChapterStateList() async {
+    final db = await database;
+
+    final List<Map<String, dynamic>> maps =
+        await db.query(SqliteSqlStatements.tableNameOfTxtChapterState);
+
+    //将 List<Map<String, dynamic> 转换成 List<> 数据类型
+    return List.generate(maps.length, (i) {
+      return TxtChapterState(
+        txtId: maps[i]['txtId'],
+        chapterId: maps[i]['chapterId'],
+        txtFontSize: maps[i]['txtFontSize'],
+        perPageAverageWordCount: maps[i]['perPageAverageWordCount'],
+        chapterPageCount: maps[i]['chapterPageCount'],
+      );
+    });
+  }
+
+  ///================ UserTxtState 数据库表值对应的操作（为了简单，都是Row级别）
+  // 插入数据
+  Future<int> insertUserTxtState(UserTxtState userTxtState) async {
+    Database db = await database;
+    var result = await db.insert(
+      SqliteSqlStatements.tableNameOfUserTxtState,
+      userTxtState.toMap(),
+    );
+    return result;
+  }
+
+  // 修改数据
+  Future<int> updateUserTxtState(UserTxtState userTxtState) async {
+    Database db = await database;
+    var result = await db.update(
+      SqliteSqlStatements.tableNameOfUserTxtState,
+      userTxtState.toMap(),
+      // 确保Id存在.
+      where: 'txtId = ?',
+      // 传递 的id作为whereArg，以防止SQL注入。
+      whereArgs: [userTxtState.txtId],
+    );
+    return result;
+  }
+
+  //  查询指定txt的阅读进度，传入兩個id
+  Future<List<UserTxtState>> queryUserTxtStateByTxtId(
+      String txtId, String chapterId) async {
+    Database db = await database;
+    List<Map<String, dynamic>> maps = await db.query(
+      SqliteSqlStatements.tableNameOfUserTxtState,
+      where: 'txtId = ? and chapterId =? ',
+      whereArgs: [txtId, chapterId],
+    );
+
+    return List.generate(maps.length, (i) {
+      return UserTxtState(
+        txtId: maps[i]['txtId'],
+        currentChapterId: maps[i]['currentChapterId'],
+        currentChapterPageNumber: maps[i]['currentChapterPageNumber'],
+        totalReadProgress: maps[i]['totalReadProgress'],
+        lastReadDatetime: maps[i]['lastReadDatetime'],
+      );
+    });
+  }
+
+  // 获取 UserTxtState 表中的所有数据
+  Future<List<UserTxtState>> readUserTxtState() async {
+    final db = await database;
+
+    final List<Map<String, dynamic>> maps =
+        await db.query(SqliteSqlStatements.tableNameOfUserTxtState);
+
+    //将 List<Map<String, dynamic> 转换成 List<> 数据类型
+    return List.generate(maps.length, (i) {
+      return UserTxtState(
+        txtId: maps[i]['txtId'],
+        currentChapterId: maps[i]['currentChapterId'],
+        currentChapterPageNumber: maps[i]['currentChapterPageNumber'],
+        totalReadProgress: maps[i]['totalReadProgress'],
         lastReadDatetime: maps[i]['lastReadDatetime'],
       );
     });
