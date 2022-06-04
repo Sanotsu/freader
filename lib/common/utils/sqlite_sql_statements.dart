@@ -72,9 +72,11 @@ class SqliteSqlStatements {
   /// txt用户阅读进度
   static const String createTable4UserTxtState = """
     CREATE TABLE user_txt_state (
+    userTxTStateId TEXT NOT NULL,
     txtId TEXT NOT NULL, 
     currentChapterId TEXT NOT NULL, 
-    currentChapterPageNumber INTEGER NOT NULL, 
+    currentChapterPageNumber TEXT NOT NULL, 
+    currentTxtFontSize TEXT NOT NULL, 
     totalReadProgress TEXT NOT NULL,
     lastReadDatetime TEXT NOT NULL
     );

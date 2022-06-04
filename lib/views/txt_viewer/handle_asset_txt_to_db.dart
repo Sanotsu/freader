@@ -11,18 +11,120 @@ import 'package:uuid/uuid.dart';
 /// 后续有时间再搞
 
 handleAssetTxt2Db(fileName) async {
+  var uuid = const Uuid();
+  // 加载txt文件
+  String data = await rootBundle.loadString('assets/txts/$fileName.txt');
+  // 处理一个txt文件，其txtId要保持一直
+  var txtId = uuid.v1();
+  var titleList = [];
+
+  // 章节内容
+  String content = "";
+  // 章节标题
+  String chapterName = "";
+// 章节编号手动自增，方便读取上一章下一章
+  int chapterId = 0;
+
+  // 逐行读取txt的字符串
+  LineSplitter ls = const LineSplitter();
+  List<String> lines = ls.convert(data);
+
+  for (var i = 0; i < lines.length; i++) {
+    var line = lines[i];
+
+    // 如果是章节标题行
+    // 不会正则，将就用吧(匹配【第x回 】，x為1，2，3,4,5個字，回后面有个空个)
+    if (line.contains(RegExp(
+        r'[第].[回][\s]|[第]..[回][\s]|[第]...[回][\s]|[第]....[回][\s]|[第].....[回][\s]'))) {
+      /// 如果该标题和内容不为空
+      if (chapterName != "" && content != "") {
+        // 章节内容存入db
+        var chapterNameCopy = json.decode(json.encode(chapterName));
+        var cloneCopy = json.decode(json.encode(content));
+
+        await savechapterToDB(
+          txtId,
+          fileName,
+          chapterId.toString(),
+          chapterNameCopy,
+          cloneCopy,
+        );
+
+        titleList.add(chapterName);
+        // 然后清空内容，保留标题供应对下一节的内容
+        content = "";
+        chapterName = line;
+        chapterId++;
+      } else {
+        //  如果该标题和内容不全,仅记录该章节标题
+        chapterName = line;
+        chapterId++;
+      }
+    } else {
+      // 如果是正文内容行，累加该行到章节正文中(加入换行符)
+      content += line + "\n";
+    }
+    // 最后一行读完后，最后一章的标题和内容还在外面，没有存入db
+    if (i == lines.length - 1) {
+      await savechapterToDB(
+        txtId,
+        fileName,
+        chapterId.toString(),
+        json.decode(json.encode(chapterName)),
+        json.decode(json.encode(content)),
+      );
+      titleList.add(chapterName);
+    }
+  }
+
+  for (var e in titleList) {
+    print(e);
+  }
+  print(titleList.length);
+}
+
+// 把章节内容存到db
+savechapterToDB(
+  String txtId,
+  String fileName,
+  String chapterId,
+  String chapterNameCopy,
+  String cloneCopy,
+) async {
+  final DatabaseHelper _databaseHelper = DatabaseHelper();
+
+  var tempTxtState = TxtState(
+      txtId: txtId,
+      txtName: fileName,
+      // 2022-06-4 为了方便读取下一章上一章，还是修改chapterId为自增的值
+      chapterId: chapterId,
+      chapterName: chapterNameCopy,
+      chapterContent: cloneCopy,
+      chapterContentLength: cloneCopy.length);
+
+  print(tempTxtState.toString());
+
+  // 本来预计是新增成功后在清空content，但好像结果是异步的-----------
+  await _databaseHelper.insertTxtState(tempTxtState);
+}
+
+handleAssetTxt2Db2(fileName) async {
   String data = await rootBundle.loadString('assets/txts/$fileName.txt');
 
   final DatabaseHelper _databaseHelper = DatabaseHelper();
   var uuid = const Uuid();
+  var txtId = uuid.v1();
 
-  var index = 0;
+  // var index = 0;
   var titleList = [];
   // 引子先不管了
-  var prefaceContent = "";
-  var content = "";
-  LineSplitter.split(data).forEach((line) {
-    index++;
+
+  String content = "";
+
+// ================================= 这里拆txt按章节存到db有大问题，db中content为空 ===========
+
+  LineSplitter.split(data).forEach((line) async {
+    // index++;
     // print('index $index -- $line');
 
     // prefaceContent += line;
@@ -30,24 +132,35 @@ handleAssetTxt2Db(fileName) async {
     // 不会正则，将就用吧(匹配【第x回 】，x為1，2，3,4,5個字，回后面有个空个)
     if (line.contains(RegExp(
         r'[第].[回][\s]|[第]..[回][\s]|[第]...[回][\s]|[第]....[回][\s]|[第].....[回][\s]'))) {
-      // print(index);
+      // 如果还没有存储章节内容，就跳过
+      if (content == "") {
+        return;
+      }
+
+      // print("contentcontentcontentcontentcontentcontent前");
+      // print(content);
+      // print("contentcontentcontentcontentcontentcontent后");
+
+      var cloneCopy = json.decode(json.encode(content));
+      content = "";
+      titleList.add(line);
 
       var tempTxtState = TxtState(
-          txtId: uuid.v1(),
+          txtId: txtId,
           txtName: fileName,
           chapterId: uuid.v1(),
           chapterName: line,
-          chapterContent: content,
-          chapterContentLength: content.length);
+          chapterContent: cloneCopy,
+          chapterContentLength: cloneCopy.length);
 
-      _databaseHelper.insertTxtState(tempTxtState);
+      print(tempTxtState.toString());
 
-      titleList.add(line);
-      content = "";
+      // 本来预计是新增成功后在清空content，但好像结果是异步的-----------
+      await _databaseHelper.insertTxtState(tempTxtState);
     } else {
+      // ???// 怎么保留换行符？
       content += line;
     }
-    // print(content);
   });
 
   for (var e in titleList) {

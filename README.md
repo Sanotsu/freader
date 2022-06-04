@@ -99,3 +99,11 @@ app
 實現主要参考`lib\_demos\multi_list_text_demo.dart`，后续可能加上分页指示器，例如`https://pub.dev/packages/dots_indicator`
 
 或者[loop_page_view](https://pub.dev/packages/loop_page_view)
+
+2022-06-04 txt reader 要改进点:
+- 关于使用 pageview 用章节总数/每页显示数量=章节数量 这个设计:
+  - 数据库的设计有点问题。关于txt信息的本身 和用户txt阅读的进度之间的查询和关联，不太好，需要改进。
+  - 每页显示的数量并不一致，有的最后一行不显示完整，有的只显示上面一半。毕竟不能填满。
+  - 只测试了一本小说，其他几部还没弄，测试的输出还有很多。
+
+- 后续可使用canvas的方法。目前可参考`lib\views\txt_viewer\text_composition`的内容

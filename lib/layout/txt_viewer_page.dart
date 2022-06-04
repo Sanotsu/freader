@@ -5,14 +5,28 @@ import 'package:flutter/material.dart';
 // import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:freader/common/utils/sqlite_helper.dart';
+import 'package:freader/models/app_embedded/txt_state.dart';
 import 'package:freader/views/txt_viewer/handle_asset_txt_to_db.dart';
-import 'package:freader/views/txt_viewer/txt_screen.dart';
+// import 'package:freader/views/txt_viewer/txt_screen.dart';
+import 'package:freader/views/txt_viewer/txt_screen_db.dart';
 
 /// 相较于pdf viewer，这个就简单弄个demo
 /// 2022-05-16 本来，现在不管，每次进来都从新开始，也沒有书签记录
 /// 解析內置的4大名著txt，不进行其他自选或者扫描
 /// 解析的过程可能比较复杂，还需考虑是否把txt按照章节解析数据存入db，还一个记录阅读进度信息
 ///
+
+class SimpleTxtState {
+  final String txtId;
+  final String txtName;
+  final UserTxtState? userTxtState;
+  const SimpleTxtState({
+    required this.txtId,
+    required this.txtName,
+    this.userTxtState,
+  });
+}
+
 class TxtViewerPage extends StatefulWidget {
   const TxtViewerPage({Key? key}) : super(key: key);
 
@@ -23,45 +37,80 @@ class TxtViewerPage extends StatefulWidget {
 class _TxtViewerPageState extends State<TxtViewerPage> {
   final DatabaseHelper _databaseHelper = DatabaseHelper();
 
-  var txtList = [
-    "A Dream of Red Mansions",
-    "The Journey to the West",
-    "Romance of the Three Kingdoms",
-    "Water Margin"
-  ];
-
-  // var txtFullContent = "";
-  // loadTxtData() async {
-  //   var t1 = DateTime.now();
-  //   print(DateTime.now());
-  //   final data = await rootBundle
-  //       .loadString('assets/txts/A_Dream_of_Red_Mansions-utf8.txt');
-  //   print("---------");
-  //   print(DateTime.now());
-  //   var t2 = DateTime.now();
-  //   print(t2.difference(t1).inMicroseconds);
-
-  //   // print(data);
-  //   setState(() {
-  //     txtFullContent = data;
-  //   });
-  // }
+  List<SimpleTxtState> txtList = [];
 
   loadData() async {
+    // 如果都没有就删除,会出问题?
     // _databaseHelper.deleteDb();
     // 如果db中txtstate不违空，就判断為已有數據了
     var tempList = await _databaseHelper.readTxtStateList();
 
-    // 其实应该大于120*3+100+4個引子的数量（464）就可以判断為重复倒入了
+    // 其实应该大于120*3+100+1個引子的数量（461）就可以判断為重复倒入了
     if (tempList.isEmpty || tempList.length > 470) {
       _databaseHelper.deleteAllTxtState();
-      handleAssetTxt2Db("红楼梦");
-      handleAssetTxt2Db("三国演义");
-      handleAssetTxt2Db("西游记");
-      handleAssetTxt2Db("水浒传");
+      await handleAssetTxt2Db("红楼梦");
+      // await handleAssetTxt2Db("三国演义");
+      // await handleAssetTxt2Db("水浒传");
+      // await handleAssetTxt2Db("西游记");
     } else {
-      print("数据都已经存在数据库了");
+      print("数据都已经存在数据库了,tempList.length is ${tempList.length}");
+
+      // 以下都是打印出来看内容的，可以删除
+      _databaseHelper.showTableNameList();
+
+      List<TxtState> a = await _databaseHelper.readTxtStateList();
+
+      for (var e in a) {
+        print("${e.txtId} -  ${e.txtName} - ${e.chapterId} - ${e.chapterName}");
+      }
+
+      var b = await _databaseHelper.queryTxtStateByIds(
+          "8b4b9f10-e005-11ec-992d-6346e84a9086",
+          "8b4b9f11-e005-11ec-992d-6346e84a9086");
+
+      for (var element in b) {
+        print(element.chapterContent);
+        print(element.chapterContentLength);
+      }
     }
+
+    // 查询当前有多少Txt，用于列表显示
+
+    var tempTxtList = await _databaseHelper.readTxtStateList();
+
+// 过滤重复的txt id和name，但值只保留id和name
+    List<SimpleTxtState> listIdList = [];
+    var list = [];
+    for (var element in tempTxtList) {
+      if (!list.contains(element.txtName)) {
+        list.add(element.txtName);
+
+        print("element.txtId ${element.txtId}");
+
+        // 查询该txt有没有被阅读过
+        List<UserTxtState> utsList =
+            await _databaseHelper.queryUserTxtStateByTxtId(element.txtId);
+
+        if (utsList.isNotEmpty) {
+          listIdList.add(SimpleTxtState(
+            txtId: element.txtId,
+            txtName: element.txtName,
+            userTxtState: utsList.first,
+          ));
+        } else {
+          listIdList.add(SimpleTxtState(
+            txtId: element.txtId,
+            txtName: element.txtName,
+          ));
+        }
+      }
+    }
+
+    print(list);
+    print(listIdList);
+    setState(() {
+      txtList = listIdList;
+    });
   }
 
   @override
@@ -74,54 +123,94 @@ class _TxtViewerPageState extends State<TxtViewerPage> {
   Widget build(BuildContext context) {
     return _buildTxtGriwView(txtList);
   }
-}
 
 // 构建txt griw列表
-_buildTxtGriwView(List<String> txtList) {
-  return GridView.builder(
-    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-      childAspectRatio: 4 / 2, // item的宽高比
-      crossAxisCount: 2,
-    ),
-    itemCount: txtList.length, // 文件的数量
-    itemBuilder: (BuildContext context, int index) {
-      return GestureDetector(
-        onTap: () => _onPdfCardTap(txtList[index], context),
-        child: SizedBox(
-          child: Card(
-            color: Colors.lightGreen,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Center(
-                  child: Text(
-                    txtList[index],
-                    maxLines: 3,
-                    style: TextStyle(fontSize: 10.sp),
+  _buildTxtGriwView(List<SimpleTxtState> txtList) {
+    return GridView.builder(
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        childAspectRatio: 4 / 2, // item的宽高比
+        crossAxisCount: 2,
+      ),
+      itemCount: txtList.length, // 文件的数量
+      itemBuilder: (BuildContext context, int index) {
+        var a = txtList[index].userTxtState?.currentChapterId;
+        var b = txtList[index].userTxtState?.currentChapterPageNumber;
+        var progressText = "已读到第$a章 第$b页";
+
+        return GestureDetector(
+          onTap: () => _onPdfCardTap(context, txtList[index]),
+          child: SizedBox(
+            child: Card(
+              color: Colors.lightGreen,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    flex: 5,
+                    child: Center(
+                      child: Text(
+                        txtList[index].txtName,
+                        maxLines: 3,
+                        style: TextStyle(fontSize: 20.sp),
+                      ),
+                    ),
                   ),
-                ),
-              ],
+                  Expanded(
+                    flex: 1,
+                    child: Divider(
+                      height: 5.sp,
+                    ),
+                  ),
+                  Expanded(
+                    flex: 2,
+                    child: Text(
+                      progressText,
+                      style: TextStyle(
+                        fontSize: 10.sp,
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 2,
+                    child: Text(
+                      "上次阅读时间: ${txtList[index].userTxtState?.lastReadDatetime}",
+                      style: TextStyle(
+                        fontSize: 10.sp,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
-        ),
-      );
-    },
-  );
-}
-
-_onPdfCardTap(String title, BuildContext context) async {
-  // 非特殊情況，跳转到指定页面
-  Navigator.of(context).push(
-    MaterialPageRoute(
-      builder: (BuildContext ctx) {
-        return TxtScreen(
-          title: title,
         );
       },
-    ),
-  ).then((value) {
-    print("这是跳转路由后返回的数据： $value");
-    // 在TXT viewer页面返回后，重新获取TXT list，更新阅读进度
-  });
+    );
+  }
+
+  _onPdfCardTap(BuildContext context, SimpleTxtState sts) async {
+    print(sts.userTxtState);
+    print(sts.txtId);
+    print(sts.txtName);
+
+    // 非特殊情況，跳转到指定页面
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (BuildContext ctx) {
+          return sts.userTxtState != null
+              ? TxtScreenDB(
+                  userTxtState: sts.userTxtState,
+                )
+              : TxtScreenDB(
+                  txtId: sts.txtId,
+                );
+        },
+      ),
+    ).then((value) {
+      print("这是跳转路由后返回的数据： $value");
+      // 在TXT viewer页面返回后，重新获取TXT list，更新阅读进度
+      loadData();
+    });
+  }
 }

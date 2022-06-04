@@ -78,17 +78,21 @@ class TxtChapterState {
 
 // 存入多個txt的各自当前正在读的章节和章节中当前页码
 class UserTxtState {
+  final String userTxTStateId; // 进度主键
   final String txtId; // txt编号（会重复）
   final String currentChapterId; // 当前章节编号
   final String currentChapterPageNumber; // 当前章节当前页面
-  final double totalReadProgress; // 整体的阅读进度,默认为0,最大值100表示100%
+  final String currentTxtFontSize; // 当前进度对应使用的字体大小
+  final String totalReadProgress; // 整体的阅读进度,默认为0,最大值100表示100%
   // 最近一次阅读的时间,如果是"-"横杆字符串，表示从未阅读过
   // 为什么不是空字符串，因为在sqlite和class之间转换，空字符串有可能变为null，会出现一些问题
   final String lastReadDatetime;
   const UserTxtState({
+    required this.userTxTStateId,
     required this.txtId,
     required this.currentChapterId,
     required this.currentChapterPageNumber,
+    required this.currentTxtFontSize,
     required this.totalReadProgress,
     required this.lastReadDatetime,
   });
@@ -96,9 +100,11 @@ class UserTxtState {
   // 将一个 UserTxtState 转换成一个Map。键必须对应于数据库中的列名。
   Map<String, dynamic> toMap() {
     return {
+      'userTxTStateId': userTxTStateId,
       'txtId': txtId,
       'currentChapterId': currentChapterId,
       'currentChapterPageNumber': currentChapterPageNumber,
+      'currentTxtFontSize': currentTxtFontSize,
       'totalReadProgress': totalReadProgress,
       'lastReadDatetime': lastReadDatetime
     };
@@ -107,8 +113,10 @@ class UserTxtState {
   // 重写 toString 方法
   @override
   String toString() {
-    return '''UserTxtState{txtId: $txtId, currentChapterId: $currentChapterId,
-     currentChapterPageNumber: $currentChapterPageNumber,totalReadProgress: $totalReadProgress, 
+    return '''UserTxtState{
+      userTxTStateId:$userTxTStateId,txtId: $txtId, currentChapterId: $currentChapterId,
+     currentChapterPageNumber: $currentChapterPageNumber,
+     currentTxtFontSize:$currentTxtFontSize,totalReadProgress: $totalReadProgress, 
      lastReadDatetime: $lastReadDatetime}''';
   }
 }

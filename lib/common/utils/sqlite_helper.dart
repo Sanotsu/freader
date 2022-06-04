@@ -231,12 +231,47 @@ class DatabaseHelper {
     });
   }
 
+// 需要按txt编号获取指定数量章节的内容
+  Future<List<TxtState>> queryFirstTxtStateByTxtId(String txtId,
+      {int? number}) async {
+    Database db = await database;
+    List<Map<String, dynamic>> maps = await db.query(
+      SqliteSqlStatements.tableNameOfTxtState,
+      where: 'txtId = ?',
+      whereArgs: [txtId],
+      // chapterId虽然是1,2,3这样的字符串数字，但排序时是字符串规则，则按照升序的话10 会在2 前面
+      // 因此chapterId+0 ，强行转换为int再排序，就不会出现上述问题了
+      orderBy: "chapterId+0 ASC",
+      limit: number ?? 10000, // 不会有1w条，相当于查询所有
+    );
+
+    return List.generate(maps.length, (i) {
+      return TxtState(
+        txtId: maps[i]['txtId'],
+        txtName: maps[i]['txtName'],
+        chapterId: maps[i]['chapterId'],
+        chapterName: maps[i]['chapterName'],
+        chapterContent: maps[i]['chapterContent'],
+        chapterContentLength: maps[i]['chapterContentLength'],
+      );
+    });
+  }
+
   // 获取 TxtState 表中的所有数据
   Future<List<TxtState>> readTxtStateList() async {
     final db = await database;
 
-    final List<Map<String, dynamic>> maps =
-        await db.query(SqliteSqlStatements.tableNameOfTxtState);
+    final List<Map<String, dynamic>> maps = await db.query(
+      SqliteSqlStatements.tableNameOfTxtState,
+      // 栏位不查询chapterContent，加载到内存太大了
+      columns: [
+        'txtId',
+        "txtName",
+        "chapterId",
+        "chapterName",
+        "chapterContentLength"
+      ],
+    );
 
     //将 List<Map<String, dynamic> 转换成 List<PdfState> 数据类型
     return List.generate(maps.length, (i) {
@@ -245,7 +280,9 @@ class DatabaseHelper {
         txtName: maps[i]['txtName'],
         chapterId: maps[i]['chapterId'],
         chapterName: maps[i]['chapterName'],
-        chapterContent: maps[i]['chapterContent'],
+        // 查看所有数据，文本全部拿出来太大了，这里就返回长度好了
+        chapterContent: "${maps[i]['chapterContentLength']}",
+        // chapterContent: maps[i]['chapterContent'],
         chapterContentLength: maps[i]['chapterContentLength'],
       );
     });
@@ -339,20 +376,26 @@ class DatabaseHelper {
   }
 
   //  查询指定txt的阅读进度，传入兩個id
-  Future<List<UserTxtState>> queryUserTxtStateByTxtId(
-      String txtId, String chapterId) async {
+  // 如果没传章节编号，可能是确定该txt有没有被阅读过
+  Future<List<UserTxtState>> queryUserTxtStateByTxtId(String txtId,
+      {String? chapterId}) async {
     Database db = await database;
     List<Map<String, dynamic>> maps = await db.query(
       SqliteSqlStatements.tableNameOfUserTxtState,
-      where: 'txtId = ? and chapterId =? ',
-      whereArgs: [txtId, chapterId],
+      where: chapterId != null ? 'txtId = ? and chapterId =? ' : 'txtId = ?',
+      whereArgs: chapterId != null ? [txtId, chapterId] : [txtId],
     );
+
+    print("=======================");
+    print(maps);
 
     return List.generate(maps.length, (i) {
       return UserTxtState(
+        userTxTStateId: maps[i]['userTxTStateId'],
         txtId: maps[i]['txtId'],
         currentChapterId: maps[i]['currentChapterId'],
         currentChapterPageNumber: maps[i]['currentChapterPageNumber'],
+        currentTxtFontSize: maps[i]['currentTxtFontSize'],
         totalReadProgress: maps[i]['totalReadProgress'],
         lastReadDatetime: maps[i]['lastReadDatetime'],
       );
@@ -369,9 +412,11 @@ class DatabaseHelper {
     //将 List<Map<String, dynamic> 转换成 List<> 数据类型
     return List.generate(maps.length, (i) {
       return UserTxtState(
+        userTxTStateId: maps[i]['userTxTStateId'],
         txtId: maps[i]['txtId'],
         currentChapterId: maps[i]['currentChapterId'],
         currentChapterPageNumber: maps[i]['currentChapterPageNumber'],
+        currentTxtFontSize: maps[i]['currentTxtFontSize'],
         totalReadProgress: maps[i]['totalReadProgress'],
         lastReadDatetime: maps[i]['lastReadDatetime'],
       );
