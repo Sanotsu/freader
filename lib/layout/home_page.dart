@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:freader/layout/image_page.dart';
 import 'package:freader/layout/news_page.dart';
 import 'package:freader/layout/pdf_viewer_page.dart';
+import 'package:freader/layout/tools_page.dart';
 import 'package:freader/layout/txt_viewer_page.dart';
 import 'package:freader/widgets/hitokoto_sentence.dart';
 
@@ -57,7 +58,7 @@ class _HomePageState extends State<HomePage> {
     print(_counter);
 
     return DefaultTabController(
-      length: 4,
+      length: 5,
       child: Scaffold(
         // appBar: PreferredSize(
         //     preferredSize: Size.fromHeight(0.1.sh), // here the desired height
@@ -68,6 +69,7 @@ class _HomePageState extends State<HomePage> {
           children: [
             NewsPage(),
             ImagePage(),
+            ToolsPage(),
             PdfViewerPage(),
             TxtViewerPage(),
           ],
@@ -232,14 +234,15 @@ _buildAppBar() {
         insets: EdgeInsets.symmetric(horizontal: 2.0.sp),
       ),
       // 出现在被选择的Tab下面的线的厚度。
-      indicatorWeight: 1.sp,
+      indicatorWeight: 5.sp,
       indicatorSize: TabBarIndicatorSize.label,
+      isScrollable: true,
       tabs: [
         Tab(
           child: Text(
             "新闻",
             style: TextStyle(
-                fontFamily: "BarlowBold", fontSize: 10.sp, color: Colors.black),
+                fontFamily: "BarlowBold", fontSize: 16.sp, color: Colors.black),
           ),
         ),
         Tab(
@@ -247,7 +250,14 @@ _buildAppBar() {
           child: Text(
             "图片",
             style: TextStyle(
-                fontFamily: "BarlowBold", fontSize: 10.sp, color: Colors.black),
+                fontFamily: "BarlowBold", fontSize: 16.sp, color: Colors.black),
+          ),
+        ),
+        Tab(
+          child: Text(
+            "实用工具",
+            style: TextStyle(
+                fontFamily: "BarlowBold", fontSize: 16.sp, color: Colors.black),
           ),
         ),
         Tab(
@@ -255,14 +265,14 @@ _buildAppBar() {
           child: Text(
             "PDF viewer",
             style: TextStyle(
-                fontFamily: "BarlowBold", fontSize: 10.sp, color: Colors.black),
+                fontFamily: "BarlowBold", fontSize: 16.sp, color: Colors.black),
           ),
         ),
         Tab(
           child: Text(
             "TXT viewer",
             style: TextStyle(
-                fontFamily: "BarlowBold", fontSize: 10.sp, color: Colors.black),
+                fontFamily: "BarlowBold", fontSize: 16.sp, color: Colors.black),
           ),
         ),
       ],
