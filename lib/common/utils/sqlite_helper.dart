@@ -51,19 +51,38 @@ class DatabaseHelper {
   }
 
   // 关闭数据库
-  void closeDatabase() async {
+  Future<bool> closeDatabase() async {
     Database db = await database;
 
-    print(db.isOpen);
+    print("db.isOpen ${db.isOpen}");
     await db.close();
-    print(db.isOpen);
+    print("db.isOpen ${db.isOpen}");
+
+    // 删除db或者关闭db都需要重置db为null，
+    // 否则后续会保留之前的连接，以致出现类似错误：Unhandled Exception: DatabaseException(database_closed 5)
+    // https://github.com/tekartik/sqflite/issues/223
+    _database = null;
+
+    // 如果已经关闭了，返回ture
+    if (!db.isOpen) {
+      return true;
+    } else {
+      return false;
+    }
   }
 
   // 删除sqlite的db文件（初始化数据库操作中那个path的值）
   void deleteDb() async {
     print("开始删除內嵌的sqlite db文件");
+
+    // 删除db或者关闭db都需要重置db为null，
+    // 否则后续会保留之前的连接，以致出现类似错误：Unhandled Exception: DatabaseException(database_closed 5)
+    // https://stackoverflow.com/questions/60848752/delete-database-when-log-out-and-create-again-after-log-in-dart
+    _database = null;
+
     await deleteDatabase(
-        "/data/user/0/com.example.freader/app_flutter/freader_embedded.db");
+      "/data/user/0/com.example.freader/app_flutter/freader_embedded.db",
+    );
   }
 
 // 显示db中已有的table，默认的和自建立的
@@ -385,9 +404,6 @@ class DatabaseHelper {
       where: chapterId != null ? 'txtId = ? and chapterId =? ' : 'txtId = ?',
       whereArgs: chapterId != null ? [txtId, chapterId] : [txtId],
     );
-
-    print("=======================");
-    print(maps);
 
     return List.generate(maps.length, (i) {
       return UserTxtState(

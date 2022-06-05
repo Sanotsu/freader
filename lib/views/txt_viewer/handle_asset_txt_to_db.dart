@@ -102,69 +102,7 @@ savechapterToDB(
       chapterContent: cloneCopy,
       chapterContentLength: cloneCopy.length);
 
-  print(tempTxtState.toString());
+  // print(tempTxtState.toString());
 
-  // 本来预计是新增成功后在清空content，但好像结果是异步的-----------
   await _databaseHelper.insertTxtState(tempTxtState);
-}
-
-handleAssetTxt2Db2(fileName) async {
-  String data = await rootBundle.loadString('assets/txts/$fileName.txt');
-
-  final DatabaseHelper _databaseHelper = DatabaseHelper();
-  var uuid = const Uuid();
-  var txtId = uuid.v1();
-
-  // var index = 0;
-  var titleList = [];
-  // 引子先不管了
-
-  String content = "";
-
-// ================================= 这里拆txt按章节存到db有大问题，db中content为空 ===========
-
-  LineSplitter.split(data).forEach((line) async {
-    // index++;
-    // print('index $index -- $line');
-
-    // prefaceContent += line;
-
-    // 不会正则，将就用吧(匹配【第x回 】，x為1，2，3,4,5個字，回后面有个空个)
-    if (line.contains(RegExp(
-        r'[第].[回][\s]|[第]..[回][\s]|[第]...[回][\s]|[第]....[回][\s]|[第].....[回][\s]'))) {
-      // 如果还没有存储章节内容，就跳过
-      if (content == "") {
-        return;
-      }
-
-      // print("contentcontentcontentcontentcontentcontent前");
-      // print(content);
-      // print("contentcontentcontentcontentcontentcontent后");
-
-      var cloneCopy = json.decode(json.encode(content));
-      content = "";
-      titleList.add(line);
-
-      var tempTxtState = TxtState(
-          txtId: txtId,
-          txtName: fileName,
-          chapterId: uuid.v1(),
-          chapterName: line,
-          chapterContent: cloneCopy,
-          chapterContentLength: cloneCopy.length);
-
-      print(tempTxtState.toString());
-
-      // 本来预计是新增成功后在清空content，但好像结果是异步的-----------
-      await _databaseHelper.insertTxtState(tempTxtState);
-    } else {
-      // ???// 怎么保留换行符？
-      content += line;
-    }
-  });
-
-  for (var e in titleList) {
-    print(e);
-  }
-  print(titleList.length);
 }

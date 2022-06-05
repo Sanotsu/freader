@@ -2,13 +2,11 @@
 
 import 'package:flutter/material.dart';
 
-// import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:freader/common/utils/sqlite_helper.dart';
 import 'package:freader/models/app_embedded/txt_state.dart';
 import 'package:freader/views/txt_viewer/handle_asset_txt_to_db.dart';
-// import 'package:freader/views/txt_viewer/txt_screen.dart';
-import 'package:freader/views/txt_viewer/txt_screen_db.dart';
+import 'package:freader/views/txt_viewer/txt_screen_pageview.dart';
 
 /// 相较于pdf viewer，这个就简单弄个demo
 /// 2022-05-16 本来，现在不管，每次进来都从新开始，也沒有书签记录
@@ -46,36 +44,24 @@ class _TxtViewerPageState extends State<TxtViewerPage> {
     var tempList = await _databaseHelper.readTxtStateList();
 
     // 其实应该大于120*3+100+1個引子的数量（461）就可以判断為重复倒入了
-    if (tempList.isEmpty || tempList.length > 470) {
+    if (tempList.isEmpty || tempList.length > 461) {
       _databaseHelper.deleteAllTxtState();
       await handleAssetTxt2Db("红楼梦");
-      // await handleAssetTxt2Db("三国演义");
-      // await handleAssetTxt2Db("水浒传");
-      // await handleAssetTxt2Db("西游记");
+      await handleAssetTxt2Db("三国演义");
+      await handleAssetTxt2Db("水浒传");
+      await handleAssetTxt2Db("西游记");
     } else {
-      print("数据都已经存在数据库了,tempList.length is ${tempList.length}");
+      print("数据都已经存在数据库了,全db章节数量: ${tempList.length}");
 
       // 以下都是打印出来看内容的，可以删除
-      _databaseHelper.showTableNameList();
-
-      List<TxtState> a = await _databaseHelper.readTxtStateList();
-
-      for (var e in a) {
-        print("${e.txtId} -  ${e.txtName} - ${e.chapterId} - ${e.chapterName}");
-      }
-
-      var b = await _databaseHelper.queryTxtStateByIds(
-          "8b4b9f10-e005-11ec-992d-6346e84a9086",
-          "8b4b9f11-e005-11ec-992d-6346e84a9086");
-
-      for (var element in b) {
-        print(element.chapterContent);
-        print(element.chapterContentLength);
-      }
+      // _databaseHelper.showTableNameList();
+      // List<TxtState> a = await _databaseHelper.readTxtStateList();
+      // for (var e in a) {
+      //   print("${e.txtId} -  ${e.txtName} - ${e.chapterId} - ${e.chapterName}");
+      // }
     }
 
     // 查询当前有多少Txt，用于列表显示
-
     var tempTxtList = await _databaseHelper.readTxtStateList();
 
 // 过滤重复的txt id和name，但值只保留id和name
@@ -85,9 +71,7 @@ class _TxtViewerPageState extends State<TxtViewerPage> {
       if (!list.contains(element.txtName)) {
         list.add(element.txtName);
 
-        print("element.txtId ${element.txtId}");
-
-        // 查询该txt有没有被阅读过
+        // 查询该txt有没有被阅读过(有阅读过，传给子组件就是阅读记录状态，否则只是txt编号，默认开始读第一章)
         List<UserTxtState> utsList =
             await _databaseHelper.queryUserTxtStateByTxtId(element.txtId);
 
@@ -106,8 +90,6 @@ class _TxtViewerPageState extends State<TxtViewerPage> {
       }
     }
 
-    print(list);
-    print(listIdList);
     setState(() {
       txtList = listIdList;
     });
@@ -135,7 +117,8 @@ class _TxtViewerPageState extends State<TxtViewerPage> {
       itemBuilder: (BuildContext context, int index) {
         var a = txtList[index].userTxtState?.currentChapterId;
         var b = txtList[index].userTxtState?.currentChapterPageNumber;
-        var progressText = "已读到第$a章 第$b页";
+        var progressText =
+            a != null ? "已读到第$a章 第${int.parse(b!) + 1}页" : "暂无阅读记录";
 
         return GestureDetector(
           onTap: () => _onPdfCardTap(context, txtList[index]),
@@ -174,7 +157,7 @@ class _TxtViewerPageState extends State<TxtViewerPage> {
                   Expanded(
                     flex: 2,
                     child: Text(
-                      "上次阅读时间: ${txtList[index].userTxtState?.lastReadDatetime}",
+                      "上次阅读时间: ${(txtList[index].userTxtState?.lastReadDatetime) ?? "暂无"}",
                       style: TextStyle(
                         fontSize: 10.sp,
                       ),
@@ -190,19 +173,19 @@ class _TxtViewerPageState extends State<TxtViewerPage> {
   }
 
   _onPdfCardTap(BuildContext context, SimpleTxtState sts) async {
-    print(sts.userTxtState);
-    print(sts.txtId);
-    print(sts.txtName);
+    // print(sts.userTxtState);
+    // print(sts.txtId);
+    // print(sts.txtName);
 
     // 非特殊情況，跳转到指定页面
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (BuildContext ctx) {
           return sts.userTxtState != null
-              ? TxtScreenDB(
+              ? TxtScreenPageView(
                   userTxtState: sts.userTxtState,
                 )
-              : TxtScreenDB(
+              : TxtScreenPageView(
                   txtId: sts.txtId,
                 );
         },

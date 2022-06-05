@@ -173,7 +173,7 @@ class _PDFScreenState extends State<PDFScreen> with WidgetsBindingObserver {
       color: Colors.lightBlue,
       shape: const CircularNotchedRectangle(), // 底部导航栏打一个圆形的洞
       child: SizedBox(
-        height: 30.sp,
+        height: 40.sp,
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
@@ -182,7 +182,7 @@ class _PDFScreenState extends State<PDFScreen> with WidgetsBindingObserver {
               icon: Icon(
                 Icons.bookmark,
                 color: Colors.white,
-                size: 15.sp,
+                size: 25.sp,
               ),
               onPressed: () {
                 _pdfViewerKey.currentState?.openBookmarkView();
@@ -193,7 +193,7 @@ class _PDFScreenState extends State<PDFScreen> with WidgetsBindingObserver {
               icon: Icon(
                 Icons.zoom_in,
                 color: Colors.white,
-                size: 15.sp,
+                size: 25.sp,
               ),
               onPressed: () {
                 _pdfViewerController.zoomLevel += 1;
@@ -204,7 +204,7 @@ class _PDFScreenState extends State<PDFScreen> with WidgetsBindingObserver {
               icon: Icon(
                 Icons.zoom_out,
                 color: Colors.white,
-                size: 15.sp,
+                size: 25.sp,
               ),
               onPressed: () {
                 _pdfViewerController.zoomLevel -= 1;
@@ -215,7 +215,7 @@ class _PDFScreenState extends State<PDFScreen> with WidgetsBindingObserver {
               icon: Icon(
                 _directIcon,
                 color: Colors.white,
-                size: 15.sp,
+                size: 25.sp,
               ),
               onPressed: _switchPdfScrollDirection,
             ),
@@ -224,7 +224,7 @@ class _PDFScreenState extends State<PDFScreen> with WidgetsBindingObserver {
               icon: Icon(
                 Icons.keyboard_arrow_left,
                 color: Colors.white,
-                size: 15.sp,
+                size: 25.sp,
               ),
               onPressed: () {
                 _pdfViewerController.previousPage();
@@ -235,7 +235,7 @@ class _PDFScreenState extends State<PDFScreen> with WidgetsBindingObserver {
               icon: Icon(
                 Icons.keyboard_arrow_right,
                 color: Colors.white,
-                size: 15.sp,
+                size: 25.sp,
               ),
               onPressed: () {
                 _pdfViewerController.nextPage();

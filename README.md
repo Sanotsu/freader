@@ -107,3 +107,6 @@ app
   - 只测试了一本小说，其他几部还没弄，测试的输出还有很多。
 
 - 后续可使用canvas的方法。目前可参考`lib\views\txt_viewer\text_composition`的内容
+
+pdf和txt中删除db再重建好像有点问题，不是这么搞的。
+加载txt章节时，没有转圈圈提示

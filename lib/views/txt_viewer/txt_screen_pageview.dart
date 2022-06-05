@@ -8,20 +8,20 @@ import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
 import 'package:page_view_indicators/linear_progress_page_indicator.dart';
 
-class TxtScreenDB extends StatefulWidget {
+class TxtScreenPageView extends StatefulWidget {
   // 如果有阅读记录，则获取该记录继续读；如果没读过，通过txtid获取第一章节，开始读
   // 真实调用时，两个只能传一个，有了txtId，就不能传userTxtState，否则会出问题
   final UserTxtState? userTxtState;
   final String? txtId;
 
-  const TxtScreenDB({Key? key, this.userTxtState, this.txtId})
+  const TxtScreenPageView({Key? key, this.userTxtState, this.txtId})
       : super(key: key);
 
   @override
-  State<TxtScreenDB> createState() => _TxtScreenDBState();
+  State<TxtScreenPageView> createState() => _TxtScreenPageViewState();
 }
 
-class _TxtScreenDBState extends State<TxtScreenDB> {
+class _TxtScreenPageViewState extends State<TxtScreenPageView> {
   /// 2022-05-30 此处整体流程如下
   /// 1 传入当前txt的用户阅读进度，通过 txtId 和 chapterId，获取到当前小说章节的内容
   ///     如果没有阅读记录，则是从第一章开始
@@ -37,6 +37,8 @@ class _TxtScreenDBState extends State<TxtScreenDB> {
 
   final DatabaseHelper _databaseHelper = DatabaseHelper();
   var uuid = const Uuid();
+
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
 // 不管是第一次阅读还是继续阅读记录，都处理获取其txt编号和当前章节编号，以便后续处理
   var currentTxtId = "";
@@ -62,31 +64,27 @@ class _TxtScreenDBState extends State<TxtScreenDB> {
   // 是否在加载文件中
   var txtLoading = false;
 
+  // 底下进度条的当前进度
   final _currentPageNotifier = ValueNotifier<int>(0);
 
+// 通过txt编号和章节编号查询对应章节内容
   getChapterDataByChapterId(String txtId, String currentChapterId) async {
-    print(
-        "111111111111111111 txtId  $txtId,currentChapterId  $currentChapterId");
-
     setState(() {
       txtLoading = true;
 
       // 一旦有切换章节，那当前章节已读页码也得重置到第一页
       currentPage = 0;
       _currentPageNotifier.value = 0;
-
-      print("setState $currentPage");
     });
 
     List<TxtState> chapterContentList;
 
     /// 2 有传入阅读进度的处理
     // 指定txt的当前章节，应该只有一条数据了
-    chapterContentList =
-        await _databaseHelper.queryTxtStateByIds(txtId, currentChapterId);
-
-    print("222222222222222 getChapterDataByChapterId");
-    print(chapterContentList);
+    chapterContentList = await _databaseHelper.queryTxtStateByIds(
+      txtId,
+      currentChapterId,
+    );
 
     setState(() {
       // 如果指定编号查询能找到内容，则更新，否则不作为
@@ -100,9 +98,8 @@ class _TxtScreenDBState extends State<TxtScreenDB> {
     });
   }
 
+  // 组件初始化时，根据传入的阅读记录或者txt编号加载章节内容
   loadCurrentChapterData() async {
-    print("*************************** ${double.parse("0")}");
-
     /// 1 没有传入阅读记录的处理(新开始读的)
     //  查询第一章节开始
     // 2022-06-04 因为chapterId改为了从1开始的自增，所以不管是首次阅读还是继续阅读，都可以使用同一个db查询操作
@@ -119,8 +116,6 @@ class _TxtScreenDBState extends State<TxtScreenDB> {
     if (temp != 0.0) {
       setState(() {
         currentTxtFontSize = temp;
-        // 跳转到已读的页码
-        print("load中的字体大小$temp");
       });
     }
     // 当前章节已读的页数,并跳转
@@ -131,22 +126,10 @@ class _TxtScreenDBState extends State<TxtScreenDB> {
     }
 
     // 查询当前txt的内容，用作书签显示
-
     var list = await _databaseHelper.queryFirstTxtStateByTxtId(currentTxtId);
-    print("&&&&&&&&&&&&&&&&&&");
-    print(txtChapterList);
     setState(() {
       txtChapterList = list;
     });
-  }
-
-  testdemo() async {
-    var a = await _databaseHelper.queryTxtStateByIds(
-      "7a12beb0-e3b4-11ec-b63f-9173e67ad2ae",
-      "2",
-    );
-    print(a);
-    print("000000000000000000");
   }
 
   @override
@@ -154,7 +137,6 @@ class _TxtScreenDBState extends State<TxtScreenDB> {
     print("================前");
     print(widget.txtId);
     print(widget.userTxtState);
-    // testdemo();
     print("================后");
 
     loadCurrentChapterData();
@@ -172,10 +154,6 @@ class _TxtScreenDBState extends State<TxtScreenDB> {
             : DateTime.now().add(const Duration(hours: 8)));
 
     var totalReadProgress = int.parse(currentChapterId) / 120;
-
-    print(
-      "当前的文本进度 $currentTxtId $currentChapterId $currentPage $currentTxtFontSize $totalReadProgress $lastReadDatetime ",
-    );
 
     // 如果没有读过，就是新增阅读记录。有读过，就是修改
     var uts = UserTxtState(
@@ -195,50 +173,55 @@ class _TxtScreenDBState extends State<TxtScreenDB> {
 
   @override
   Widget build(BuildContext context) {
-    /*
     // 获取屏幕的宽高(sp)
     var deviceData = MediaQuery.of(context);
     var deviceHeight = deviceData.size.height; // 或者 ScreenUtil().screenWidth
     var deviceWidth = deviceData.size.width; // 或者 ScreenUtil().screenHeight
 
-    print(" 屏幕尺寸; ${ScreenUtil().screenWidth} ${ScreenUtil().screenHeight}");
-    print("${deviceData.size.width} ${deviceData.size.height}");
+    // print("屏幕尺寸1: ${ScreenUtil().screenWidth} ${ScreenUtil().screenHeight}");
+    // print("屏幕尺寸2: ${deviceData.size.width} ${deviceData.size.height}");
 
-    // 60 - AppBar estimated height, 45 为bottom的高度。如果有虚拟按钮，还要减其高度
-    var txtHeight = deviceHeight - 60.sp - 45.sp - ScreenUtil().bottomBarHeight;
-    var txtWitdh = deviceWidth - 20.sp;
-    // 设备可用来显示文字的面积大小
+    // txt显示的高度剩余 appbar80 buttom44 进度条5
+    // WillPopScope下到显示文字的Text中的间隔边框约为 30*26(宽*高)，如果还有虚拟按钮的高度,默认每页2行空白行
+    var noUseHeight = (80 + 45 + 5 + 30).sp +
+        ScreenUtil().bottomBarHeight +
+        currentTxtFontSize * 2;
+    var noUseWidth = 30.sp;
+
+    var txtHeight = deviceHeight - noUseHeight;
+    var txtWitdh = deviceWidth - noUseWidth; // 各种组件预估侵占的宽度为60
+    // 设备可用来显示文字的面积大小(默认假设每页有2行空白行)
     var deviceDimension = txtHeight * txtWitdh;
 
-    print("444444444444444444444 $deviceDimension $txtHeight , $txtWitdh");
-
     //  计算每页大概多少字
-    //  每个字符的估计尺寸：textSize * (textSize * 0.8), 文本大小的宽度估计尺寸是其高度的80%。
-    var pageCharLimit =
-        (deviceDimension / (currentTxtFontSize * (currentTxtFontSize * 0.8)))
-            .round();
+    //  每个字符的估计尺寸：textSize * (textSize * 0.8), 文本大小的宽度估计尺寸是其高度的80%。中文是英文的2倍？
+    var perCharSize = currentTxtFontSize * 2 * (currentTxtFontSize * 0.8);
+    var pageCharLimit = (deviceDimension / perCharSize).round();
 
-    debugPrint('Character limit per page: $pageCharLimit');
+    /// 计算总共大概会有多少页 （总字数/每页字数）向上取整。
+    var pageCount = (textLength / pageCharLimit).ceil();
 
-    /// 计算总共大概会有多少页 （总字数/每页字数）
-    var pageCount = (textLength / pageCharLimit).round();
-    debugPrint('Pages: $pageCount');
+    // print("""长度、面积单位sp:
+    //     原始设备高度*宽度 $deviceHeight * $deviceWidth
+    //     文本显示高度*宽度 $txtHeight * $txtWitdh 显示总面积:$deviceDimension
+    //     当前章节:$currentChapterId 章节总字数:$textLength
+    //     当前字体大小:$currentTxtFontSize 每个字占面积:$perCharSize
+    //     每页文字数量:$pageCharLimit 该章共多少页:$pageCount 当前页:$currentPage
+    //     """);
 
-    /// |||||||||||2022-05-31 以上这些显示面积的计算都不准确，因为，body中的布局还有其他内容
-    /// 所以这里直接使用真实预估的面积直接计算每页显示文字数量
-    */
-    // ========================加入换行符空白行之后，这里的每页显示数量和分页就不是这样计算了
-
-    print("当前字体：$currentTxtFontSize");
-    var temp = ((500.sp * 360.sp) /
+    /// 2022-05-31 以上这些显示面积的计算都不准确，
+    /// 因为空白行数不定、字体大小不定、一页高度并不一定总能显示正常行高、标点和文字占面积不一样，段头段位也有空白
+    /// 所以下面这里直接使用真实预估的面积直接计算每页显示文字数量（小米6）
+/*
+    var temp = ((525.sp * 380.sp) /
         (currentTxtFontSize * (currentTxtFontSize) * 0.9 * 2));
 
     var pageCharLimit = temp.round();
     var pageCount = (textLength / pageCharLimit).ceil();
 
-    print(
-        "$temp 当前章节$currentChapterId 每页文字数量$pageCharLimit 一共多少页 $pageCount 当前页$currentPage ");
-
+    print("当前显示区域面积：$temp  当前字体大小：$currentTxtFontSize 每页文字数量：$pageCharLimit");
+    print("当前章节：$currentChapterId  一该章共多少页：$pageCount 当前页：$currentPage ");
+*/
     List<String> pageText = [];
     var index = 0;
     var startStrIndex = 0;
@@ -266,16 +249,8 @@ class _TxtScreenDBState extends State<TxtScreenDB> {
     );
 
     return Scaffold(
-      appBar:
-          //  AppBar(
-          //   title: Text(
-          //     appTitle,
-          //     style: TextStyle(fontSize: 20.sp),
-          //   ),
-
-          // ),
-
-          AppBar(
+      key: _scaffoldKey,
+      appBar: AppBar(
         title: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -315,7 +290,7 @@ class _TxtScreenDBState extends State<TxtScreenDB> {
                       itemBuilder: (_, index) {
                         return Card(
                           child: Container(
-                            padding: const EdgeInsets.all(16.0),
+                            padding: EdgeInsets.all(10.0.sp),
                             child: Text(
                               pageText[index],
                               style: TextStyle(fontSize: currentTxtFontSize),
@@ -331,7 +306,7 @@ class _TxtScreenDBState extends State<TxtScreenDB> {
                 ],
               ),
       ),
-      bottomNavigationBar: _buildBottomNavigationBar(),
+      bottomNavigationBar: _buildBottomNavigationBar(context, pageController),
     );
   }
 
@@ -346,7 +321,6 @@ class _TxtScreenDBState extends State<TxtScreenDB> {
 
 // 底下章节页码进度条
   _buildLinearProgressIndicator(totalPage) {
-    print("创建进度条里面 totalPage$totalPage curentPage $currentPage");
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) =>
           LinearProgressPageIndicator(
@@ -354,35 +328,41 @@ class _TxtScreenDBState extends State<TxtScreenDB> {
         currentPageNotifier: _currentPageNotifier,
         progressColor: Colors.green,
         width: constraints.maxWidth,
-        height: 5.sp,
+        height: 4.sp,
       ),
     );
   }
 
 // 下方的功能按钮
-  Widget _buildBottomNavigationBar() {
+  Widget _buildBottomNavigationBar(
+    BuildContext ctx,
+    PageController pageController,
+  ) {
     return BottomAppBar(
       color: Colors.lightBlue,
       child: SizedBox(
-        height: 45.sp,
+        height: 40.sp,
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             // 书签
+            //  通过调用上层Scaffold的key，去打开drawer，以显示书签
             IconButton(
               icon: Icon(
                 Icons.bookmark,
                 color: Colors.white,
-                size: 30.sp,
+                size: 20.sp,
               ),
-              onPressed: () {},
+              onPressed: () {
+                _scaffoldKey.currentState?.openDrawer();
+              },
             ),
             // 放大
             IconButton(
               icon: Icon(
                 Icons.zoom_in,
                 color: Colors.white,
-                size: 30.sp,
+                size: 20.sp,
               ),
               onPressed: () {
                 // 放大字体(但有最大值)
@@ -390,6 +370,8 @@ class _TxtScreenDBState extends State<TxtScreenDB> {
                   currentTxtFontSize += 4;
                 }
                 getChapterDataByChapterId(currentTxtId, currentChapterId);
+                //新章节，都是到新章节的第一页
+                pageController.jumpToPage(0);
               },
             ),
             // 縮小
@@ -397,7 +379,7 @@ class _TxtScreenDBState extends State<TxtScreenDB> {
               icon: Icon(
                 Icons.zoom_out,
                 color: Colors.white,
-                size: 30.sp,
+                size: 20.sp,
               ),
               onPressed: () {
                 // 缩小字体（但有最小值）
@@ -405,6 +387,8 @@ class _TxtScreenDBState extends State<TxtScreenDB> {
                   currentTxtFontSize -= 4;
                 }
                 getChapterDataByChapterId(currentTxtId, currentChapterId);
+                //新章节，都是到新章节的第一页
+                pageController.jumpToPage(0);
               },
             ),
             // 切换方向
@@ -414,7 +398,7 @@ class _TxtScreenDBState extends State<TxtScreenDB> {
               icon: Icon(
                 Icons.keyboard_arrow_left,
                 color: Colors.white,
-                size: 30.sp,
+                size: 20.sp,
               ),
               onPressed: () {
                 // 点击上一章，则修改当前章节编号，并进行查询(有最小值)
@@ -422,6 +406,8 @@ class _TxtScreenDBState extends State<TxtScreenDB> {
                   currentChapterId =
                       (int.parse(currentChapterId) - 1).toString();
                   getChapterDataByChapterId(currentTxtId, currentChapterId);
+                  //新章节，都是到新章节的第一页
+                  pageController.jumpToPage(0);
                 }
               },
             ),
@@ -430,7 +416,7 @@ class _TxtScreenDBState extends State<TxtScreenDB> {
               icon: Icon(
                 Icons.keyboard_arrow_right,
                 color: Colors.white,
-                size: 30.sp,
+                size: 20.sp,
               ),
               onPressed: () {
                 // 点击下一章，则修改当前章节编号，并进行查询(有最大值，但西游记只有100回)
@@ -438,6 +424,8 @@ class _TxtScreenDBState extends State<TxtScreenDB> {
                   currentChapterId =
                       (int.parse(currentChapterId) + 1).toString();
                   getChapterDataByChapterId(currentTxtId, currentChapterId);
+                  //新章节，都是到新章节的第一页
+                  pageController.jumpToPage(0);
                 }
               },
             )
@@ -451,11 +439,7 @@ class _TxtScreenDBState extends State<TxtScreenDB> {
 // 使用drawer做书签
   Widget _buildBookmarkDrawer(List<TxtState> txtChapterList, pageController) {
 // 获取所有的章节信息做书签的内容
-
     return Drawer(
-      // Add a ListView to the drawer. This ensures the user can scroll
-      // through the options in the drawer if there isn't enough vertical
-      // space to fit everything.
       child: Column(
         children: [
           SizedBox(
@@ -484,45 +468,52 @@ class _TxtScreenDBState extends State<TxtScreenDB> {
             ),
           ),
           Expanded(
-              child: ListView.builder(
-                  itemCount: txtChapterList.length,
-                  itemExtent: 30.0.sp, //强制高度
-                  itemBuilder: (BuildContext context, int index) {
-                    // print(txtChapterList[index]);
-                    return ListTile(
-                      title: Text(
-                        " ${txtChapterList[index].chapterName}",
-                        style: TextStyle(
-                          color: currentChapterId ==
-                                  txtChapterList[index].chapterId
-                              ? Colors.lightBlue
-                              : Colors.black,
-                          fontSize: 10.sp,
-                        ),
+            child: ListView.builder(
+                itemCount: txtChapterList.length,
+                itemExtent: 50.0.sp, //强制高度
+                itemBuilder: (BuildContext context, int index) {
+                  var tempArr = (txtChapterList[index].chapterName).split(" ");
+
+                  return ListTile(
+                    title: Text(
+                      "${tempArr[0]}\n${tempArr[1]} ${tempArr[2]}",
+                      style: TextStyle(
+                        color:
+                            currentChapterId == txtChapterList[index].chapterId
+                                ? Colors.lightBlue
+                                : Colors.black,
+                        fontSize: 15.sp,
                       ),
-                      onTap: () {
-                        // Update the state of the app
-                        setState(() {
-                          currentPage = 0;
-                          currentChapterId = txtChapterList[index].chapterId;
-                          getChapterDataByChapterId(
-                            txtChapterList[index].txtId,
-                            txtChapterList[index].chapterId,
-                          );
-                        });
-                        // 从书签进入，都是到新章节的第一页
-                        pageController.jumpToPage(0);
-                        // Then close the drawer
-                        Navigator.pop(context);
-                      },
-                    );
-                  }))
+                    ),
+                    onTap: () {
+                      // Update the state of the app
+                      setState(() {
+                        currentPage = 0;
+                        currentChapterId = txtChapterList[index].chapterId;
+                        getChapterDataByChapterId(
+                          txtChapterList[index].txtId,
+                          txtChapterList[index].chapterId,
+                        );
+                      });
+                      // 从书签进入，都是到新章节的第一页
+                      pageController.jumpToPage(0);
+                      // Then close the drawer
+                      Navigator.pop(context);
+                    },
+                  );
+                }),
+          ),
+          // 底部留少量空间
+          SizedBox(
+            height: 50.sp,
+          ),
         ],
       ),
     );
   }
 }
 
+// 加载中的loading组件
 Widget buildLoadingWidget() {
   return Center(
     child: Padding(
