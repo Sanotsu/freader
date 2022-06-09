@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:freader/models/readhub_api_result.dart';
 import 'package:freader/models/readhub_api_topic_detail.dart';
+import 'package:freader/utils/global_styles.dart';
 
 import 'package:freader/utils/platform_util.dart';
 import 'package:freader/views/readhub_category/fetch_readhub_api_result.dart';
@@ -98,7 +99,7 @@ class _ReadhubTypedNewsState extends State<ReadhubTypedNews> {
     print('加载更多  $isLoading');
 
     // 延迟3秒，看一下加载效果
-    await Future.delayed(const Duration(seconds: 3));
+    await Future.delayed(const Duration(seconds: 1));
 
     // 上拉加载更多，则应该是获取当前页的下一页的数据
     var response = await fetchReadhubApiCommonResult(_genUrl(currentPage + 1));
@@ -261,7 +262,7 @@ class _ItemCardBottomAreaWidgetState extends State<ItemCardBottomAreaWidget> {
             overflow:
                 PlatformUtil.isWeb ? TextOverflow.fade : TextOverflow.ellipsis,
             style: Theme.of(context).textTheme.caption!.copyWith(
-                  fontSize: 8.sp,
+                  fontSize: sizeContent4,
                 ),
           ),
         ),
@@ -273,7 +274,7 @@ class _ItemCardBottomAreaWidgetState extends State<ItemCardBottomAreaWidget> {
           tooltip: "share",
           child: Icon(
             Icons.share,
-            size: 10.sp,
+            size: bottomIconButtonSize2,
           ),
         ),
         // 收藏
@@ -281,8 +282,12 @@ class _ItemCardBottomAreaWidgetState extends State<ItemCardBottomAreaWidget> {
           onTap: () => {},
           tooltip: "star",
           child: staredArticleList.contains(widget.newsItem.uid)
-              ? Icon(Icons.star, size: 10.sp, color: Colors.lightBlue)
-              : Icon(Icons.star, size: 10.sp),
+              ? Icon(
+                  Icons.star,
+                  size: bottomIconButtonSize2,
+                  color: Colors.lightBlue,
+                )
+              : Icon(Icons.star, size: bottomIconButtonSize2),
         ),
         // 热门话题有更多链接，其他的就没有
         widget.newsItem.newsAggList != null
@@ -291,7 +296,7 @@ class _ItemCardBottomAreaWidgetState extends State<ItemCardBottomAreaWidget> {
                 tooltip: 'news agg list',
                 child: Icon(
                   Icons.link,
-                  size: 14.sp,
+                  size: bottomIconButtonSize2,
                   color: Colors.lightBlue,
                 ),
               )
@@ -315,7 +320,7 @@ class _ItemCardBottomAreaWidgetState extends State<ItemCardBottomAreaWidget> {
                 tooltip: "detail",
                 child: Icon(
                   Icons.details,
-                  size: 10.sp,
+                  size: bottomIconButtonSize2,
                   color: Colors.lightBlue,
                 ),
               )
@@ -436,7 +441,7 @@ class _ItemCardWidgetState extends State<ItemCardWidget> {
   Widget build(BuildContext context) {
     ItemsData newsItem = widget.data[widget.index];
     return Container(
-      height: 80,
+      height: 100,
       color: Colors.white,
       child: Card(
         child: Column(
@@ -451,7 +456,10 @@ class _ItemCardWidgetState extends State<ItemCardWidget> {
                 TextSpan(
                     // 不指定颜色可能默认为白色，看不见，像是没有内容一样(Theme.of()本身返回TextStyle)
                     // style: Theme.of(context).textTheme.bodyText2,
-                    style: TextStyle(color: Colors.lightBlue, fontSize: 10.sp),
+                    style: TextStyle(
+                      color: Colors.lightBlue,
+                      fontSize: sizeHeadline3,
+                    ),
                     text: "${widget.index} --- ${newsItem.title}",
                     recognizer: TapGestureRecognizer()
                       ..onTap = () async {
@@ -496,7 +504,7 @@ class _ItemCardWidgetState extends State<ItemCardWidget> {
                 ),
                 style: Theme.of(context).textTheme.caption!.copyWith(
                     letterSpacing: 1.0,
-                    fontSize: 8.sp,
+                    fontSize: sizeContent3,
                     color: Theme.of(context)
                         .textTheme
                         .headline6!

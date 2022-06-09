@@ -7,6 +7,7 @@ import 'package:freader/layout/news_page.dart';
 import 'package:freader/layout/pdf_viewer_page.dart';
 import 'package:freader/layout/tools_page.dart';
 import 'package:freader/layout/txt_viewer_page.dart';
+import 'package:freader/utils/global_styles.dart';
 import 'package:freader/widgets/hitokoto_sentence.dart';
 
 ///
@@ -102,111 +103,14 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
-// 主页的appBar(使用了PreferredSize固定了appBar的高度，显示屏的10%)
-class HomeAppBar extends StatefulWidget {
-  const HomeAppBar({Key? key}) : super(key: key);
-
-  @override
-  State<HomeAppBar> createState() => _HomeAppBarState();
-}
-
-class _HomeAppBarState extends State<HomeAppBar> {
-// 2022-04-22 HomeAppBar给了0.1.sh，59.2dp，title和actions占一行，是29.2，button是30dp
-// 但实际 HomeAppBar 高度是83.2dp，还有29.2在哪儿？
-
-  @override
-  Widget build(BuildContext context) {
-    return AppBar(
-      title: const Text(
-        "let's freader",
-        style: TextStyle(fontFamily: "BarlowBold", fontSize: 20),
-      ),
-      actions: <Widget>[
-        IconButton(
-          iconSize: 20,
-          icon: const Icon(
-            Icons.search,
-            semanticLabel: 'search', // icon的语义标签。
-          ),
-          onPressed: () {},
-        ),
-        IconButton(
-          iconSize: 20,
-          icon: const Icon(
-            Icons.scanner,
-            semanticLabel: 'scanner',
-          ),
-          onPressed: () {},
-        ),
-      ],
-      bottom: PreferredSize(
-        // 这个组件如果没有其他限制，更偏向的size
-        preferredSize: const Size.fromHeight(1),
-        child: Container(
-          height: 30,
-          color: Colors.red, // 用來看位置，不需要的话这个Container可以改为SizedBox
-          child: const TabBar(
-            // // 可以使得tab的文本自适应显示长度，很长的内容都会显示完整。
-            // isScrollable: true,
-            // // 标签左右空10dp，上下无空
-            // labelPadding: EdgeInsets.symmetric(horizontal: 10.0),
-            /// TabBar 的下划线的样式
-            indicator: UnderlineTabIndicator(
-              borderSide: BorderSide(width: 2.0), // 下划线的粗度
-              // 下划线的四边的间距horizontal橫向
-              insets: EdgeInsets.symmetric(horizontal: 2.0),
-            ),
-            indicatorWeight: 0,
-            indicatorSize: TabBarIndicatorSize.label,
-            tabs: [
-              Tab(
-                child: Text(
-                  "新闻",
-                  style: TextStyle(
-                      fontFamily: "BarlowBold",
-                      fontSize: 10,
-                      color: Colors.black),
-                ),
-              ),
-              Tab(
-                // height: 12,
-                child: Text(
-                  "图片",
-                  style: TextStyle(
-                      fontFamily: "BarlowBold",
-                      fontSize: 10,
-                      color: Colors.black),
-                ),
-              ),
-              Tab(
-                // height: 12,
-                child: Text(
-                  "PDF viewer",
-                  style: TextStyle(
-                      fontFamily: "BarlowBold",
-                      fontSize: 10,
-                      color: Colors.black),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 /// 2022-5-14 主页的appBar
 /// 使用默认样式
 _buildAppBar() {
   return AppBar(
-    title: Text(
-      "Let's freader",
-      style: TextStyle(fontFamily: "BarlowBold", fontSize: 20.sp),
-    ),
+    title: Text("Let's freader", style: appBarTextStyle),
     actions: <Widget>[
       IconButton(
-        iconSize: 20,
+        iconSize: appBarIconButtonSize,
         icon: const Icon(
           Icons.search,
           semanticLabel: 'search', // icon的语义标签。
@@ -214,7 +118,7 @@ _buildAppBar() {
         onPressed: () {},
       ),
       IconButton(
-        iconSize: 20,
+        iconSize: appBarIconButtonSize,
         icon: const Icon(
           Icons.scanner,
           semanticLabel: 'scanner',
@@ -238,41 +142,34 @@ _buildAppBar() {
       indicatorSize: TabBarIndicatorSize.label,
       isScrollable: true,
       tabs: [
-        Tab(
-          child: Text(
-            "新闻",
-            style: TextStyle(
-                fontFamily: "BarlowBold", fontSize: 16.sp, color: Colors.black),
+        SizedBox(
+          width: tabWidth,
+          child: Tab(
+            child: Text("各式新闻", style: blackHeadTextStyle),
           ),
         ),
-        Tab(
-          // height: 12,
-          child: Text(
-            "图片",
-            style: TextStyle(
-                fontFamily: "BarlowBold", fontSize: 16.sp, color: Colors.black),
+        SizedBox(
+          width: tabWidth,
+          child: Tab(
+            child: Text("开源图片", style: blackHeadTextStyle),
           ),
         ),
-        Tab(
-          child: Text(
-            "实用工具",
-            style: TextStyle(
-                fontFamily: "BarlowBold", fontSize: 16.sp, color: Colors.black),
+        SizedBox(
+          width: tabWidth,
+          child: Tab(
+            child: Text("实用工具", style: blackHeadTextStyle),
           ),
         ),
-        Tab(
-          // height: 12,
-          child: Text(
-            "PDF viewer",
-            style: TextStyle(
-                fontFamily: "BarlowBold", fontSize: 16.sp, color: Colors.black),
+        SizedBox(
+          width: tabWidth,
+          child: Tab(
+            child: Text("PDF阅读器", style: blackHeadTextStyle),
           ),
         ),
-        Tab(
-          child: Text(
-            "TXT viewer",
-            style: TextStyle(
-                fontFamily: "BarlowBold", fontSize: 16.sp, color: Colors.black),
+        SizedBox(
+          width: tabWidth,
+          child: Tab(
+            child: Text("内置小说", style: blackHeadTextStyle),
           ),
         ),
       ],
@@ -392,7 +289,7 @@ class _HomeBottomAppBarState extends State<HomeBottomAppBar> {
               icon: Icon(
                 Icons.home,
                 color: _iconHomeColor,
-                size: 20.sp,
+                size: appBarIconButtonSize,
               ),
               onPressed: _onHomeItemPressed,
             ),
@@ -401,7 +298,7 @@ class _HomeBottomAppBarState extends State<HomeBottomAppBar> {
               icon: Icon(
                 Icons.business,
                 color: _iconColor,
-                size: 20.sp,
+                size: appBarIconButtonSize,
               ),
               onPressed: _onItemPressed,
             ),

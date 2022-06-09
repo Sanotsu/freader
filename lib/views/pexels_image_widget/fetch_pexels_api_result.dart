@@ -47,7 +47,9 @@ Future<List<PhotosData>> fetchPexelsApiImageCuratedResult(int page) async {
 Future<List<PhotosData>> fetchPexelsApiImageQueryResult(
     String queryParams) async {
   // 调用者传递条件即可
-  var url = "https://api.pexels.com/v1/search/?$queryParams";
+  // var url = "https://api.pexels.com/v1/search/?$queryParams";
+  // 2022-06-09 默认中文地区
+  var url = "https://api.pexels.com/v1/search/?$queryParams&locale=zh-CN";
 
   final response = await http.get(Uri.parse(url), headers: requestHeaders);
 

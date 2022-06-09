@@ -55,7 +55,7 @@ class _NewsPageState extends State<NewsPage> {
                   width: 60.0.sp,
                   child: Image.asset(siteLogos[index]),
                 ),
-                trailing: Icon(icons[index]),
+                // trailing: Icon(icons[index]),
               ),
             ),
           );

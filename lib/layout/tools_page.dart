@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:freader/views/news_page_demo.dart';
-import 'package:freader/views/readhub_page.dart';
 import 'package:freader/views/tools_category/random_network_photo_screen.dart';
 import 'package:freader/views/tools_category/today_in_history_screen.dart';
 
@@ -111,7 +110,7 @@ _onCardTap(BuildContext context, int index) {
       screen = const NewsPageDemo();
       break;
     default:
-      screen = const ReadhubPage();
+      screen = const NewsPageDemo();
   }
 
   Navigator.of(context).push(

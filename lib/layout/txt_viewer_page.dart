@@ -37,7 +37,13 @@ class _TxtViewerPageState extends State<TxtViewerPage> {
 
   List<SimpleTxtState> txtList = [];
 
+  var txtLoading = false;
+
   loadData() async {
+    setState(() {
+      txtLoading = true;
+    });
+
     // 如果都没有就删除,会出问题?
     // _databaseHelper.deleteDb();
     // 如果db中txtstate不违空，就判断為已有數據了
@@ -92,6 +98,7 @@ class _TxtViewerPageState extends State<TxtViewerPage> {
 
     setState(() {
       txtList = listIdList;
+      txtLoading = false;
     });
   }
 
@@ -103,7 +110,9 @@ class _TxtViewerPageState extends State<TxtViewerPage> {
 
   @override
   Widget build(BuildContext context) {
-    return _buildTxtGriwView(txtList);
+    return txtLoading
+        ? const Center(child: CircularProgressIndicator())
+        : _buildTxtGriwView(txtList);
   }
 
 // 构建txt griw列表

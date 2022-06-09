@@ -43,7 +43,7 @@ class _ReadhubTopicDetailDialogState extends State<ReadhubTopicDetailDialog> {
 // 构建alert dialog 正文content部分
 Widget setupAlertDialoadContainer(ReadhubApiTopicDetailData topicDetail) {
   return Container(
-    height: 300.sp, // 34 + 116 +34 +116 （媒体报道文字+内容+事件追踪文字+内容）
+    height: 310.sp, // 34 + 116 +34 +116 （媒体报道文字+内容+事件追踪文字+内容）
     width: 300.sp, // 好像没法设定宽度？
     decoration: BoxDecoration(
       borderRadius: BorderRadius.circular(15),

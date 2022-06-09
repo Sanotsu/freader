@@ -25,12 +25,12 @@ class _RandomNetworkPhotoScreenState extends State<RandomNetworkPhotoScreen> {
   var networkPhotoUrlList = [
     "https://www.hlapi.cn/api/ecy3", // 随机二次元图片③
     "https://www.hlapi.cn/api/sjmm1", // 随机手机美女图片①
-    // "https://www.hlapi.cn/api/gqbz", // 随机高清风景壁纸
+    "https://www.hlapi.cn/api/gqbz", // 随机高清风景壁纸
     "https://www.hlapi.cn/api/mm2", // 随机美女图片②
     "https:/www.hlapi.cn/api/ecy1", // 随机二次元图片①
-    // "https://www.hlapi.cn/api/mcj", // 随机mc酱动漫图片
-    "https://www.hlapi.cn/api/mjx", // 买家秀
-    // "https://www.hlapi.cn/api/bjt", // 网站随机背景图
+    "https://www.hlapi.cn/api/mcj", // 随机mc酱动漫图片
+    // "https://www.hlapi.cn/api/mjx", // 买家秀
+    "https://www.hlapi.cn/api/bjt", // 网站随机背景图
     "https://www.hlapi.cn/api/mm1", // 随机美女图片①
     "https://www.hlapi.cn/api/sjdm1", // 随机手机动漫图片①
     // "https://www.hlapi.cn/api/gxdt", // 搞笑动态图片

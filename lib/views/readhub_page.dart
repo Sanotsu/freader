@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:freader/utils/global_styles.dart';
 import 'package:freader/views/readhub_category/readhub_typed_news.dart';
 
 class ReadhubPage extends StatefulWidget {
@@ -18,7 +19,7 @@ class _ReadhubPageState extends State<ReadhubPage> {
         // 2022-05-06 后续可参看 lib\_demos\search_on_app_bar.dart 做readhub的新闻查询。
         actions: <Widget>[
           IconButton(
-            iconSize: 20,
+            iconSize: appBarIconButtonSize,
             icon: const Icon(
               Icons.search,
               semanticLabel: 'search', // icon的语义标签。
@@ -33,7 +34,7 @@ class _ReadhubPageState extends State<ReadhubPage> {
           child: Column(
             children: <Widget>[
               Container(
-                height: 20,
+                height: tabContainerHeight,
                 color: Colors.brown, // 用來看位置，不需要的话这个Container可以改为SizedBox
                 child: TabBar(
                   indicator: UnderlineTabIndicator(
@@ -48,25 +49,25 @@ class _ReadhubPageState extends State<ReadhubPage> {
                     Tab(
                       child: Text(
                         "热门话题",
-                        style: TextStyle(fontSize: 10.sp),
+                        style: TextStyle(fontSize: sizeHeadline3),
                       ),
                     ),
                     Tab(
                       child: Text(
                         '科技动态',
-                        style: TextStyle(fontSize: 10.sp),
+                        style: TextStyle(fontSize: sizeHeadline3),
                       ),
                     ),
                     Tab(
                       child: Text(
                         '技术资讯',
-                        style: TextStyle(fontSize: 10.sp),
+                        style: TextStyle(fontSize: sizeHeadline3),
                       ),
                     ),
                     Tab(
                       child: Text(
                         '区块链',
-                        style: TextStyle(fontSize: 10.sp),
+                        style: TextStyle(fontSize: sizeHeadline3),
                       ),
                     ),
                   ],

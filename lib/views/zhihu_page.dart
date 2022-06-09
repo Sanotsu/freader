@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:freader/utils/global_styles.dart';
 
 import 'package:freader/views/zhihu_category/zhihu_daily_news.dart';
 
@@ -33,7 +34,7 @@ class _ZhihuPageState extends State<ZhihuPage> {
           child: Column(
             children: <Widget>[
               Container(
-                height: 20,
+                height: tabContainerHeight,
                 color: Colors.brown, // 用來看位置，不需要的话这个Container可以改为SizedBox
                 child: TabBar(
                   indicator: UnderlineTabIndicator(
@@ -48,13 +49,13 @@ class _ZhihuPageState extends State<ZhihuPage> {
                     Tab(
                       child: Text(
                         "占位资讯",
-                        style: TextStyle(fontSize: 10.sp),
+                        style: TextStyle(fontSize: sizeHeadline3),
                       ),
                     ),
                     Tab(
                       child: Text(
                         "知乎日报",
-                        style: TextStyle(fontSize: 10.sp),
+                        style: TextStyle(fontSize: sizeHeadline3),
                       ),
                     ),
                   ],

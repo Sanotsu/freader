@@ -50,7 +50,7 @@ class _ImagePageState extends State<ImagePage> with TickerProviderStateMixin {
                   width: 60.0.sp,
                   child: Image.asset(siteLogos[index]),
                 ),
-                trailing: Icon(icons[index]),
+                // trailing: Icon(icons[index]),
               ),
             ),
           );
