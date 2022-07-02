@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:freader/views/markdown_viewer/mark.dart';
+// import 'package:freader/views/markdown_viewer/markdown_screen.dart';
 import 'package:freader/views/news_page_demo.dart';
 import 'package:freader/views/tools_category/random_network_photo_screen.dart';
 import 'package:freader/views/tools_category/today_in_history_screen.dart';
@@ -107,7 +109,8 @@ _onCardTap(BuildContext context, int index) {
       screen = const RandomNetworkPhotoScreen();
       break;
     case 2:
-      screen = const NewsPageDemo();
+      // screen = const MarkdownScreen(mdAssetPath: 'assets/md/typescript-handbook-overview.md');
+      screen = const MarkdownPageScreen();
       break;
     default:
       screen = const NewsPageDemo();
