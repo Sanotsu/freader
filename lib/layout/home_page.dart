@@ -1,4 +1,4 @@
-// ignore_for_file: avoid_print
+// ignore_for_file: avoid_print, prefer_typing_uninitialized_variables
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -10,6 +10,7 @@ import 'package:freader/layout/tools_page.dart';
 import 'package:freader/layout/txt_viewer_page.dart';
 import 'package:freader/utils/global_styles.dart';
 import 'package:freader/widgets/hitokoto_sentence.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 
 ///
 /// 2022-04-21
@@ -40,6 +41,41 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  var subscription;
+  String _stateText = ""; //用来显示状态
+
+  @override
+  void initState() {
+    super.initState();
+    subscription = Connectivity()
+        .onConnectivityChanged
+        .listen((ConnectivityResult result) {
+      setState(() {
+        _stateText = result.toString();
+      });
+
+      // if (result == ConnectivityResult.wifi) {
+      //   setState(() {
+      //     _stateText = "当前处于wifi网络";
+      //   });
+      // } else if (result == ConnectivityResult.mobile) {
+      //   setState(() {
+      //     _stateText = "当前处于数据流量网络";
+      //   });
+      // } else if (result == ConnectivityResult.none) {
+      //   setState(() {
+      //     _stateText = "当前无网络连接";
+      //   });
+      // } else {
+      //   setState(() {
+      //     _stateText = "处于其他连接";
+      //   });
+      // }
+    });
+
+    print(_stateText);
+  }
+
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
@@ -61,7 +97,7 @@ class _HomePageState extends State<HomePage> {
           ],
         ),
         // 主页侧边抽屉组件
-        drawer: const HomeDrawer(),
+        drawer: HomeDrawer(networkState: _stateText),
         bottomNavigationBar: const HomeBottomAppBar(),
         // bottomNavigationBar: const HomeBottomNavigationBar(),
         // 漂浮在body上方的按钮，默认右下角(如果要悬浮按钮和下方导航条一起用，HomeBottomAppBar比HomeBottomNavigationBar好)
@@ -170,9 +206,9 @@ _buildAppBar() {
 
 // 主页的左侧抽屉drawer
 class HomeDrawer extends StatelessWidget {
-  const HomeDrawer({
-    Key? key,
-  }) : super(key: key);
+  const HomeDrawer({Key? key, required this.networkState}) : super(key: key);
+
+  final String networkState;
 
   @override
   Widget build(BuildContext context) {
@@ -209,6 +245,28 @@ class HomeDrawer extends StatelessWidget {
                       style: TextStyle(fontWeight: FontWeight.bold),
                     )
                   ],
+                ),
+              ),
+            ),
+            SizedBox(
+              height: 50.sp,
+              child: Center(
+                child: RichText(
+                  text: TextSpan(
+                    text: '当前网络: ',
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: sizeContent2,
+                    ),
+                    children: <TextSpan>[
+                      TextSpan(
+                          text: networkState,
+                          style: TextStyle(
+                            color: Colors.red,
+                            fontSize: sizeContent2,
+                          )),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -273,7 +331,7 @@ class _HomeBottomAppBarState extends State<HomeBottomAppBar> {
       color: Colors.white,
       shape: const CircularNotchedRectangle(), // 底部导航栏打一个圆形的洞
       child: SizedBox(
-        height: 30.sp,
+        height: 40.sp,
         child: Row(
           children: [
             IconButton(

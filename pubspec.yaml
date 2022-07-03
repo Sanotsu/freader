@@ -124,8 +124,11 @@ dependencies:
   flutter_markdown: ^0.6.10+2
   # md 部件（支持toc等，但是渲染什么的有bug）
   markdown_widget: ^1.2.9
+
+  # 上面3.0.4 没有更新,但这里有更新
   # 分组列表
   grouped_list: ^5.1.2
+  connectivity_plus: ^2.3.5
 
 dev_dependencies:
   flutter_test:

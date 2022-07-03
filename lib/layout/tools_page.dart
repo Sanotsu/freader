@@ -33,31 +33,23 @@ class _ToolsPageState extends State<ToolsPage> {
   final bgImages = [
     "images/tools_image/历史上的今天.png",
     "images/tools_image/随机网络图片.png",
-    "images/avatar.png",
-    "images/avatar.png"
-  ];
-
-  // 站点图标
-  final icons = [
-    Icons.newspaper,
-    Icons.newspaper,
-    Icons.newspaper,
-    Icons.newspaper,
+    "images/tools_image/ToBeContinue.png",
+    "images/tools_image/ToBeContinue.png"
   ];
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        SizedBox(
-          height: 50.sp,
-          child: Center(
-            child: Text(
-              "实用工具主页",
-              style: TextStyle(fontSize: 20.sp),
-            ),
-          ),
-        ),
+        // SizedBox(
+        //   height: 50.sp,
+        //   child: Center(
+        //     child: Text(
+        //       "实用工具主页",
+        //       style: TextStyle(fontSize: 20.sp),
+        //     ),
+        //   ),
+        // ),
         Expanded(
           child: GridView.builder(
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(

@@ -60,3 +60,6 @@ app.*.map.json
 
 # md的技术博文文档改动很大,暂时不上传了,之前上传的assets/md就先不管了
 assets/mds
+
+# demo 不上传了，之前的都删除了
+lib/_demos

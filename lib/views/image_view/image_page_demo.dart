@@ -42,7 +42,7 @@ class _ImagePageDemoState extends State<ImagePageDemo> {
   List<Card> _buildGridCards(int count) {
 // 创建List中用到的图片地址字串(List当前索引与10的余数)
     List imageUrlList = List.generate(
-        count, (value) => "images/image_page_demo/demo${value % 10}.jpg");
+        count, (value) => "images/image_page_demo/demo${value % 5}.jpg");
 
     List<Card> cards = List.generate(
       count,
