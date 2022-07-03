@@ -161,9 +161,9 @@ flutter:
     # - assets/jsons/pexels_api_images.json
     - assets/pdfs/
     - assets/txts/
-    - assets/md/
-    - assets/md/javascript/
-    - assets/md/typescript/
+    - assets/mds/
+    - assets/mds/javascript/
+    - assets/mds/typescript/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.

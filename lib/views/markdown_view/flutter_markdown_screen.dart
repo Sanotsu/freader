@@ -22,7 +22,7 @@ class FlutterMarkdownScreen extends StatefulWidget {
 class _FlutterMarkdownScreenState extends State<FlutterMarkdownScreen> {
   @override
   Widget build(BuildContext context) {
-    // 拆取路劲中的文件名称，'assets/md/demo.md' 中取 demo
+    // 拆取路劲中的文件名称，'assets/mds/demo.md' 中取 demo
     var tempArr = widget.mdAssetPath.split("/");
     String title = tempArr[tempArr.length - 1].split(".")[0];
 
@@ -102,7 +102,7 @@ class _FlutterMarkdownScreenState extends State<FlutterMarkdownScreen> {
   }
 
   Future<String> getLocalPexelsApiImageJson() async {
-    String mdString = await rootBundle.loadString('assets/md/demo.md');
+    String mdString = await rootBundle.loadString('assets/mds/demo.md');
     return mdString;
   }
 }

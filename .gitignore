@@ -57,3 +57,6 @@ app.*.map.json
 # assets/pdfs
 # 同上
 # assets/txts
+
+# md的技术博文文档改动很大,暂时不上传了,之前上传的assets/md就先不管了
+assets/mds

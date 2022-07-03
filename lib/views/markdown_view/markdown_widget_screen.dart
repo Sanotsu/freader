@@ -69,7 +69,7 @@ class _MarkdownWidgetScreenState extends State<MarkdownWidgetScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // 拆取路劲中的文件名称，'assets/md/demo.md' 中取 demo
+    // 拆取路劲中的文件名称，'assets/mds/demo.md' 中取 demo
     var tempArr = widget.mdAssetPath.split("/");
     String title = tempArr[tempArr.length - 1].split(".")[0];
     return Scaffold(
@@ -128,8 +128,11 @@ class _MarkdownWidgetScreenState extends State<MarkdownWidgetScreen> {
                             },
                             selectable: true,
                           ),
-
-                          // 无序列表的样式配置（有序列表是olConfig）
+                          // 有序列表的样式配置 实测,必须严格4个空格,且子列表中间没有正文的格式才能正确显示.
+                          olConfig: OlConfig(
+                            textStyle: TextStyle(fontSize: 10.sp),
+                          ),
+                          // 无序列表的样式配置
                           ulConfig: UlConfig(
                             textStyle: TextStyle(fontSize: 10.sp),
                           ),

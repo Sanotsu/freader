@@ -35,7 +35,7 @@ class _MarkdownPageState extends State<MarkdownPage> {
   List<GroupListObject> titleGroupList = [];
 
   // md文件所在asset的路径
-  String mdAssetPath = 'assets/md';
+  String mdAssetPath = 'assets/mds';
 
   /// 获取asset指定文件夹中的文件，读取md文件列表
   getMarkdownFileList() async {
