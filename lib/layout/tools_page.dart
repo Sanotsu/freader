@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:freader/views/markdown_viewer/mark.dart';
-// import 'package:freader/views/markdown_viewer/markdown_screen.dart';
-import 'package:freader/views/news_page_demo.dart';
-import 'package:freader/views/tools_category/random_network_photo_screen.dart';
-import 'package:freader/views/tools_category/today_in_history_screen.dart';
+import 'package:freader/views/news_view/news_page_demo.dart';
+import 'package:freader/views/tools_view/random_network_photo_screen.dart';
+import 'package:freader/views/tools_view/today_in_history_screen.dart';
 
 /// 2022-05-05
 /// 目前支持或计划支持的开源的新闻api，就会放到这个titles中，点击对应的card，跳转到具体网站的页面，查看详情内容
@@ -109,8 +107,7 @@ _onCardTap(BuildContext context, int index) {
       screen = const RandomNetworkPhotoScreen();
       break;
     case 2:
-      // screen = const MarkdownScreen(mdAssetPath: 'assets/md/typescript-handbook-overview.md');
-      screen = const MarkdownPageScreen();
+      screen = const NewsPageDemo();
       break;
     default:
       screen = const NewsPageDemo();

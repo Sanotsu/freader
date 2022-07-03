@@ -5,8 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:freader/common/utils/sqlite_helper.dart';
 import 'package:freader/models/app_embedded/txt_state.dart';
-import 'package:freader/views/txt_viewer/handle_asset_txt_to_db.dart';
-import 'package:freader/views/txt_viewer/txt_screen_pageview.dart';
+import 'package:freader/views/txt_view/handle_asset_txt_to_db.dart';
+import 'package:freader/views/txt_view/txt_screen_pageview.dart';
 
 /// 相较于pdf viewer，这个就简单弄个demo
 /// 2022-05-16 本来，现在不管，每次进来都从新开始，也沒有书签记录

@@ -35,6 +35,65 @@ dependencies:
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
+
+  # 2022-07-02 因为sdk更新到3.0.4，一下包也一并更新到最新,但有些包可能有问题
+  # cupertino_icons: ^1.0.5
+  # # 网络请求
+  # http: ^0.13.4
+  # # 打开url链接
+  # url_launcher: ^6.1.4
+  # # json序列化
+  # json_serializable: ^6.1.6
+  # json_annotation: ^4.5.0
+  # # 布局尺寸分析
+  # flutter_screenutil: ^5.4.0+1
+  # # InheritedWidget的包装器 ，使它们更易于使用和更可重用。
+  # provider: ^6.0.3
+  # # 国际化
+  # intl: ^0.17.0
+  # # 获取设备信息
+  # device_info_plus: ^4.0.0
+  # # 获取flutter包信息
+  # package_info_plus: ^1.4.2
+  # # http client
+  # dio: ^4.0.6
+  # # 查找文件系统上常用位置
+  # path_provider: ^2.0.11
+  # # 显示来自互联网的图像并将它们保存在缓存目录中。
+  # cached_network_image: ^3.2.1
+  # # 跨平台（iOS、Android）API 来请求权限并检查其状态。
+  # permission_handler: ^10.0.0
+  # # 保存图片到相册
+  # image_gallery_saver: "^1.7.1"
+  # # 保存图片到相册
+  # gallery_saver: ^2.3.2
+  # # 提供了一个手势敏感的可缩放小部件
+  # photo_view: ^0.14.0
+  # # 显示浮空提示信息
+  # fluttertoast: ^8.0.9
+  # # 时间格式化
+  # date_format: ^2.0.6
+  # # datetime选择器
+  # flutter_datetime_picker: ^1.5.1
+  # # pdf阅读器
+  # syncfusion_flutter_pdfviewer: ^20.2.36-beta
+  # # 文件选择器
+  # file_picker: ^4.6.1
+  # # sqlite
+  # sqflite: ^2.0.2+1
+  # # 基于字符串的路径操作库。
+  # path: ^1.8.1 # 2022-07-02 如果使用1.8.2,flutter_test会有问题
+  # # uuid生成器
+  # uuid: ^3.0.6
+  # # PageViews 的可定制进度指标
+  # page_view_indicators: ^2.0.0
+  # # flutter_markdown: 0.6.10 #0.6.10以上版本，需要flutter3.0以上
+  # # Flutter 的 Markdown 渲染器（flutter官方的，但是功能很少，没有toc）
+  # flutter_markdown: ^0.6.10+2
+  # # md 部件（支持toc等，但是渲染什么的有bug）
+  # markdown_widget: ^1.2.9
+
+  # 2.10.5 时的依赖版本
   cupertino_icons: ^1.0.2
   http: ^0.13.4
   url_launcher: ^6.0.20
@@ -42,40 +101,31 @@ dependencies:
   json_annotation: ^4.5.0
   flutter_screenutil: ^5.4.0+1
   provider: ^6.0.2
-  # window_size:
-  #   git:
-  #     url: https://github.com/google/flutter-desktop-embedding.git
-  #     path: plugins/window_size
   intl: ^0.17.0
   device_info_plus: ^3.2.3
   package_info_plus: ^1.4.2
   dio: ^4.0.6
-  webview_flutter: ^3.0.2
   path_provider: ^2.0.9
-  timeline_tile: ^2.0.0
-  shared_preferences: ^2.0.13
   cached_network_image: ^3.2.0
-  search_page: ^2.0.0+1
-  image_downloader: ^0.31.0
   permission_handler: ^9.2.0
   image_gallery_saver: "^1.7.1"
   gallery_saver: ^2.3.2
   fluttertoast: ^8.0.9
   date_format: ^2.0.6
   flutter_datetime_picker: ^1.5.1
-  flutter_pdfview: ^1.2.2
   syncfusion_flutter_pdfviewer: ^20.1.52-beta
   file_picker: 4.5.1
   sqflite: ^2.0.2+1
   path: ^1.8.0
-  external_path: ^1.0.1
-  loop_page_view: ^1.1.1
   uuid: ^3.0.6
   page_view_indicators: ^2.0.0
   photo_view: ^0.14.0
-  flutter_easyloading: ^3.0.5
-  # flutter_markdown: 0.6.10 #0.6.10以上版本，需要flutter3.0以上
-  markdown_widget: any
+  # Flutter 的 Markdown 渲染器（flutter官方的，但是功能很少，没有toc）
+  flutter_markdown: ^0.6.10+2
+  # md 部件（支持toc等，但是渲染什么的有bug）
+  markdown_widget: ^1.2.9
+  # 分组列表
+  grouped_list: ^5.1.2
 
 dev_dependencies:
   flutter_test:
@@ -108,10 +158,12 @@ flutter:
     - images/tools_image/
     - assets/
     - assets/jsons/
+    # - assets/jsons/pexels_api_images.json
     - assets/pdfs/
     - assets/txts/
     - assets/md/
-    # - assets/jsons/pexels_api_images.json
+    - assets/md/javascript/
+    - assets/md/typescript/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.

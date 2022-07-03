@@ -10,7 +10,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:freader/common/utils/sqlite_helper.dart';
 import 'package:freader/common/utils/sqlite_sql_statements.dart';
 import 'package:freader/models/app_embedded/pdf_state.dart';
-import 'package:freader/views/pdf_viewer/pdf_screen.dart';
+import 'package:freader/views/pdf_view/pdf_screen.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:path/path.dart' as p;

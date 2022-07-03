@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:freader/layout/image_page.dart';
+import 'package:freader/layout/markdown_page.dart';
 import 'package:freader/layout/news_page.dart';
 import 'package:freader/layout/pdf_viewer_page.dart';
 import 'package:freader/layout/tools_page.dart';
@@ -39,27 +40,10 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
-
-    print("_counter is $_counter");
-  }
-
   @override
   Widget build(BuildContext context) {
-    print(_counter);
-
     return DefaultTabController(
-      length: 5,
+      length: 6,
       child: Scaffold(
         // appBar: PreferredSize(
         //     preferredSize: Size.fromHeight(0.1.sh), // here the desired height
@@ -69,6 +53,7 @@ class _HomePageState extends State<HomePage> {
         body: const TabBarView(
           children: [
             NewsPage(),
+            MarkdownPage(),
             ImagePage(),
             ToolsPage(),
             PdfViewerPage(),
@@ -85,7 +70,7 @@ class _HomePageState extends State<HomePage> {
           width: 30.0.sp,
           child: FittedBox(
             child: FloatingActionButton(
-              onPressed: _incrementCounter,
+              onPressed: () => {},
               tooltip: 'Increment',
               child: Icon(
                 Icons.add,
@@ -146,6 +131,12 @@ _buildAppBar() {
           width: tabWidth,
           child: Tab(
             child: Text("各式新闻", style: blackHeadTextStyle),
+          ),
+        ),
+        SizedBox(
+          width: tabWidth,
+          child: Tab(
+            child: Text("科技博文", style: blackHeadTextStyle),
           ),
         ),
         SizedBox(

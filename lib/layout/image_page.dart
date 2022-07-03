@@ -2,8 +2,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:freader/views/image_page_demo.dart';
-import 'package:freader/views/pexels_image_page.dart';
+import 'package:freader/views/image_view/image_page_demo.dart';
+import 'package:freader/views/image_view/pexels_category/pexels_image_page.dart';
 
 class ImagePage extends StatefulWidget {
   const ImagePage({Key? key}) : super(key: key);

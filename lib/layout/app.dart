@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:freader/layout/home_page.dart';
 
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -42,7 +41,6 @@ class FreaderApp extends StatelessWidget {
             primarySwatch: Colors.blue,
           ),
           home: const HomePage(title: 'Flutter Demo Home Page'),
-          builder: EasyLoading.init(),
         );
       },
     );

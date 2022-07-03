@@ -18,6 +18,12 @@ A new Flutter project.
 ├─routes        存放所有路由页面类
 ├─states        保存APP中需要跨组件共享的状态类
 ├─views         页面
+│  ├─image_view       开源图片tab        
+│  ├─markdown_view    科技博文tab
+│  ├─news_view        各式新闻tab
+│  ├─pdf_view         pdf阅读器tab
+│  ├─tools_view       实用工具tab
+│  └─txt_view         内置小说tab  
 └─widgets       APP内封装的一些Widget组件都在该目录下
 ```
 
