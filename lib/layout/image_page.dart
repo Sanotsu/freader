@@ -1,7 +1,9 @@
-// ignore_for_file: deprecated_member_use, avoid_print
+// ignore_for_file: deprecated_member_use, avoid_print, prefer_typing_uninitialized_variables
 
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:freader/utils/global_styles.dart';
 import 'package:freader/views/image_view/image_page_demo.dart';
 import 'package:freader/views/image_view/pexels_category/pexels_image_page.dart';
 
@@ -34,6 +36,34 @@ class _ImagePageState extends State<ImagePage> with TickerProviderStateMixin {
   // 分类图标
   final icons = [Icons.image, Icons.image, Icons.image, Icons.image];
 
+  var subscription;
+  //用来显示网络状态的字符串
+  String networkStateString = "";
+
+// 获取当前连接的网络
+  getState() async {
+    var connectivityResult = await (Connectivity().checkConnectivity());
+    setState(() {
+      networkStateString = connectivityResult.toString();
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    // 初始获取网络连接种类
+    getState();
+
+    // 初始就监听网络连接变化，如果进入本页面，使用的不是wifi，才方便弹窗提醒。
+    subscription = Connectivity()
+        .onConnectivityChanged
+        .listen((ConnectivityResult result) {
+      setState(() {
+        networkStateString = result.toString();
+      });
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return ListView.separated(
@@ -41,7 +71,7 @@ class _ImagePageState extends State<ImagePage> with TickerProviderStateMixin {
         itemCount: titles.length,
         itemBuilder: (context, index) {
           return GestureDetector(
-            onTap: () => _onCardTap(context, index),
+            onTap: () => _onCardTap(context, index, networkStateString),
             child: Card(
               child: ListTile(
                 title: Text(titles[index]),
@@ -59,16 +89,23 @@ class _ImagePageState extends State<ImagePage> with TickerProviderStateMixin {
 }
 
 /// 点击卡片，进行页面跳转
-_onCardTap(BuildContext context, int index) {
+_onCardTap(BuildContext context, int index, String networkStateString) {
   Widget screen;
 
   switch (index) {
     case 0:
       screen = const ImagePageDemo();
       break;
-    // 如果是点击第二个，为跳转到pexels页面，先弹窗提醒，用户确定，才跳转；取消则不跳转。
+    // 如果是点击第二个，为跳转到pexels页面，
+    //    如果网络不是wifi环境，先弹窗提醒，用户确定，才跳转；取消则不跳转。
+    //    如果是wifi环境，直接跳转，不弹窗。
     case 1:
-      return showConfirmDialog(context, const PexelsImagePage());
+      if (networkStateString != "ConnectivityResult.wifi") {
+        return showConfirmDialog(context, const PexelsImagePage());
+      } else {
+        screen = const PexelsImagePage();
+        break;
+      }
     case 2:
       screen = const ImagePageDemo();
       break;
@@ -97,18 +134,18 @@ void showConfirmDialog(context, routePage) {
       return AlertDialog(
         title: Text(
           '温馨提醒',
-          style: TextStyle(fontSize: 16.sp),
+          style: TextStyle(fontSize: sizeDialogTitle),
         ),
         content: SingleChildScrollView(
           child: ListBody(
             children: <Widget>[
               Text(
-                '浏览pexels的图片会消耗大量流量,',
-                style: TextStyle(fontSize: 14.sp),
+                '当前处于数据流量网络,',
+                style: TextStyle(fontSize: sizeDialogContent),
               ),
               Text(
-                '即便连入wifi也是如此,确定继续浏览图片资源?',
-                style: TextStyle(fontSize: 14.sp),
+                '浏览pexels的图片会消耗大量流量,确定继续浏览图片资源?',
+                style: TextStyle(fontSize: sizeDialogContent),
               ),
             ],
           ),
@@ -116,14 +153,24 @@ void showConfirmDialog(context, routePage) {
         actions: <Widget>[
           // 点击取消，保持在当前页面
           TextButton(
-            child: const Text('取消'),
+            child: Text(
+              '取消',
+              style: TextStyle(
+                fontSize: sizeDialogButton,
+              ),
+            ),
             onPressed: () {
               Navigator.pop(ctx);
             },
           ),
           // 点击确认，则跳转到新的页面
           TextButton(
-            child: const Text('确定'),
+            child: Text(
+              '确定',
+              style: TextStyle(
+                fontSize: sizeDialogButton,
+              ),
+            ),
             onPressed: () {
               // 跳转新页面之前，先关闭dialog
               Navigator.of(ctx).pop();

@@ -34,3 +34,8 @@ var sizeContent1 = 16.sp;
 var sizeContent2 = 14.sp;
 var sizeContent3 = 12.sp;
 var sizeContent4 = 10.sp;
+
+// 定义dialog字体
+var sizeDialogTitle = 16.sp;
+var sizeDialogContent = 14.sp;
+var sizeDialogButton = 14.sp;

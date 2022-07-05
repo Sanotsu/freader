@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:freader/models/pexels_api_images_result.dart';
+import 'package:freader/utils/global_styles.dart';
 import 'package:freader/views/image_view/pexels_category/pexels_image_widget/fetch_pexels_api_result.dart';
 import 'package:freader/views/image_view/pexels_category/pexels_image_widget/pexels_image_detail_page.dart';
 
@@ -185,9 +186,10 @@ class _PexelsImagePageState extends State<PexelsImagePage> {
     Widget _buildQueryRow() {
       return Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           SizedBox(
-            height: 20.sp,
+            height: 40.sp,
             width: 0.7.sw,
             child: TextField(
               controller: _queryTextController, // 控制器
@@ -195,8 +197,11 @@ class _PexelsImagePageState extends State<PexelsImagePage> {
               decoration: InputDecoration(
                 prefixIcon: Icon(
                   Icons.search,
-                  size: 14.sp,
+                  size: bottomIconButtonSize1,
                 ),
+              ),
+              style: TextStyle(
+                fontSize: sizeContent2,
               ),
             ),
           ),
@@ -204,11 +209,11 @@ class _PexelsImagePageState extends State<PexelsImagePage> {
             padding: EdgeInsets.all(5.0.sp),
             child: SizedBox(
               width: 0.2.sw,
-              height: 20.sp,
+              height: 30.sp,
               child: ElevatedButton(
                 child: Text(
                   "查询",
-                  style: TextStyle(fontSize: 10.sp),
+                  style: TextStyle(fontSize: sizeContent3),
                 ),
                 onPressed: () {
                   print("_queryTextController ${_queryTextController.text}");
