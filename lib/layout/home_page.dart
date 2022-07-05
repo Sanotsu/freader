@@ -172,7 +172,7 @@ _buildAppBar() {
         SizedBox(
           width: tabWidth,
           child: Tab(
-            child: Text("科技博文", style: blackHeadTextStyle),
+            child: Text("技术文章", style: blackHeadTextStyle),
           ),
         ),
         SizedBox(

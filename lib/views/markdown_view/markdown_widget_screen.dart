@@ -6,6 +6,7 @@ import 'package:markdown_widget/markdown_widget.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:markdown_widget/config/highlight_themes.dart' as theme;
 import 'package:url_launcher/url_launcher.dart';
+import 'dart:convert';
 
 /// （在用）2022-07-02 markdown_widget是第三方的，有toc，但在drawer点击切换时，老报错
 /// 滑动正文的时候也老是报错：
@@ -72,6 +73,12 @@ class _MarkdownWidgetScreenState extends State<MarkdownWidgetScreen> {
     // 拆取路劲中的文件名称，'assets/mds/demo.md' 中取 demo
     var tempArr = widget.mdAssetPath.split("/");
     String title = tempArr[tempArr.length - 1].split(".")[0];
+
+// 有些文章有带图片，需要相对路径
+    List tArr = json.decode(json.encode(tempArr));
+    tArr.removeLast();
+    String imagesPath = tArr.join("/");
+
     return Scaffold(
       appBar: AppBar(
         title: Text(title),
@@ -103,57 +110,63 @@ class _MarkdownWidgetScreenState extends State<MarkdownWidgetScreen> {
                       data: snapshot.data,
                       controller: tocController,
                       styleConfig: StyleConfig(
-                          // 正文的样式配置
-                          pConfig: PConfig(
-                            textStyle: TextStyle(fontSize: 10.sp),
-                            linkStyle: TextStyle(
-                              fontSize: 10.sp,
-                              color: Colors.blue,
-                            ),
-                            onLinkTap: (url) async {
-                              var tempUrl = Uri.parse(url ?? "");
-                              if (await canLaunchUrl(tempUrl)) {
-                                await launchUrl(
-                                  tempUrl,
-                                  mode: LaunchMode.inAppWebView,
-                                  webViewConfiguration:
-                                      const WebViewConfiguration(
-                                    enableJavaScript: true,
-                                    enableDomStorage: true,
-                                  ),
-                                );
-                              } else {
-                                throw 'Could not launch $url';
-                              }
-                            },
-                            selectable: true,
+                        // 正文的样式配置
+                        pConfig: PConfig(
+                          textStyle: TextStyle(fontSize: 10.sp),
+                          linkStyle: TextStyle(
+                            fontSize: 10.sp,
+                            color: Colors.blue,
                           ),
-                          // 有序列表的样式配置 实测,必须严格4个空格,且子列表中间没有正文的格式才能正确显示.
-                          olConfig: OlConfig(
-                            textStyle: TextStyle(fontSize: 10.sp),
-                          ),
-                          // 无序列表的样式配置
-                          ulConfig: UlConfig(
-                            textStyle: TextStyle(fontSize: 10.sp),
-                          ),
-                          // 各级标题的样式配置
-                          titleConfig: TitleConfig(
-                            h1: TextStyle(fontSize: 16.sp),
-                            h2: TextStyle(fontSize: 14.sp),
-                            h3: TextStyle(fontSize: 12.sp),
-                            h4: TextStyle(fontSize: 10.sp),
-                            h5: TextStyle(fontSize: 10.sp),
-                          ),
-                          // 代码的样式配置（实测必须```定行，没有缩进才能识别）
-                          preConfig: PreConfig(
-                            language: 'ts',
-                            textStyle: TextStyle(fontSize: 10.sp),
-                            theme: theme.a11yLightTheme,
-                          ),
-                          // 使用`code`包装的代码的样式设置
-                          codeConfig: CodeConfig(
-                            codeStyle: TextStyle(fontSize: 10.sp),
-                          )),
+                          onLinkTap: (url) async {
+                            var tempUrl = Uri.parse(url ?? "");
+                            if (await canLaunchUrl(tempUrl)) {
+                              await launchUrl(
+                                tempUrl,
+                                mode: LaunchMode.inAppWebView,
+                                webViewConfiguration:
+                                    const WebViewConfiguration(
+                                  enableJavaScript: true,
+                                  enableDomStorage: true,
+                                ),
+                              );
+                            } else {
+                              throw 'Could not launch $url';
+                            }
+                          },
+                          selectable: true,
+                        ),
+                        // 有序列表的样式配置 实测,必须严格4个空格,且子列表中间没有正文的格式才能正确显示.
+                        olConfig: OlConfig(
+                          textStyle: TextStyle(fontSize: 10.sp),
+                        ),
+                        // 无序列表的样式配置
+                        ulConfig: UlConfig(
+                          textStyle: TextStyle(fontSize: 10.sp),
+                        ),
+                        // 各级标题的样式配置
+                        titleConfig: TitleConfig(
+                          h1: TextStyle(fontSize: 16.sp),
+                          h2: TextStyle(fontSize: 14.sp),
+                          h3: TextStyle(fontSize: 12.sp),
+                          h4: TextStyle(fontSize: 10.sp),
+                          h5: TextStyle(fontSize: 10.sp),
+                        ),
+                        // 代码的样式配置（实测必须```定行，没有缩进才能识别）
+                        preConfig: PreConfig(
+                          language: 'ts',
+                          textStyle: TextStyle(fontSize: 10.sp),
+                          theme: theme.a11yLightTheme,
+                        ),
+                        // 使用`code`包装的代码的样式设置
+                        codeConfig: CodeConfig(
+                          codeStyle: TextStyle(fontSize: 10.sp),
+                        ),
+                        imgBuilder: (String url, attributes) {
+                          // print("============");
+                          // print("$imagesPath/$url");
+                          return Image.asset("$imagesPath/$url");
+                        },
+                      ),
                     );
                   } else {
                     return const Center(

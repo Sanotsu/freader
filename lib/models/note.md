@@ -12,6 +12,9 @@
 `app_embedded`文件夹下的 model 是 app 内部逻辑的一些类，就不是那些 api 返回的 json 转化的 model 了，  
 一般是内部持久化逻辑的东西。例如`pdf viewer`存放所有的 pdf 文件列表，及其对应阅读记录？
 
+2022-07-04 
+
+单独直接转为class的[JSON to Dart null safety](https://www.webinovers.com/web-tools/json-to-dart-convertor)
 ---
 
 ## readhub 相关 model 和 url 说明
@@ -133,9 +136,9 @@ readhub api 几个分类返回的结构还不一致，之前并未注意。
 ### 请求地址
 
 | 地址                         | 协议  | 方法 | QPS | 限制 | 线路 |
-| ---------------------------- | ----- | ---- | --- | ---- | ---- |
-| v1.hitokoto.cn               | HTTPS | Any  | 3.5 | 全球 |
-| international.v1.hitokoto.cn | HTTPS | Any  | 10  | 国外 |
+|------------------------------|-------|------|-----|------|------|
+| v1.hitokoto.cn               | HTTPS | Any  | 3.5 | 全球 |      |
+| international.v1.hitokoto.cn | HTTPS | Any  | 10  | 国外 |      |
 
 常用 url 示例 : `https://v1.hitokoto.cn/?c=k&c=i&c=d`
 

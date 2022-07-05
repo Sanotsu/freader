@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:freader/views/news_view/news_page_demo.dart';
 import 'package:freader/views/news_view/readhub_category/readhub_page.dart';
+import 'package:freader/views/news_view/sina_roll_news_category/sina_roll_news_page.dart';
 import 'package:freader/views/news_view/zhihu_category/zhihu_page.dart';
 
 /// 2022-05-05
@@ -16,19 +17,19 @@ class NewsPage extends StatefulWidget {
 
 class _NewsPageState extends State<NewsPage> {
   // 新闻站点
-  final titles = ["Readhub", "知乎日报", "NewsData", "So on"];
+  final titles = ["Readhub", "知乎日报", "新浪滚动新闻", "NewsData"];
   // 站点简述
   final subtitles = [
     "每天三分钟的科技新闻聚合阅读.",
     "每天三次，每次七分钟.",
-    "Here is list 2 subtitle",
+    "新浪实时热点新闻",
     "Here is list 3 subtitle"
   ];
 
   final siteLogos = [
     "images/site_logos/readhub_logo.png",
     "images/site_logos/zhihu_daily_logo.png",
-    "images/avatar.png",
+    "images/site_logos/sina_news_logo.png",
     "images/avatar.png"
   ];
   // 站点图标
@@ -73,7 +74,7 @@ _onCardTap(BuildContext context, int index) {
       screen = const ZhihuPage();
       break;
     case 2:
-      screen = const NewsPageDemo();
+      screen = const SinaRollNewsPage();
       break;
     default:
       screen = const NewsPageDemo();
