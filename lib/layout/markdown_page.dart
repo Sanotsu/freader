@@ -53,6 +53,14 @@ class _MarkdownPageState extends State<MarkdownPage> {
 
     for (String e in mdList) {
       var tempArr = e.split("/");
+      print(tempArr.length);
+
+      // 2022-07-05 理论上，md的文章在 assets/mds/<类别>/xxx.md，也就是4层，
+      // 所以大于4层的应该是文章的附件，例如图片等，就不显示了。
+      // 可能有直接放在最外面的文章，就不限制等于4了。
+      if (tempArr.length > 4) {
+        continue;
+      }
       tempGroupList.add(
         GroupListObject(
           // 路径中文是转码后的，所以要转码回来才能看懂是什么

@@ -54,7 +54,9 @@ class _NewsPageState extends State<NewsPage> {
                 subtitle: Text(subtitles[index]),
                 leading: SizedBox(
                   width: 60.0.sp,
-                  child: Image.asset(siteLogos[index]),
+                  child: Center(
+                    child: Image.asset(siteLogos[index]),
+                  ),
                 ),
                 // trailing: Icon(icons[index]),
               ),
