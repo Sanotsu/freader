@@ -85,7 +85,7 @@ class _HomePageState extends State<HomePage> {
         //     preferredSize: Size.fromHeight(0.1.sh), // here the desired height
         //     child: const HomeAppBar()),
         // 2022-05-14 使用默认样式大小
-        appBar: _buildAppBar(),
+        appBar: _buildAppBar(_stateText),
         body: const TabBarView(
           children: [
             NewsPage(),
@@ -98,7 +98,7 @@ class _HomePageState extends State<HomePage> {
         ),
         // 主页侧边抽屉组件
         drawer: HomeDrawer(networkState: _stateText),
-        bottomNavigationBar: const HomeBottomAppBar(),
+        bottomNavigationBar: HomeBottomAppBar(networkState: _stateText),
         // bottomNavigationBar: const HomeBottomNavigationBar(),
         // 漂浮在body上方的按钮，默认右下角(如果要悬浮按钮和下方导航条一起用，HomeBottomAppBar比HomeBottomNavigationBar好)
         floatingActionButton: SizedBox(
@@ -126,10 +126,12 @@ class _HomePageState extends State<HomePage> {
 
 /// 2022-5-14 主页的appBar
 /// 使用默认样式
-_buildAppBar() {
+_buildAppBar(String networkState) {
   return AppBar(
     title: Text("Let's freader", style: appBarTextStyle),
     actions: <Widget>[
+      // 当前网络连接方式图标（数据流量、wifi、其他无网）
+      _genNetworkStateIcon(networkState),
       IconButton(
         iconSize: appBarIconButtonSize,
         icon: const Icon(
@@ -296,8 +298,11 @@ class HomeDrawer extends StatelessWidget {
 // BottomAppBar
 // BottomAppBar:一个通常与Scaffold.bottomNavigationBar一起使用的容器，
 // 可以沿着顶部有一个缺口，为一个重叠的FloatingActionButton留出空间。
+// ignore: must_be_immutable
 class HomeBottomAppBar extends StatefulWidget {
-  const HomeBottomAppBar({Key? key}) : super(key: key);
+  HomeBottomAppBar({Key? key, this.networkState}) : super(key: key);
+
+  String? networkState = "";
 
   @override
   State<HomeBottomAppBar> createState() => _HomeBottomAppBarState();
@@ -326,6 +331,12 @@ class _HomeBottomAppBarState extends State<HomeBottomAppBar> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    print(widget.networkState);
+  }
+
+  @override
   Widget build(BuildContext context) {
     return BottomAppBar(
       color: Colors.white,
@@ -342,7 +353,9 @@ class _HomeBottomAppBarState extends State<HomeBottomAppBar> {
               ),
               onPressed: _onHomeItemPressed,
             ),
-            const SizedBox(), //中间位置空出
+            // const SizedBox(), //中间位置空出
+            // 暂时选个位置显示连接网络图标
+            _genNetworkStateIcon(widget.networkState ?? ""),
             IconButton(
               icon: Icon(
                 Icons.business,
@@ -355,6 +368,29 @@ class _HomeBottomAppBarState extends State<HomeBottomAppBar> {
           mainAxisAlignment: MainAxisAlignment.spaceAround, //均分底部导航栏横向空间
         ),
       ),
+    );
+  }
+}
+
+// 显示网络状态的图标
+Widget _genNetworkStateIcon(String networkState) {
+  if (networkState == "ConnectivityResult.wifi") {
+    return Icon(
+      Icons.network_wifi,
+      color: Colors.green,
+      size: appBarIconButtonSize,
+    );
+  } else if (networkState == "ConnectivityResult.mobile") {
+    return Icon(
+      Icons.network_cell,
+      color: Colors.orange,
+      size: appBarIconButtonSize,
+    );
+  } else {
+    return Icon(
+      Icons.network_locked,
+      color: Colors.red,
+      size: appBarIconButtonSize,
     );
   }
 }
