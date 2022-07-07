@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:freader/views/news_view/news_page_demo.dart';
 import 'package:freader/views/tools_view/random_network_photo_screen.dart';
 import 'package:freader/views/tools_view/today_in_history_screen.dart';
+import 'package:freader/views/tools_view/multilingual_translation_screen.dart';
 
 /// 2022-05-05
 /// 目前支持或计划支持的开源的新闻api，就会放到这个titles中，点击对应的card，跳转到具体网站的页面，查看详情内容
@@ -33,7 +34,7 @@ class _ToolsPageState extends State<ToolsPage> {
   final bgImages = [
     "images/tools_image/历史上的今天.png",
     "images/tools_image/随机网络图片.png",
-    "images/tools_image/ToBeContinue.png",
+    "images/tools_image/多国语言翻译.png",
     "images/tools_image/ToBeContinue.png"
   ];
 
@@ -99,7 +100,7 @@ _onCardTap(BuildContext context, int index) {
       screen = const RandomNetworkPhotoScreen();
       break;
     case 2:
-      screen = const NewsPageDemo();
+      screen = const MultilingualTranslationScreen();
       break;
     default:
       screen = const NewsPageDemo();
