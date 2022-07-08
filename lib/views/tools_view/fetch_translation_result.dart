@@ -2,7 +2,13 @@
 
 import 'dart:async';
 import 'dart:convert';
+import 'package:convert/convert.dart';
 import 'package:dio/dio.dart';
+import 'package:crypto/crypto.dart';
+import 'package:freader/common/personal/constants.dart';
+import 'package:freader/models/baidu_fanyi_result.dart';
+import 'package:freader/utils/constant_functions.dart';
+import 'dart:math';
 
 import 'package:http/http.dart' as http;
 
@@ -46,6 +52,67 @@ Future<Map<String, dynamic>> fetchLibreTranslateResult(
     // If the server did not return a 200 OK response,
     // then throw an exception.
     throw Exception('Failed to load data from $url');
+  }
+}
+
+// 获取baidu翻译的结果
+Future<BaiduFanyiResult> fetchBaiduTranslateResult(
+  String text,
+  String source,
+  String target,
+) async {
+  String commonUrl = "https://fanyi-api.baidu.com/api/trans/vip/translate";
+
+  /// 1 生成签名
+  /// appid + q + salt + 密钥 的顺序拼接得到字符串 1。
+  /// 对字符串 1 做 MD5 ，得到 32 位小写的 sign。
+  String salt = (Random().nextDouble() * 1024 * 1024).floor().toString();
+
+  String temp = GlobalConstants.baiduFanyiApiAppId +
+      text +
+      salt +
+      GlobalConstants.baiduFanyiApiSecretKey;
+
+  String sign = hex.encode(md5.convert(utf8.encode(temp)).bytes);
+
+  /// 2 构建参数
+  // var body = {
+  //   "q": text,
+  //   "from": source,
+  //   "to": target,
+  //   "appid": GlobalConstants.baiduFanyiApiAppId,
+  //   "salt": salt,
+  //   "sign": sign
+  // };
+
+  // cusPrintAll(body.toString());
+
+  // var headers = {"Content-Type": "application/x-www-form-urlencoded"};
+
+  /// 3 发起请求，处理返回值
+  // final response = await http.post(
+  //   Uri.parse(url),
+  //   body: jsonEncode(body),
+  //   headers: headers,
+  // );
+
+  /// 2022-07-08 文档说可以用post，但用post会报错：52003 未授权的用户。
+  /// 但改为get请求就没问题了，真奇怪
+  ///
+  var finalUrl = commonUrl +
+      "?q=$text&from=$source&to=zh&appid=${GlobalConstants.baiduFanyiApiAppId}&salt=$salt&sign=$sign";
+  final response = await http.get(Uri.parse(finalUrl));
+
+  cusPrintAll(finalUrl);
+
+  if (response.statusCode == 200) {
+    var resp = jsonDecode(response.body);
+
+    print(resp);
+
+    return BaiduFanyiResult.fromJson(jsonDecode(response.body));
+  } else {
+    throw Exception('Failed to load data from $commonUrl');
   }
 }
 

@@ -130,6 +130,8 @@ dependencies:
   grouped_list: ^5.1.2
   # 获取网络连接信息等
   connectivity_plus: ^2.3.5
+  # 加密库
+  crypto: ^3.0.2
 
 dev_dependencies:
   flutter_test:
