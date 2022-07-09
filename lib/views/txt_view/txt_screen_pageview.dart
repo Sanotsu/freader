@@ -472,11 +472,12 @@ class _TxtScreenPageViewState extends State<TxtScreenPageView> {
                 itemCount: txtChapterList.length,
                 itemExtent: 50.0.sp, //强制高度
                 itemBuilder: (BuildContext context, int index) {
+                  // 2022-07-08 不是四大名著的话，章节标题不是有两句的
                   var tempArr = (txtChapterList[index].chapterName).split(" ");
 
                   return ListTile(
                     title: Text(
-                      "${tempArr[0]}\n${tempArr[1]} ${tempArr[2]}",
+                      "${tempArr[0]}\n${tempArr[1]} ${tempArr.length > 2 ? tempArr[2] : ''}",
                       style: TextStyle(
                         color:
                             currentChapterId == txtChapterList[index].chapterId

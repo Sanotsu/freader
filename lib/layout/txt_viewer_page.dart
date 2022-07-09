@@ -50,12 +50,15 @@ class _TxtViewerPageState extends State<TxtViewerPage> {
     var tempList = await _databaseHelper.readTxtStateList();
 
     // 其实应该大于120*3+100+1個引子的数量（461）就可以判断為重复倒入了
-    if (tempList.isEmpty || tempList.length > 461) {
+    // 章节总计
+    var chapterTotal = 120 + 120 + 121 + 100 + 9;
+    if (tempList.isEmpty || tempList.length > chapterTotal) {
       _databaseHelper.deleteAllTxtState();
       await handleAssetTxt2Db("红楼梦");
       await handleAssetTxt2Db("三国演义");
       await handleAssetTxt2Db("水浒传");
       await handleAssetTxt2Db("西游记");
+      await handleAssetTxt2Db("阿Q正传");
     } else {
       print("数据都已经存在数据库了,全db章节数量: ${tempList.length}");
 

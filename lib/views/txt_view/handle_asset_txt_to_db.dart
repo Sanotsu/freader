@@ -11,6 +11,20 @@ import 'package:uuid/uuid.dart';
 /// 后续有时间再搞
 
 handleAssetTxt2Db(fileName) async {
+  // 小说章节行筛选使用的正则规则
+  // var regRule = RegExp(
+  //   r'[第].[回][\s]|[第]..[回][\s]|[第]...[回][\s]|[第]....[回][\s]|[第].....[回][\s]',
+  // );
+
+  /// 正则
+  /// .       （小数点）默认匹配除换行符之外的任何单个字符。
+  /// +       （加号）匹配前面一个表达式 1 次或者多次。等价于 {1,}。
+  /// \s      匹配一个空白字符，包括空格、制表符、换页符和换行符。
+  /// [xyz]   一个字符集合。匹配方括号中的任意字符，包括转义序列。
+  ///  终上，匹配 “第XXXX章/回/篇” 这样的标题
+
+  var regRule = RegExp(r'[第].+[回章篇][\s]');
+
   var uuid = const Uuid();
   // 加载txt文件
   String data = await rootBundle.loadString('assets/txts/$fileName.txt');
@@ -34,8 +48,7 @@ handleAssetTxt2Db(fileName) async {
 
     // 如果是章节标题行
     // 不会正则，将就用吧(匹配【第x回 】，x為1，2，3,4,5個字，回后面有个空个)
-    if (line.contains(RegExp(
-        r'[第].[回][\s]|[第]..[回][\s]|[第]...[回][\s]|[第]....[回][\s]|[第].....[回][\s]'))) {
+    if (line.contains(regRule)) {
       /// 如果该标题和内容不为空
       if (chapterName != "" && content != "") {
         // 章节内容存入db

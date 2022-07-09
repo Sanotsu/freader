@@ -90,8 +90,8 @@ class _HomePageState extends State<HomePage> {
           children: [
             NewsPage(),
             MarkdownPage(),
-            ImagePage(),
             ToolsPage(),
+            ImagePage(),
             PdfViewerPage(),
             TxtViewerPage(),
           ],
@@ -180,13 +180,13 @@ _buildAppBar(String networkState) {
         SizedBox(
           width: tabWidth,
           child: Tab(
-            child: Text("开源图片", style: blackHeadTextStyle),
+            child: Text("实用工具", style: blackHeadTextStyle),
           ),
         ),
         SizedBox(
           width: tabWidth,
           child: Tab(
-            child: Text("实用工具", style: blackHeadTextStyle),
+            child: Text("开源图片", style: blackHeadTextStyle),
           ),
         ),
         SizedBox(
