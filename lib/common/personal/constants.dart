@@ -4,4 +4,8 @@ class GlobalConstants {
 
   static String baiduFanyiApiAppId = "20220708001267549";
   static String baiduFanyiApiSecretKey = "JXwJEoYMwNEmFUidryW0";
+
+  /// 记录登入账号、状态的字符串key
+  static String loginState = "loginState";
+  static String loginAccount = "loginAccount";
 }

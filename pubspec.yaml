@@ -132,6 +132,10 @@ dependencies:
   connectivity_plus: ^2.3.5
   # 加密库
   crypto: ^3.0.2
+  # 登陆页组件,丰富多样\动画不少
+  flutter_login: ^4.0.0
+  # 用于读取和写入简单键值对的 Flutter 插件。（简单用于存入登入）
+  shared_preferences: ^2.0.15
 
 dev_dependencies:
   flutter_test:

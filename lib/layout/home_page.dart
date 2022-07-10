@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:freader/common/personal/constants.dart';
 import 'package:freader/layout/image_page.dart';
 import 'package:freader/layout/markdown_page.dart';
 import 'package:freader/layout/news_page.dart';
@@ -9,8 +10,10 @@ import 'package:freader/layout/pdf_viewer_page.dart';
 import 'package:freader/layout/tools_page.dart';
 import 'package:freader/layout/txt_viewer_page.dart';
 import 'package:freader/utils/global_styles.dart';
+import 'package:freader/views/login_screen.dart';
 import 'package:freader/widgets/hitokoto_sentence.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 ///
 /// 2022-04-21
@@ -42,11 +45,12 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   var subscription;
-  String _stateText = ""; //用来显示状态
+  String _stateText = ""; //用来显示网络状态
 
   @override
   void initState() {
     super.initState();
+    // 获取网络连接状态
     subscription = Connectivity()
         .onConnectivityChanged
         .listen((ConnectivityResult result) {
@@ -132,22 +136,15 @@ _buildAppBar(String networkState) {
     actions: <Widget>[
       // 当前网络连接方式图标（数据流量、wifi、其他无网）
       _genNetworkStateIcon(networkState),
-      IconButton(
-        iconSize: appBarIconButtonSize,
-        icon: const Icon(
-          Icons.search,
-          semanticLabel: 'search', // icon的语义标签。
-        ),
-        onPressed: () {},
-      ),
-      IconButton(
-        iconSize: appBarIconButtonSize,
-        icon: const Icon(
-          Icons.scanner,
-          semanticLabel: 'scanner',
-        ),
-        onPressed: () {},
-      ),
+      // IconButton(
+      //   iconSize: appBarIconButtonSize,
+      //   icon: const Icon(
+      //     Icons.logout_outlined,
+      //     color: Colors.greenAccent,
+      //     semanticLabel: 'logout', // icon的语义标签。
+      //   ),
+      //   onPressed: () {},
+      // ),
     ],
     bottom: TabBar(
       // // 可以使得tab的文本自适应显示长度，很长的内容都会显示完整。
@@ -207,10 +204,37 @@ _buildAppBar(String networkState) {
 }
 
 // 主页的左侧抽屉drawer
-class HomeDrawer extends StatelessWidget {
+class HomeDrawer extends StatefulWidget {
   const HomeDrawer({Key? key, required this.networkState}) : super(key: key);
 
   final String networkState;
+
+  @override
+  State<HomeDrawer> createState() => _HomeDrawerState();
+}
+
+class _HomeDrawerState extends State<HomeDrawer> {
+  String _userName = ""; //用来显示登入的用户名称
+
+  // 点击退出后，清除登入状态为false
+  Future<void> saveLoginState() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(GlobalConstants.loginState, false);
+  }
+
+  // 获取登入账号
+  getLoginUser() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _userName = prefs.getString(GlobalConstants.loginAccount) ?? "";
+    });
+  }
+
+  @override
+  void initState() {
+    getLoginUser();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -242,9 +266,12 @@ class HomeDrawer extends StatelessWidget {
                         ),
                       ),
                     ),
-                    const Text(
-                      "Sanot Su",
-                      style: TextStyle(fontWeight: FontWeight.bold),
+                    Text(
+                      _userName,
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: sizeContent1,
+                      ),
                     )
                   ],
                 ),
@@ -262,7 +289,7 @@ class HomeDrawer extends StatelessWidget {
                     ),
                     children: <TextSpan>[
                       TextSpan(
-                          text: networkState,
+                          text: widget.networkState,
                           style: TextStyle(
                             color: Colors.red,
                             fontSize: sizeContent2,
@@ -274,16 +301,35 @@ class HomeDrawer extends StatelessWidget {
             ),
             Expanded(
               child: ListView(
-                children: const <Widget>[
-                  ListTile(
+                children: <Widget>[
+                  const ListTile(
                     leading: Icon(Icons.add),
                     title: Text('Add account'),
                   ),
-                  ListTile(
+                  const ListTile(
                     leading: Icon(Icons.settings),
                     title: Text('Manage accounts'),
                   ),
-                  HitokotoSentence(),
+                  ListTile(
+                    leading: const Icon(Icons.logout_outlined),
+                    title: const Text(
+                      '退出当前账号',
+                      style: TextStyle(
+                        color: Colors.lightBlue,
+                        decoration: TextDecoration.underline,
+                      ),
+                    ),
+                    onTap: () async {
+                      // 点击退出按钮后，清除登入状态为false，并跳转到登陆页
+                      await saveLoginState();
+                      Navigator.of(context).pushReplacement(
+                        MaterialPageRoute(
+                          builder: (context) => const LoginScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                  const HitokotoSentence(),
                 ],
               ),
             ),
