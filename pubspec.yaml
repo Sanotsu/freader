@@ -136,6 +136,9 @@ dependencies:
   flutter_login: ^4.0.0
   # 用于读取和写入简单键值对的 Flutter 插件。（简单用于存入登入）
   shared_preferences: ^2.0.15
+  # 蓝牙插件（需要java11及以上。旧版本flutter_blue已经不维护了）
+  # 修改gradle.properties文件,添加org.gradle.java.home=your jdk path
+  flutter_blue_plus: ^1.1.3
 
 dev_dependencies:
   flutter_test:
@@ -176,6 +179,8 @@ flutter:
     - assets/mds/typescript/
     - assets/mds/nodejs/
     - assets/mds/nodejs/assets/
+    - assets/mds/dsa/
+    - assets/mds/dsa/pictures/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.

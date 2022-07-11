@@ -131,11 +131,27 @@ class _HomePageState extends State<HomePage> {
 /// 2022-5-14 主页的appBar
 /// 使用默认样式
 _buildAppBar(String networkState) {
+  var labelChar = "";
+  var temp = networkState.split(".");
+  if (temp.length > 1) {
+    labelChar = temp[1];
+  }
+
   return AppBar(
     title: Text("Let's freader", style: appBarTextStyle),
     actions: <Widget>[
       // 当前网络连接方式图标（数据流量、wifi、其他无网）
+      SizedBox(
+        width: 60.sp,
+        child: Center(
+          child: Text(
+            labelChar != "" ? labelChar : networkState,
+            style: const TextStyle(color: Colors.orange),
+          ),
+        ),
+      ),
       _genNetworkStateIcon(networkState),
+      SizedBox(width: 20.sp)
       // IconButton(
       //   iconSize: appBarIconButtonSize,
       //   icon: const Icon(
@@ -400,8 +416,6 @@ class _HomeBottomAppBarState extends State<HomeBottomAppBar> {
               onPressed: _onHomeItemPressed,
             ),
             // const SizedBox(), //中间位置空出
-            // 暂时选个位置显示连接网络图标
-            _genNetworkStateIcon(widget.networkState ?? ""),
             IconButton(
               icon: Icon(
                 Icons.business,

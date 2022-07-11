@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:freader/views/ble_view/simple_blue_screen.dart';
 import 'package:freader/views/news_view/news_page_demo.dart';
 import 'package:freader/views/tools_view/random_network_photo_screen.dart';
 import 'package:freader/views/tools_view/today_in_history_screen.dart';
@@ -22,11 +23,13 @@ class _ToolsPageState extends State<ToolsPage> {
     "随机笑话段子",
     "随机静动图片",
     "近期天气预报",
+    "近期天气预报",
   ];
   // 站点简述
   final subtitles = [
     "历史上今天发生地一些大事情.",
     "随机获取并浏览一张网络图片.",
+    "Here is list 2 subtitle",
     "Here is list 2 subtitle",
     "Here is list 3 subtitle"
   ];
@@ -35,6 +38,7 @@ class _ToolsPageState extends State<ToolsPage> {
     "images/tools_image/历史上的今天.png",
     "images/tools_image/随机网络图片.png",
     "images/tools_image/多国语言翻译.png",
+    "images/tools_image/蓝牙连接测试.png",
     "images/tools_image/ToBeContinue.png"
   ];
 
@@ -101,6 +105,9 @@ _onCardTap(BuildContext context, int index) {
       break;
     case 2:
       screen = const MultilingualTranslationScreen();
+      break;
+    case 3:
+      screen = const SimpleBlueScreen();
       break;
     default:
       screen = const NewsPageDemo();
