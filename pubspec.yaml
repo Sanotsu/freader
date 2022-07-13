@@ -139,6 +139,12 @@ dependencies:
   # 蓝牙插件（需要java11及以上。旧版本flutter_blue已经不维护了）
   # 修改gradle.properties文件,添加org.gradle.java.home=your jdk path
   flutter_blue_plus: ^1.1.3
+  # 音频播放插件
+  just_audio: ^0.9.27
+  # 配合上一个实现后台播放(其他高级音频背景播放，使用audio_service)
+  just_audio_background: ^0.0.1-beta.7
+  # 同上配合使用，此插件会告知操作系统您的音频应用程序的性质（例如游戏、媒体播放器、助手等）以及您的应用程序将如何处理和启动音频中断（例如电话中断）
+  audio_session: ^0.1.9
 
 dev_dependencies:
   flutter_test:
@@ -170,6 +176,7 @@ flutter:
     - images/site_logos/
     - images/tools_image/
     - assets/
+    - assets/audio/
     - assets/jsons/
     # - assets/jsons/pexels_api_images.json
     - assets/pdfs/
