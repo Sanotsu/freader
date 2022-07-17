@@ -145,6 +145,12 @@ dependencies:
   just_audio_background: ^0.0.1-beta.7
   # 同上配合使用，此插件会告知操作系统您的音频应用程序的性质（例如游戏、媒体播放器、助手等）以及您的应用程序将如何处理和启动音频中断（例如电话中断）
   audio_session: ^0.1.9
+  # 另一个音乐播放插件
+  assets_audio_player: ^3.0.5
+  # 查询本地音乐信息(不能用，我都直接可以下载他需要的kotlin-compiler-embeddable-1.4.32.jar,但gradle build的时候，死活下不动，卡住)
+  # on_audio_query: ^2.6.1
+  # 用于获取音频的元数据信息
+  flutter_media_metadata: ^1.0.0+1
 
 dev_dependencies:
   flutter_test:

@@ -4,6 +4,7 @@
 
 list(APPEND FLUTTER_PLUGIN_LIST
   connectivity_plus_windows
+  flutter_media_metadata
   permission_handler_windows
   syncfusion_pdfviewer_windows
   url_launcher_windows
