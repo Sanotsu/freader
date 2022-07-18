@@ -153,7 +153,7 @@ class AudioDbHelper {
     return result;
   }
 
-  /// 查询音频信息
+  /// 查询音频信息---？？？？？？？？也有问题，每次只能传一个参数
   // 如果有传id，用id精确查；有传name，用name模糊查；都没有，查所有。
   Future<List<LocalAudioInfo>> queryLocalAudioInfo({
     String? audioId,
@@ -195,6 +195,7 @@ class AudioDbHelper {
   // 新增歌单(已经包含新增歌单本身，和指定歌单新增指定歌曲)
   Future<int> insertLocalAudioPlaylist(LocalAudioPlaylist lap) async {
     Database db = await database;
+    // insert返回最后插入行的id
     var result = await db.insert(
       SqliteSqlStatements.tableNameOfLocalAudioPlaylist,
       lap.toMap(),
@@ -203,12 +204,35 @@ class AudioDbHelper {
   }
 
   // 删除歌单
-  Future<int> deleteLocalAudioPlaylist(String id) async {
+  Future<int> deleteLocalAudioPlaylist({String? id, String? name}) async {
+    // 根据传入参数，构建查询条件
+    var where = "";
+    var whereArgs = [];
+    if (id != null) {
+      where += " audioPlaylistId = ? and";
+      whereArgs.add(id);
+    }
+    if (name != null) {
+      where += " audioPlaylistName = ? and";
+      whereArgs.add(name);
+    }
+
+    if (name == null && id == null) {
+      where = " audioPlaylistId = ? and";
+      whereArgs = ["无效删除"];
+    }
+
+    // 因为不知道传入的id是都有还是只有一个，先传的那个，所以 where 最后都有个and,作为条件是，要先去掉
+    var realWhere = where;
+    if (where.endsWith("and")) {
+      realWhere = where.substring(0, where.length - 4);
+    }
+
     Database db = await database;
     var result = await db.delete(
       SqliteSqlStatements.tableNameOfLocalAudioPlaylist,
-      where: "audioPlaylistId=?",
-      whereArgs: [id],
+      where: realWhere,
+      whereArgs: whereArgs,
     );
     return result;
   }

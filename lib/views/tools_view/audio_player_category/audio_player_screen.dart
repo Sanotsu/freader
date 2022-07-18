@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_media_metadata/flutter_media_metadata.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:freader/common/personal/constants.dart';
 import 'package:freader/common/utils/sqlite_audio_helper.dart';
 import 'package:freader/models/app_embedded/local_audio_state.dart';
@@ -55,6 +56,10 @@ class AudioPlayScreenState extends State<AudioPlayScreen> {
 
   // 用来歌曲名搜索的文本框控制器
   final audioSaerchController = TextEditingController();
+
+  // 新增歌单时的歌单名输入框控制器
+  final playlistCreateController = TextEditingController();
+
 // test =============================
 
   @override
@@ -267,6 +272,74 @@ class AudioPlayScreenState extends State<AudioPlayScreen> {
     });
   }
 
+  /// 新增歌单
+  createPlaylist(String playlistName) async {
+    // 不管新增结果，都要清空输入框值
+    setState(() {
+      playlistCreateController.text = "";
+    });
+
+    // 1 查询是否已有同名歌单
+    var list = await audioDbHelper.getLocalAudioPlaylist(lapName: playlistName);
+    if (list.isNotEmpty) {
+      Fluttertoast.showToast(msg: "已存在同名歌单!", toastLength: Toast.LENGTH_SHORT);
+      return;
+    }
+
+    // 2 新增歌单
+    var playlistId = const Uuid().v1();
+
+    var lap = LocalAudioPlaylist(
+      audioPlaylistId: playlistId,
+      audioPlaylistName: playlistName,
+      audioId: "",
+      audioName: "",
+      audioPath: "",
+    );
+
+    await audioDbHelper.insertLocalAudioPlaylist(lap);
+
+    // 3 新增成功后，重新查询所有的歌单，并切换当前歌单切换为新增的歌单
+    var tempList = await audioDbHelper.getLocalAudioPlaylist(isFull: false);
+
+    setState(() {
+      allDbPlaylist = [];
+      allDbPlaylist = tempList;
+
+      allPlaylist = [];
+      for (var e in tempList) {
+        allPlaylist.add(e.audioPlaylistName);
+      }
+      currentPlaylistName = playlistName;
+
+      // 4 重新构建新歌单的数据
+      buildSelectPlaylist(currentPlaylistName);
+    });
+  }
+
+  /// 删除当前歌单
+  deleteCurrentPlaylist() async {
+    // 1 删除当前歌单
+    await audioDbHelper.deleteLocalAudioPlaylist(name: currentPlaylistName);
+
+    // 2 删除成功后，重新查询所有的歌单，并切换当前歌单切换为新增的歌单（【【【可以抽成一个函数，参数是当前要绑定的列表名称）
+    var tempList = await audioDbHelper.getLocalAudioPlaylist(isFull: false);
+
+    setState(() {
+      allDbPlaylist = [];
+      allDbPlaylist = tempList;
+
+      allPlaylist = [];
+      for (var e in tempList) {
+        allPlaylist.add(e.audioPlaylistName);
+      }
+      currentPlaylistName = GlobalConstants.localAudioMyFavoriteName;
+
+      // 3 重新构建新歌单的数据
+      buildSelectPlaylist(currentPlaylistName);
+    });
+  }
+
   @override
   void dispose() {
     _player.dispose();
@@ -373,9 +446,61 @@ class AudioPlayScreenState extends State<AudioPlayScreen> {
                           },
                         ),
 
+                        ///> 删除当前歌单的icon按钮
+                        IconButton(
+                          icon: const Icon(Icons.remove),
+                          color: Colors.blue,
+                          tooltip: '删除当前歌单',
+                          onPressed: () {
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                // 后续这些dialog等通用配置可以单独列，不要这样到处size都不同
+                                return AlertDialog(
+                                  title: Text(
+                                    "确认删除(预设歌单不可删)?",
+                                    style: TextStyle(fontSize: 18.sp),
+                                  ),
+                                  content: Text(currentPlaylistName),
+                                  actions: <Widget>[
+                                    TextButton(
+                                      onPressed: () {
+                                        Navigator.of(context).pop();
+                                      },
+                                      child: Text(
+                                        '取消',
+                                        style: TextStyle(fontSize: 14.sp),
+                                      ),
+                                    ),
+                                    TextButton(
+                                      // 如果要被删除的歌单是默认歌单，缺点按钮不可点击
+                                      onPressed: (currentPlaylistName ==
+                                                  GlobalConstants
+                                                      .localAudioMyFavoriteName ||
+                                              currentPlaylistName ==
+                                                  GlobalConstants
+                                                      .localAudioDeaultPlaylistName)
+                                          ? null
+                                          : () async {
+                                              deleteCurrentPlaylist();
+
+                                              Navigator.of(context).pop();
+                                            },
+                                      child: Text(
+                                        '确定',
+                                        style: TextStyle(fontSize: 14.sp),
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
+                          },
+                        ),
+
                         ///> 歌单名称（这里我想弄一个点击下拉切换到不同的歌单的功能，切换之后要重新渲染歌单）
                         SizedBox(
-                          width: 200.sp,
+                          width: 160.sp,
                           child: DropdownSearch<String>(
                             // 单模式弹出窗口的自定义道具
                             popupProps: PopupProps.menu(
@@ -393,9 +518,58 @@ class AudioPlayScreenState extends State<AudioPlayScreen> {
                               buildSelectPlaylist(playlistName ?? "");
                             },
                             // 音乐播放主页默认是我的最爱列表，这里的值注意和initData一致
-                            selectedItem:
-                                GlobalConstants.localAudioMyFavoriteName,
+                            selectedItem: currentPlaylistName,
                           ),
+                        ),
+
+                        ///> 添加歌单的icon按钮
+                        IconButton(
+                          icon: const Icon(Icons.add),
+                          color: Colors.blue,
+                          tooltip: '新建歌单',
+                          onPressed: () {
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                // 后续这些dialog等通用配置可以单独列，不要这样到处size都不同
+                                return AlertDialog(
+                                  title: Text(
+                                    "搜索歌单名:",
+                                    style: TextStyle(fontSize: 18.sp),
+                                  ),
+                                  content: TextField(
+                                    controller: playlistCreateController,
+                                  ),
+                                  actions: <Widget>[
+                                    TextButton(
+                                      onPressed: () {
+                                        Navigator.of(context).pop();
+                                      },
+                                      child: Text(
+                                        '取消',
+                                        style: TextStyle(fontSize: 14.sp),
+                                      ),
+                                    ),
+                                    TextButton(
+                                      onPressed: () async {
+                                        print(
+                                            "-------playlistCreateController---${playlistCreateController.text}");
+
+                                        createPlaylist(
+                                            playlistCreateController.text);
+
+                                        Navigator.of(context).pop();
+                                      },
+                                      child: Text(
+                                        '确定',
+                                        style: TextStyle(fontSize: 14.sp),
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
+                          },
                         ),
 
                         ///> 随机播放的图标按钮
@@ -446,7 +620,7 @@ class AudioPlayScreenState extends State<AudioPlayScreen> {
                 // 后续这些dialog等通用配置可以单独列，不要这样到处size都不同
                 return AlertDialog(
                   title: Text(
-                    "输入歌曲名:",
+                    "搜索歌曲名:",
                     style: TextStyle(fontSize: 18.sp),
                   ),
                   content: TextField(
@@ -464,7 +638,6 @@ class AudioPlayScreenState extends State<AudioPlayScreen> {
                     ),
                     TextButton(
                       onPressed: () async {
-                        // allDbPlaylist
                         print(
                             "-------audioSaerchController---${audioSaerchController.text}");
 
@@ -647,8 +820,6 @@ class AudioPlayScreenState extends State<AudioPlayScreen> {
                               ),
                               TextButton(
                                 onPressed: () async {
-                                  // allDbPlaylist
-
                                   // 选择了需要添加的歌单之后，取得其歌单的id信息
                                   // 这里必然是存在的（没有bug的话），所以不做其他检查了
                                   var selectPlaylist = allDbPlaylist.where(
