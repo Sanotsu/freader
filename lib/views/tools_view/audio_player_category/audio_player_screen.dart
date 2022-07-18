@@ -20,7 +20,6 @@ import 'package:uuid/uuid.dart';
 
 import 'audio_player_widget/commons.dart';
 
-// ------------------------------长按 添加到歌单没有成功？？？？？？？？？？？？？？？？？？？？
 class AudioPlayScreen extends StatefulWidget {
   const AudioPlayScreen({Key? key}) : super(key: key);
 
@@ -51,9 +50,12 @@ class AudioPlayScreenState extends State<AudioPlayScreen> {
   // 长按指定歌曲后，弹出新增到歌单中，被选中的歌单
   var selectedPlaylistForAudioAdd = "";
 
+  // 当前歌单的名称（切换时记得修改状态）
+  var currentPlaylistName = "";
+
+  // 用来歌曲名搜索的文本框控制器
+  final audioSaerchController = TextEditingController();
 // test =============================
-// 往歌单新加默认asset音频的测试需要的索引初始值
-  static int _nextMediaId = 0;
 
   @override
   void initState() {
@@ -79,7 +81,7 @@ class AudioPlayScreenState extends State<AudioPlayScreen> {
   initData() async {
     await _init();
 
-    audioDbHelper.deleteDb();
+    // audioDbHelper.deleteDb();
 
     // 1 查看默认歌曲列表是否有歌
     //      有歌，说明之前扫描过，就不扫描了,直接读取默认歌单的数据；
@@ -113,6 +115,9 @@ class AudioPlayScreenState extends State<AudioPlayScreen> {
       lapId: GlobalConstants.localAudioMyFavoriteId,
     );
 
+    // 初始化时，默认为我的最爱歌单
+    currentPlaylistName = GlobalConstants.localAudioMyFavoriteName;
+
     print("favoriteAudioList ----------- ${list.length}");
 
     _playlist = await buildPlaylist(list);
@@ -141,15 +146,15 @@ class AudioPlayScreenState extends State<AudioPlayScreen> {
     List<AudioSource> tempChildren = [];
 
     // 1 遍历歌单歌曲地址，获取元数据信息，构建列表组件
-    for (var i = 1; i < list.length; i++) {
+    for (var i = 0; i < list.length; i++) {
       var ele = list[i];
 
-      var metadata = await MetadataRetriever.fromFile(File(ele.audioPath));
-
       // 如果路径为空，直接跳了
-      if (metadata.filePath == null) {
+      if (ele.audioPath == "") {
         continue;
       }
+
+      var metadata = await MetadataRetriever.fromFile(File(ele.audioPath));
 
       // 音频元数据额外属性，如果有内嵌专辑图片，就用。没有，预设图篇
       // 还需要保存音频文件在数据库的数据，例如audio的id、name、path等，供移除或者添加到其他歌单时有值可用
@@ -222,8 +227,7 @@ class AudioPlayScreenState extends State<AudioPlayScreen> {
       _playlist = temp;
     });
 
-    // ???????????????? 为什么会触发 buildCurrent()  但列表子组件没有更新呢？。。。。。。。。。
-    // 因为没有绑定
+    // 绑定新歌单
     await _player.setAudioSource(_playlist);
 
     setState(() {
@@ -231,9 +235,42 @@ class AudioPlayScreenState extends State<AudioPlayScreen> {
     });
   }
 
+  /// 按钮弹窗输入搜索歌曲名后，传递歌单名和歌曲名，查询指定歌单是否有歌
+  /// 如果有歌，【理应是跳转到该歌单指定位置，但目前能力有限，重新构建只含该歌曲的当前歌单。毕竟关键字搜索，万一很多呢】
+  buildAudioSearchPlaylist(String playlistName, String audioName) async {
+    setState(() {
+      isAudioPlaylistReady = false;
+    });
+
+    if (playlistName == "") {
+      return;
+    }
+
+    var currentAudionListInfo = await audioDbHelper.getLocalAudioPlaylist(
+      lapName: playlistName,
+      audioName: audioName,
+    );
+
+    print(">>>>>>>$currentAudionListInfo");
+    var temp = await buildPlaylist(currentAudionListInfo);
+
+    setState(() {
+      _playlist = temp;
+    });
+
+    await _player.setAudioSource(_playlist);
+
+    // 查询构建列表后，也要原本的查询输入值
+    setState(() {
+      isAudioPlaylistReady = true;
+      audioSaerchController.text = "";
+    });
+  }
+
   @override
   void dispose() {
     _player.dispose();
+    audioSaerchController.dispose();
     super.dispose();
   }
 
@@ -251,6 +288,8 @@ class AudioPlayScreenState extends State<AudioPlayScreen> {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
+        // resizeToAvoidBottomInset: false属性会和flutter 官方的监听软键盘高度继承类 WidgetsBindingObserver 相互抵消 注意取舍和业务逻辑判断
+        resizeToAvoidBottomInset: false,
         body: SafeArea(
           child: isAudioPageReady
               ? Column(
@@ -347,6 +386,10 @@ class AudioPlayScreenState extends State<AudioPlayScreen> {
                             ),
                             items: allPlaylist,
                             onChanged: (playlistName) {
+                              setState(() {
+                                currentPlaylistName = playlistName ?? "";
+                              });
+
                               buildSelectPlaylist(playlistName ?? "");
                             },
                             // 音乐播放主页默认是我的最爱列表，这里的值注意和initData一致
@@ -388,20 +431,57 @@ class AudioPlayScreenState extends State<AudioPlayScreen> {
                   child: CircularProgressIndicator()), // 加载列表时默认是个圈，有其他东西代替更好了
         ),
 
-        /// 测试：新增歌曲到当前歌单的悬空按钮
-        /// 歌单管理不放在当前组件，这里改为搜索当前歌单？
+        /// 歌单管理不放在当前组件，这里改为搜索当前歌单指定歌曲
         floatingActionButton: FloatingActionButton(
-          child: const Icon(Icons.add),
+          child: const Icon(Icons.search),
+
+          /// 点击搜索按钮，查看本歌单
+          /// (只为了搜索demo，如果查询所有的话，不在当前歌单怎么办？直接跳到默认？先不想这个逻辑，只为了实现搜索。后续要改，再改)
           onPressed: () {
-            _playlist.add(AudioSource.uri(
-              Uri.parse("asset:///assets/audio/nature.mp3"),
-              tag: MediaItem(
-                id: '${_nextMediaId++}',
-                album: "(demo)Public Domain",
-                title: "(demo)Nature Sounds $_nextMediaId",
-                extras: {"albumArtUrl": "images/tools_image/music-player.jpg"},
-              ),
-            ));
+            print("-------currentPlaylistName---$currentPlaylistName");
+
+            showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                // 后续这些dialog等通用配置可以单独列，不要这样到处size都不同
+                return AlertDialog(
+                  title: Text(
+                    "输入歌曲名:",
+                    style: TextStyle(fontSize: 18.sp),
+                  ),
+                  content: TextField(
+                    controller: audioSaerchController,
+                  ),
+                  actions: <Widget>[
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                      child: Text(
+                        '取消',
+                        style: TextStyle(fontSize: 14.sp),
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: () async {
+                        // allDbPlaylist
+                        print(
+                            "-------audioSaerchController---${audioSaerchController.text}");
+
+                        buildAudioSearchPlaylist(
+                            currentPlaylistName, audioSaerchController.text);
+
+                        Navigator.of(context).pop();
+                      },
+                      child: Text(
+                        '确定',
+                        style: TextStyle(fontSize: 14.sp),
+                      ),
+                    ),
+                  ],
+                );
+              },
+            );
           },
         ),
       ),

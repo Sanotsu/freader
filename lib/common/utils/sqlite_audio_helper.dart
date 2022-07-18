@@ -241,12 +241,14 @@ class AudioDbHelper {
     return result.length;
   }
 
-  /// --- 获取歌单信息？？？？？？？？这个可选参数的判断有问题，只能传一个
+  /// 获取歌单信息
   // 有歌单id、歌单name或者不传，都查询符合条件的含歌曲的完整歌单
   // 如果isFull为false，则不需要歌单里面的歌曲，只是查有几张歌单，获取id之类的，用于添加歌曲等
+  // 如果有传audioName，说明查询符合该关键字的歌曲有哪些，并且在哪些歌单里（2022-07-18目前应该是和name一起，查询指定歌单中的歌曲）
   Future<List<LocalAudioPlaylist>> getLocalAudioPlaylist({
     String? lapId,
     String? lapName,
+    String? audioName,
     bool? isFull,
   }) async {
     final db = await database;
@@ -265,16 +267,20 @@ class AudioDbHelper {
 
     // 有传id或者name，或者两者都传，拼好条件
     if (lapId != null) {
-      where += "audioPlaylistId = ? and";
+      where += " audioPlaylistId = ? and";
       whereArgs.add(lapId);
     }
     if (lapName != null) {
-      where += "audioPlaylistName = ? and";
+      where += " audioPlaylistName = ? and";
       whereArgs.add(lapName);
+    }
+    if (audioName != null) {
+      where += " audioName like ? and";
+      whereArgs.add('%$audioName%');
     }
     // 但如果两者都没传，则为查询全部，条件重新拼
     if (lapId == null && lapName == null) {
-      where = "audioPlaylistId != ? and";
+      where = " audioPlaylistId != ? and";
       whereArgs = [""];
     }
 
