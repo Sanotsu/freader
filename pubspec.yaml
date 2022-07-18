@@ -151,6 +151,8 @@ dependencies:
   # on_audio_query: ^2.6.1
   # 用于获取音频的元数据信息
   flutter_media_metadata: ^1.0.0+1
+  # 可搜索下拉选择框插件
+  dropdown_search: ^5.0.2
 
 dev_dependencies:
   flutter_test:

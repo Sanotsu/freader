@@ -3,9 +3,11 @@
 import 'dart:io';
 
 import 'package:audio_session/audio_session.dart';
+import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_media_metadata/flutter_media_metadata.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:freader/common/personal/constants.dart';
 import 'package:freader/common/utils/sqlite_audio_helper.dart';
 import 'package:freader/models/app_embedded/local_audio_state.dart';
@@ -18,6 +20,7 @@ import 'package:uuid/uuid.dart';
 
 import 'audio_player_widget/commons.dart';
 
+// ------------------------------长按 添加到歌单没有成功？？？？？？？？？？？？？？？？？？？？
 class AudioPlayScreen extends StatefulWidget {
   const AudioPlayScreen({Key? key}) : super(key: key);
 
@@ -35,8 +38,18 @@ class AudioPlayScreenState extends State<AudioPlayScreen> {
   // 当前显示的歌单
   late ConcatenatingAudioSource _playlist;
 
-  // 音频播放页面是否在数据加载中
-  bool isAudioNotReady = true;
+  // 音频播放页面是否在数据加载中(初始化时肯定是否)
+  bool isAudioPageReady = false;
+
+  // 播放列表是否构建完成
+  bool isAudioPlaylistReady = true;
+
+  // 所有的歌单信息（供下拉选择）
+  List<String> allPlaylist = [];
+  List<LocalAudioPlaylist> allDbPlaylist = [];
+
+  // 长按指定歌曲后，弹出新增到歌单中，被选中的歌单
+  var selectedPlaylistForAudioAdd = "";
 
 // test =============================
 // 往歌单新加默认asset音频的测试需要的索引初始值
@@ -71,45 +84,45 @@ class AudioPlayScreenState extends State<AudioPlayScreen> {
     // 1 查看默认歌曲列表是否有歌
     //      有歌，说明之前扫描过，就不扫描了,直接读取默认歌单的数据；
     //      否则，首次使用，扫描全盘，存入默认歌单
-    var defaultAudionList = await audioDbHelper.queryLocalAudioInfo();
+    var defaultAudioList = await audioDbHelper.queryLocalAudioInfo();
 
-    print("defaultAudionList${defaultAudionList.length}");
+    // print("defaultAudionList-------${defaultAudionList.length}");
 
-    var favoriteAudionList = await audioDbHelper.getLocalAudioPlaylist(
+    // === 查看歌单列表
+    var tempList = await audioDbHelper.getLocalAudioPlaylist(isFull: false);
+    print("^^^^^^^^^^^^^^^^^^${tempList.length}");
+
+    setState(() {
+      allDbPlaylist = [];
+      allDbPlaylist = tempList;
+
+      allPlaylist = [];
+      for (var e in tempList) {
+        allPlaylist.add(e.audioPlaylistName);
+      }
+    });
+
+    print("[[[[[[[[[[[[[[[[[[[[[[${defaultAudioList.length}");
+    // db中是否有歌曲存在？有的话，就假装扫描过。（测试：如果没有就默认全盘扫描。但最佳是用户手动扫描）
+    if (defaultAudioList.isEmpty) {
+      await scanAllLocalAudio();
+    }
+
+    // 2 获取默认歌单的数据，构建歌单列表(测试：全盘扫描是，默认名字长度>40的存到了我的最爱)
+    List<LocalAudioPlaylist> list = await audioDbHelper.getLocalAudioPlaylist(
       lapId: GlobalConstants.localAudioMyFavoriteId,
     );
 
-    print("favoriteAudionList ${favoriteAudionList.length}");
-
-    // 为什么小于1？因为有默认全局歌单这么一条初始值
-    if (defaultAudionList.length <= 1) {
-      print("9999999999999999");
-      await scanAllLocalAudio();
-      print("9999999999999999999");
-    }
-    print("7777777777777777");
-
-    // 2 获取默认歌单的数据，构建歌单列表
-    List<LocalAudioPlaylist> list = await audioDbHelper.getLocalAudioPlaylist(
-      lapId: GlobalConstants.localAudioDeaultPlaylistId,
-    );
-
-    print("0000000000000$list");
+    print("favoriteAudioList ----------- ${list.length}");
 
     _playlist = await buildPlaylist(list);
 
-    print("1111111$_playlist");
-
     // 3 播放插件绑定播放列表
     try {
-      print("22222222222$_playlist");
-
       await _player.setAudioSource(_playlist);
       setState(() {
-        isAudioNotReady = false;
+        isAudioPageReady = true;
       });
-
-      print("333333$_playlist");
     } catch (e, stackTrace) {
       // Catch load errors: 404, invalid url ...
       print("Error loading playlist: $e");
@@ -123,8 +136,6 @@ class AudioPlayScreenState extends State<AudioPlayScreen> {
   /// 最好的办法当然是把元数据放到db了，不过这只是个demo，不做这。
   /// 其实db缺少的栏位很多，只是个示例就不强迫了
   buildPlaylist(List<LocalAudioPlaylist> list) async {
-    print("aaaaaaaaaaaaaaaaaaaaaaaaaa${list.length}");
-
     var defaultAlbumArtUrl = "images/tools_image/music-player.jpg";
 
     List<AudioSource> tempChildren = [];
@@ -141,10 +152,14 @@ class AudioPlayScreenState extends State<AudioPlayScreen> {
       }
 
       // 音频元数据额外属性，如果有内嵌专辑图片，就用。没有，预设图篇
-      print("-----------<<<<<<<<$metadata ");
-      Map<String, dynamic> ex = {"albumArtUrl": defaultAlbumArtUrl};
+      // 还需要保存音频文件在数据库的数据，例如audio的id、name、path等，供移除或者添加到其他歌单时有值可用
+      // print("-----------<<<<<<<<$metadata   ---${ele.toJson().toString()} ");
+      Map<String, dynamic> cusExtras = {
+        "playlistInfo": ele.toJson(),
+        "albumArtUrl": defaultAlbumArtUrl,
+      };
       if (metadata.albumArt != null) {
-        ex = {"albumArtUint8List": metadata.albumArt};
+        cusExtras.addAll({"albumArtUint8List": metadata.albumArt});
       }
 
       // 把歌单第一首，列为正在播放的
@@ -162,7 +177,7 @@ class AudioPlayScreenState extends State<AudioPlayScreen> {
               artist: metadata.trackArtistNames.toString(),
               album: metadata.albumName,
               title: metadata.trackName ?? ele.audioName,
-              extras: ex,
+              extras: cusExtras,
             ),
           ),
         );
@@ -179,7 +194,7 @@ class AudioPlayScreenState extends State<AudioPlayScreen> {
             artist: metadata.trackArtistNames.toString(),
             album: metadata.albumName,
             title: metadata.trackName ?? ele.audioName,
-            extras: ex,
+            extras: cusExtras,
           ),
         ),
       );
@@ -188,12 +203,41 @@ class AudioPlayScreenState extends State<AudioPlayScreen> {
     return ConcatenatingAudioSource(children: tempChildren);
   }
 
+  /// 切换主页歌单
+  /// 切换后，要查询歌单数据，重新构建歌单列表
+  buildSelectPlaylist(String playlistName) async {
+    setState(() {
+      isAudioPlaylistReady = false;
+    });
+
+    if (playlistName == "") {
+      return;
+    }
+
+    var currentAudionListInfo =
+        await audioDbHelper.getLocalAudioPlaylist(lapName: playlistName);
+    var temp = await buildPlaylist(currentAudionListInfo);
+
+    setState(() {
+      _playlist = temp;
+    });
+
+    // ???????????????? 为什么会触发 buildCurrent()  但列表子组件没有更新呢？。。。。。。。。。
+    // 因为没有绑定
+    await _player.setAudioSource(_playlist);
+
+    setState(() {
+      isAudioPlaylistReady = true;
+    });
+  }
+
   @override
   void dispose() {
     _player.dispose();
     super.dispose();
   }
 
+  // 获取当前播放位置音频数据
   Stream<PositionData> get _positionDataStream =>
       Rx.combineLatest3<Duration, Duration, Duration?, PositionData>(
           _player.positionStream,
@@ -208,10 +252,8 @@ class AudioPlayScreenState extends State<AudioPlayScreen> {
       debugShowCheckedModeBanner: false,
       home: Scaffold(
         body: SafeArea(
-          child: isAudioNotReady
-              ? const Center(
-                  child: CircularProgressIndicator()) // 加载列表时默认是个圈，有其他东西代替更好了
-              : Column(
+          child: isAudioPageReady
+              ? Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -238,10 +280,12 @@ class AudioPlayScreenState extends State<AudioPlayScreen> {
                     ),
 
                     /// 正在播放的音频区域
-                    buildCurrent(_player),
+                    _buildCurrentPlayArea(_player),
 
                     /// 音频控制按钮区域
                     ControlButtons(_player),
+
+                    /// 音频拖动进度条
                     StreamBuilder<PositionData>(
                       stream: _positionDataStream,
                       builder: (context, snapshot) {
@@ -261,7 +305,9 @@ class AudioPlayScreenState extends State<AudioPlayScreen> {
 
                     /// 切换播放方式区域(单曲循环等、歌单名称、随机播放图标)
                     Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
+                        ///> 播放方式切换按钮（单曲循环、列表循环、不循环）
                         StreamBuilder<LoopMode>(
                           stream: _player.loopModeStream,
                           builder: (context, snapshot) {
@@ -287,14 +333,29 @@ class AudioPlayScreenState extends State<AudioPlayScreen> {
                             );
                           },
                         ),
-                        // 歌单名称（这里我想弄一个点击下拉切换到不同的歌单的功能，切换之后要重新渲染歌单）
-                        Expanded(
-                          child: Text(
-                            "Playlist",
-                            style: Theme.of(context).textTheme.headline6,
-                            textAlign: TextAlign.center,
+
+                        ///> 歌单名称（这里我想弄一个点击下拉切换到不同的歌单的功能，切换之后要重新渲染歌单）
+                        SizedBox(
+                          width: 200.sp,
+                          child: DropdownSearch<String>(
+                            // 单模式弹出窗口的自定义道具
+                            popupProps: PopupProps.menu(
+                              showSelectedItems: true,
+                              disabledItemFn: (String s) => s.startsWith('I'),
+                              // 默认是 FlexFit.tight，填满所有可用空间，改为loose，则只显示已占用高度
+                              fit: FlexFit.loose,
+                            ),
+                            items: allPlaylist,
+                            onChanged: (playlistName) {
+                              buildSelectPlaylist(playlistName ?? "");
+                            },
+                            // 音乐播放主页默认是我的最爱列表，这里的值注意和initData一致
+                            selectedItem:
+                                GlobalConstants.localAudioMyFavoriteName,
                           ),
                         ),
+
+                        ///> 随机播放的图标按钮
                         StreamBuilder<bool>(
                           stream: _player.shuffleModeEnabledStream,
                           builder: (context, snapshot) {
@@ -320,62 +381,11 @@ class AudioPlayScreenState extends State<AudioPlayScreen> {
 
                     /// 具体当前播放列表区域
                     /// 左右滑动从列表移除（但没有从db移除）
-                    SizedBox(
-                      height: 240.0,
-                      child: StreamBuilder<SequenceState?>(
-                        stream: _player.sequenceStateStream,
-                        builder: (context, snapshot) {
-                          final state = snapshot.data;
-                          final sequence = state?.sequence ?? [];
-                          // ReorderableListView 拖拽排序组件
-                          return ReorderableListView(
-                            // 拖拽排序后的回调函数
-                            onReorder: (int oldIndex, int newIndex) {
-                              if (oldIndex < newIndex) newIndex--;
-                              _playlist.move(oldIndex, newIndex);
-                            },
-                            // 拖动的子组件
-                            children: [
-                              for (var i = 0; i < sequence.length; i++)
-                                // 滑动清除组件  Dismissible（从列表中移除）
-                                Dismissible(
-                                  key: ValueKey(sequence[i]),
-                                  background: Container(
-                                    color: Colors.redAccent,
-                                    alignment: Alignment.centerRight,
-                                    child: const Padding(
-                                      padding: EdgeInsets.only(right: 8.0),
-                                      child: Icon(Icons.delete,
-                                          color: Colors.white),
-                                    ),
-                                  ),
-                                  onDismissed: (dismissDirection) {
-                                    _playlist.removeAt(i);
-                                  },
-                                  // 歌单列表显示的内容（音频名称、歌手名、专辑名等）
-                                  child: Material(
-                                    color: i == state!.currentIndex
-                                        ? Colors.grey.shade300
-                                        : null,
-                                    child: ListTile(
-                                      title:
-                                          Text(sequence[i].tag.title as String),
-                                      subtitle: Text(
-                                          "${sequence[i].tag?.artist}---${sequence[i].tag?.album}"),
-                                      onTap: () {
-                                        // 点击跳转指定歌曲位置
-                                        _player.seek(Duration.zero, index: i);
-                                      },
-                                    ),
-                                  ),
-                                ),
-                            ],
-                          );
-                        },
-                      ),
-                    ),
+                    _buildPlaylistArea(_player, _playlist),
                   ],
-                ),
+                )
+              : const Center(
+                  child: CircularProgressIndicator()), // 加载列表时默认是个圈，有其他东西代替更好了
         ),
 
         /// 测试：新增歌曲到当前歌单的悬空按钮
@@ -399,7 +409,7 @@ class AudioPlayScreenState extends State<AudioPlayScreen> {
   }
 
   /// 正在播放的音频区域函数
-  buildCurrent(_player) {
+  _buildCurrentPlayArea(_player) {
     return Expanded(
       child: StreamBuilder<SequenceState?>(
         stream: _player.sequenceStateStream,
@@ -410,8 +420,7 @@ class AudioPlayScreenState extends State<AudioPlayScreen> {
           }
           final metadata = state!.currentSource!.tag as MediaItem;
 
-          print(".........>>>>>>>>${metadata.extras}");
-          print(">>>>>>>>>>>.........>>>>>>>>$metadata");
+          // print(">>>>>>>>>>>.........>>>>>>>>$metadata");
 
           return Column(
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -456,6 +465,164 @@ class AudioPlayScreenState extends State<AudioPlayScreen> {
       ),
     );
   }
+
+  /// 构建播放列表区域
+  _buildPlaylistArea(AudioPlayer _player, ConcatenatingAudioSource _playlist) {
+    return SizedBox(
+      height: 240.0,
+      child: StreamBuilder<SequenceState?>(
+        stream: _player.sequenceStateStream,
+        builder: (context, snapshot) {
+          final state = snapshot.data;
+          final sequence = state?.sequence ?? [];
+          // ReorderableListView 拖拽排序组件
+          if (isAudioPlaylistReady) {
+            return ReorderableListView(
+              // 拖拽排序后的回调函数
+              onReorder: (int oldIndex, int newIndex) {
+                if (oldIndex < newIndex) newIndex--;
+                _playlist.move(oldIndex, newIndex);
+              },
+              // 拖动的子组件
+              children: [
+                for (var i = 0; i < sequence.length; i++)
+                  // 滑动清除组件  Dismissible（从列表中移除）
+                  GestureDetector(
+                    key: ValueKey(sequence[i]),
+                    child: Container(
+                      alignment: Alignment.center,
+                      color: Colors.blue,
+                      child: Dismissible(
+                        key: ValueKey(sequence[i]),
+                        background: Container(
+                          color: Colors.redAccent,
+                          alignment: Alignment.centerRight,
+                          child: const Padding(
+                            padding: EdgeInsets.only(right: 8.0),
+                            child: Icon(Icons.delete, color: Colors.white),
+                          ),
+                        ),
+                        onDismissed: (dismissDirection) {
+                          _playlist.removeAt(i);
+                        },
+                        // 歌单列表显示的内容（音频名称、歌手名、专辑名等）
+                        child: Material(
+                          color: i == state!.currentIndex
+                              ? Colors.grey.shade300
+                              : null,
+                          child: ListTile(
+                            title: Text(sequence[i].tag.title as String),
+                            subtitle: Text(
+                                "${sequence[i].tag?.artist}---${sequence[i].tag?.album}"),
+                            onTap: () {
+                              // 点击跳转指定歌曲位置
+                              _player.seek(Duration.zero, index: i);
+                            },
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    //长按指定歌曲，弹窗供加入指定别的歌单
+                    onLongPress: () {
+                      // 在音频元数据的 extras属性中有存入对应其db信息，取出来，转型
+                      var selectedAudioInPlaylist = LocalAudioPlaylist.fromJson(
+                          (sequence[i].tag.extras['playlistInfo']));
+
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          // 后续这些dialog等通用配置可以单独列，不要这样到处size都不同
+                          return AlertDialog(
+                            title: Text(
+                              "添加到歌单:",
+                              style: TextStyle(fontSize: 18.sp),
+                            ),
+                            content: SizedBox(
+                              width: 200.sp,
+                              child: DropdownSearch<String>(
+                                // 自定义样式
+                                popupProps: const PopupProps.menu(
+                                  // 默认是 FlexFit.tight，填满所有可用空间，改为loose，则只显示已占用高度
+                                  fit: FlexFit.loose,
+                                ),
+                                items: allPlaylist,
+                                onChanged: (el) {
+                                  setState(() {
+                                    selectedPlaylistForAudioAdd = el ?? "";
+                                  });
+                                },
+                                selectedItem: allPlaylist[0],
+                              ),
+                            ),
+                            actions: <Widget>[
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                                child: Text(
+                                  '取消',
+                                  style: TextStyle(fontSize: 14.sp),
+                                ),
+                              ),
+                              TextButton(
+                                onPressed: () async {
+                                  // allDbPlaylist
+
+                                  // 选择了需要添加的歌单之后，取得其歌单的id信息
+                                  // 这里必然是存在的（没有bug的话），所以不做其他检查了
+                                  var selectPlaylist = allDbPlaylist.where(
+                                      (row) => (row.audioPlaylistName ==
+                                          selectedPlaylistForAudioAdd));
+
+                                  //点击确定之后，
+                                  //如果已存在，则不新增。否则，新增
+                                  var alreadyList = await audioDbHelper
+                                      .checkIsAudioInPlaylist(
+                                    selectPlaylist.first.audioPlaylistId,
+                                    selectedAudioInPlaylist.audioId,
+                                  );
+
+                                  //如果不存在，把当前音频添加到选中的歌单去（新增db row）
+                                  if (alreadyList <= 0) {
+                                    await audioDbHelper
+                                        .insertLocalAudioPlaylist(
+                                            LocalAudioPlaylist(
+                                                audioPlaylistId: selectPlaylist
+                                                    .first.audioPlaylistId,
+                                                audioPlaylistName:
+                                                    selectedPlaylistForAudioAdd,
+                                                audioId: selectedAudioInPlaylist
+                                                    .audioId,
+                                                audioName:
+                                                    selectedAudioInPlaylist
+                                                        .audioName,
+                                                audioPath:
+                                                    selectedAudioInPlaylist
+                                                        .audioPath));
+                                  }
+                                  Navigator.of(context).pop();
+                                },
+                                child: Text(
+                                  '确定',
+                                  style: TextStyle(fontSize: 14.sp),
+                                ),
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                    },
+                  ),
+              ],
+            );
+          } else {
+            return const Center(child: CircularProgressIndicator());
+          }
+        },
+      ),
+    );
+  }
 }
 
 /// 当前歌曲控制按钮具体实现
@@ -475,7 +642,7 @@ class ControlButtons extends StatelessWidget {
           onPressed: () {
             showSliderDialog(
               context: context,
-              title: "Adjust volume",
+              title: "音量调节",
               divisions: 10,
               min: 0.0,
               max: 1.0,
@@ -542,7 +709,7 @@ class ControlButtons extends StatelessWidget {
             onPressed: () {
               showSliderDialog(
                 context: context,
-                title: "Adjust speed",
+                title: "倍速调节",
                 divisions: 10,
                 min: 0.5,
                 max: 1.5,

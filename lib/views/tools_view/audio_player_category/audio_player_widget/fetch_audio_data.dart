@@ -5,8 +5,6 @@ import 'dart:io';
 import 'package:freader/common/personal/constants.dart';
 import 'package:freader/common/utils/sqlite_audio_helper.dart';
 import 'package:freader/models/app_embedded/local_audio_state.dart';
-import 'package:freader/utils/util_functions.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:path/path.dart' as path;
 import 'package:uuid/uuid.dart';
@@ -27,8 +25,8 @@ Future<List<LocalAudioInfo>> scanAllLocalAudio() async {
   final AudioDbHelper audioDbHelper = AudioDbHelper();
 
   // 要扫描的文件夹(在实机上扫不出来)
-  // String rootDir = '/storage/emulated/0/Music/test';
-  String rootDir = '/storage/emulated/0';
+  String rootDir = '/storage/emulated/0/Music/test';
+  // String rootDir = '/storage/emulated/0';
   // String rootDir = "/storage/emulated/0/netease/cloudmusic/Cache/LTBeep";
   // 其中不扫描的文件夹
   List<String> noPermissionDirList = [
@@ -49,13 +47,6 @@ Future<List<LocalAudioInfo>> scanAllLocalAudio() async {
   if (!storageStatus.isGranted) {
     await Permission.storage.request();
   }
-
-  final filepath = await getApplicationDocumentsDirectory();
-  print("IIIIIIIIIIIIIIIIIIIIIII$filepath");
-
-  await createAlbumCacheDirectory("audio_album_arts");
-
-  audioDbHelper.deleteDb();
 
   /// 2 获取可扫描的文件夹
   // 获取所有第一级文件夹(allRootFileSystemEntityList)
@@ -130,17 +121,17 @@ Future<List<LocalAudioInfo>> scanAllLocalAudio() async {
       );
 
       // 测试，加几首歌到我的最爱
-      if (audioInfo.audioName.length > 40) {
-        // 也存到默认全局歌单去
-        var audioPlayListInfo2 = LocalAudioPlaylist(
-          audioId: audioInfo.audioId,
-          audioPlaylistId: GlobalConstants.localAudioMyFavoriteId,
-          audioPlaylistName: GlobalConstants.localAudioMyFavoriteName,
-          audioName: audioInfo.audioName,
-          audioPath: audioInfo.audioPath,
-        );
-        await audioDbHelper.insertLocalAudioPlaylist(audioPlayListInfo2);
-      }
+      // if (audioInfo.audioName.length > 40) {
+      //   // 也存到默认全局歌单去
+      //   var audioPlayListInfo2 = LocalAudioPlaylist(
+      //     audioId: audioInfo.audioId,
+      //     audioPlaylistId: GlobalConstants.localAudioMyFavoriteId,
+      //     audioPlaylistName: GlobalConstants.localAudioMyFavoriteName,
+      //     audioName: audioInfo.audioName,
+      //     audioPath: audioInfo.audioPath,
+      //   );
+      //   await audioDbHelper.insertLocalAudioPlaylist(audioPlayListInfo2);
+      // }
 
       // print(audioPlayListInfo);
       // print("_____________MMMMMMMMM");
@@ -150,7 +141,7 @@ Future<List<LocalAudioInfo>> scanAllLocalAudio() async {
     }
   }
 
-  print("2sssssssds222222${audioList.length}");
+  print("2sssssssds222222--${audioList.length}");
 
   // 返回扫描出来并成功加入db的音频信息列表
   return audioList;

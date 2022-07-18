@@ -53,7 +53,7 @@ class AudioDbHelper {
 
     var initMyFavoriteLapRow = LocalAudioPlaylist(
       audioPlaylistId: GlobalConstants.localAudioMyFavoriteId,
-      audioPlaylistName: GlobalConstants.localAudioMyFavoriteId,
+      audioPlaylistName: GlobalConstants.localAudioMyFavoriteName,
       audioId: "",
       audioName: "",
       audioPath: "",
@@ -227,7 +227,21 @@ class AudioDbHelper {
     return result;
   }
 
-  /// 获取歌单信息
+// 查询指定音频在指定歌单中是否存在
+  Future<int> checkIsAudioInPlaylist(
+    String lapId,
+    String audioId,
+  ) async {
+    Database db = await database;
+    var result = await db.query(
+      SqliteSqlStatements.tableNameOfLocalAudioPlaylist,
+      where: "audioPlaylistId=? and audioId=?",
+      whereArgs: [lapId, audioId],
+    );
+    return result.length;
+  }
+
+  /// --- 获取歌单信息？？？？？？？？这个可选参数的判断有问题，只能传一个
   // 有歌单id、歌单name或者不传，都查询符合条件的含歌曲的完整歌单
   // 如果isFull为false，则不需要歌单里面的歌曲，只是查有几张歌单，获取id之类的，用于添加歌曲等
   Future<List<LocalAudioPlaylist>> getLocalAudioPlaylist({
@@ -240,6 +254,7 @@ class AudioDbHelper {
     // 根据传入参数，构建查询条件
     var where = "";
     var whereArgs = [];
+    // 默认查询歌单带其中音频的所有栏位
     var columns = [
       "audioPlaylistId",
       "audioPlaylistName",
@@ -248,34 +263,52 @@ class AudioDbHelper {
       "audioPath",
     ];
 
+    // 有传id或者name，或者两者都传，拼好条件
     if (lapId != null) {
-      where = "audioPlaylistId = ?";
-      whereArgs = [lapId];
-    } else if (lapName != null) {
-      where = "audioPlaylistName = ?";
-      whereArgs = [lapName];
-    } else {
-      where = "audioPlaylistId != ?";
+      where += "audioPlaylistId = ? and";
+      whereArgs.add(lapId);
+    }
+    if (lapName != null) {
+      where += "audioPlaylistName = ? and";
+      whereArgs.add(lapName);
+    }
+    // 但如果两者都没传，则为查询全部，条件重新拼
+    if (lapId == null && lapName == null) {
+      where = "audioPlaylistId != ? and";
       whereArgs = [""];
     }
 
-    if (isFull = false) {
+    // 如果不是查询所有栏位，则只查询播放列表基本信息，不含其中音频
+    if (isFull == false) {
       columns = ["audioPlaylistId", "audioPlaylistName"];
     }
+
+    // 因为不知道传入的id是都有还是只有一个，先传的那个，所以 where 最后都有个and,作为条件是，要先去掉
+    var realWhere = where;
+    if (where.endsWith("and")) {
+      realWhere = where.substring(0, where.length - 4);
+    }
+
+    print(
+        "000---------$realWhere--$columns--$whereArgs--$lapId--$lapName--$isFull");
 
     final List<Map<String, dynamic>> maps = await db.query(
       SqliteSqlStatements.tableNameOfLocalAudioPlaylist,
       columns: columns,
-      where: where,
+      distinct: true,
+      where: realWhere,
       whereArgs: whereArgs,
     );
+
+    print("9999999999999999999---${maps.length}");
+    print("$maps");
 
     //将 List<Map<String, dynamic> 转换成 List<> 数据类型
     return List.generate(maps.length, (i) {
       return LocalAudioPlaylist(
-        audioId: maps[i]['audioId'],
         audioPlaylistId: maps[i]['audioPlaylistId'],
-        audioPlaylistName: maps[i]['audioPlaylistId'],
+        audioPlaylistName: maps[i]['audioPlaylistName'],
+        audioId: maps[i]['audioId'] ?? "",
         audioName: maps[i]['audioName'] ?? "",
         audioPath: maps[i]['audioPath'] ?? "",
       );

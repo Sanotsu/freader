@@ -32,16 +32,16 @@ class LocalAudioInfo {
 // 正常来讲还有很多功能，比如当前听到指定歌单的哪一首歌什么的，各种用户状态什么的，先不弄了。
 class LocalAudioPlaylist {
   // 歌单编号（如果某些平台有的，可以用来查询。否则就是本地uuid）
-  final String audioPlaylistId;
+  late String audioPlaylistId;
   // 歌单名称
-  final String audioPlaylistName;
+  late String audioPlaylistName;
   // 音频编号 （如果是平台的歌单，那肯定里面的歌也有对应的id。否则就是本地的uuid）
-  final String audioId;
+  late String audioId;
   // 为了方便直接重复的基本数据，`避免 联合查询或者使用rawQuery(),还要新建复合后的类型`
-  final String audioName; // 音频名称
-  final String audioPath; // 本地路径
+  late String audioName; // 音频名称
+  late String audioPath; // 本地路径
 
-  const LocalAudioPlaylist({
+  LocalAudioPlaylist({
     required this.audioPlaylistId,
     required this.audioPlaylistName,
     required this.audioId,
@@ -65,5 +65,25 @@ class LocalAudioPlaylist {
   String toString() {
     return '''LocalAudioPlaylist{audioPlaylistId: $audioPlaylistId, audioPlaylistName:$audioPlaylistName,
     audioId:$audioId,audioName:$audioName,audioPath:$audioPath}''';
+  }
+
+  /// 在音频列表的音频元数据的额外属性上用字符串
+  // 为了能转换为string，还能再转回类型来。
+  LocalAudioPlaylist.fromJson(Map<String, dynamic> json) {
+    audioPlaylistId = json['audioPlaylistId'];
+    audioPlaylistName = json['audioPlaylistName'];
+    audioId = json['audioId'] ?? "";
+    audioName = json['audioName'] ?? "";
+    audioPath = json['audioPath'] ?? "";
+  }
+
+  Map<String, dynamic> toJson() {
+    final _data = <String, dynamic>{};
+    _data['audioPlaylistId'] = audioPlaylistId;
+    _data['audioPlaylistName'] = audioPlaylistName;
+    _data['audioId'] = audioId;
+    _data['audioName'] = audioName;
+    _data['audioPath'] = audioPath;
+    return _data;
   }
 }
