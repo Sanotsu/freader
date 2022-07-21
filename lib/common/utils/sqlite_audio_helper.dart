@@ -153,7 +153,7 @@ class AudioDbHelper {
     return result;
   }
 
-  /// 查询音频信息---？？？？？？？？也有问题，每次只能传一个参数
+  /// 查询音频信息---？？？？？？？？也有问题，每次只能传一个参数，也需要查path，常用
   // 如果有传id，用id精确查；有传name，用name模糊查；都没有，查所有。
   Future<List<LocalAudioInfo>> queryLocalAudioInfo({
     String? audioId,
@@ -261,6 +261,22 @@ class AudioDbHelper {
       SqliteSqlStatements.tableNameOfLocalAudioPlaylist,
       where: "audioPlaylistId=? and audioId=?",
       whereArgs: [lapId, audioId],
+    );
+    return result.length;
+  }
+
+  // 【通过名称】查询指定音频在指定歌单中是否存在
+  //      比如扫描音频的时候，只有扫描的文件名和下拉选择的歌单名，没有id
+  //      配合上一个函数，也多一个用name匹配的
+  Future<int> checkIsAudioInPlaylistByName(
+    String lapName,
+    String audioName,
+  ) async {
+    Database db = await database;
+    var result = await db.query(
+      SqliteSqlStatements.tableNameOfLocalAudioPlaylist,
+      where: "audioPlaylistName=? and audioName=?",
+      whereArgs: [lapName, audioName],
     );
     return result.length;
   }

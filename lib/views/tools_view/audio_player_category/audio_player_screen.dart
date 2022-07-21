@@ -12,6 +12,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:freader/common/personal/constants.dart';
 import 'package:freader/common/utils/sqlite_audio_helper.dart';
 import 'package:freader/models/app_embedded/local_audio_state.dart';
+import 'package:freader/views/tools_view/audio_player_category/audio_player_widget/audio_scan_page.dart';
 import 'package:freader/views/tools_view/audio_player_category/audio_player_widget/fetch_audio_data.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:just_audio_background/just_audio_background.dart';
@@ -373,18 +374,51 @@ class AudioPlayScreenState extends State<AudioPlayScreen> {
 
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: const [
+                      children: [
+                        IconButton(
+                          icon: const Icon(
+                            Icons.manage_search,
+                            color: Colors.blue,
+                          ),
+                          onPressed: () {
+                            // Navigator.push(
+                            //   context,
+                            //   MaterialPageRoute(
+                            //     builder: (context) => const AudioScanPage(),
+                            //   ),
+                            // );
+
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (BuildContext ctx) {
+                                  return const AudioScanPage();
+                                },
+                              ),
+                            ).then((value) {
+                              print("这是 扫描全盘后  返回的数据： $value");
+                              // 在扫描全盘页面返回后，重新获取添加到的最新歌单中，更新当前歌单
+
+                              if (value != null && value != "") {
+                                setState(() {
+                                  currentPlaylistName = value;
+                                });
+
+                                buildSelectPlaylist(currentPlaylistName);
+                              }
+                            });
+                          },
+                        ),
                         // 歌单管理页面后续还是要做的
-                        Padding(
+                        const Padding(
                           padding: EdgeInsets.only(left: 18.0),
                           child: Icon(Icons.list, color: Colors.black),
                         ),
                         // 扫描本地音乐也应该更丰富（默认点击这个按钮就执行全盘扫描）
-                        Icon(Icons.manage_search, color: Colors.black),
+                        const Icon(Icons.manage_search, color: Colors.black),
                         // 本地音乐搜索也跑不了吧（至少需要一个歌单中扫描并能定位到其位置的功能）
-                        Icon(Icons.search, color: Colors.black),
+                        const Icon(Icons.search, color: Colors.black),
                         // 其他的就不管了
-                        Padding(
+                        const Padding(
                           padding: EdgeInsets.only(right: 18.0),
                           child: Icon(Icons.lyrics, color: Colors.grey),
                         ),
@@ -534,7 +568,7 @@ class AudioPlayScreenState extends State<AudioPlayScreen> {
                                 // 后续这些dialog等通用配置可以单独列，不要这样到处size都不同
                                 return AlertDialog(
                                   title: Text(
-                                    "搜索歌单名:",
+                                    "新增歌单名:",
                                     style: TextStyle(fontSize: 18.sp),
                                   ),
                                   content: TextField(
@@ -756,7 +790,18 @@ class AudioPlayScreenState extends State<AudioPlayScreen> {
                           ),
                         ),
                         onDismissed: (dismissDirection) {
+                          // 从当前歌单移除
                           _playlist.removeAt(i);
+
+                          // 在音频元数据的 extras属性中有存入对应其db信息，取出来，转型
+                          var selectedAudioInPlaylist =
+                              LocalAudioPlaylist.fromJson(
+                                  (sequence[i].tag.extras['playlistInfo']));
+
+                          audioDbHelper.removeAudioFromLocalAudioPlaylist(
+                            selectedAudioInPlaylist.audioPlaylistId,
+                            selectedAudioInPlaylist.audioId,
+                          );
                         },
                         // 歌单列表显示的内容（音频名称、歌手名、专辑名等）
                         child: Material(
