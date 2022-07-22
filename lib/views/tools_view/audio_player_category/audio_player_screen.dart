@@ -1,6 +1,6 @@
 // ignore_for_file: avoid_print
 
-import 'dart:io';
+import 'dart:convert';
 
 import 'package:audio_session/audio_session.dart';
 import 'package:dropdown_search/dropdown_search.dart';
@@ -13,7 +13,6 @@ import 'package:freader/common/personal/constants.dart';
 import 'package:freader/common/utils/sqlite_audio_helper.dart';
 import 'package:freader/models/app_embedded/local_audio_state.dart';
 import 'package:freader/views/tools_view/audio_player_category/audio_player_widget/audio_scan_page.dart';
-import 'package:freader/views/tools_view/audio_player_category/audio_player_widget/fetch_audio_data.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:just_audio_background/just_audio_background.dart';
 
@@ -62,7 +61,7 @@ class AudioPlayScreenState extends State<AudioPlayScreen> {
   final playlistCreateController = TextEditingController();
 
 // test =============================
-
+  var defaultAlbumArtUrl = "images/tools_image/music-player.jpg";
   @override
   void initState() {
     super.initState();
@@ -89,15 +88,9 @@ class AudioPlayScreenState extends State<AudioPlayScreen> {
 
     // audioDbHelper.deleteDb();
 
-    // 1 查看默认歌曲列表是否有歌
-    //      有歌，说明之前扫描过，就不扫描了,直接读取默认歌单的数据；
-    //      否则，首次使用，扫描全盘，存入默认歌单
-    var defaultAudioList = await audioDbHelper.queryLocalAudioInfo();
-
-    // print("defaultAudionList-------${defaultAudionList.length}");
-
-    // === 查看歌单列表
-    var tempList = await audioDbHelper.getLocalAudioPlaylist(isFull: false);
+    // 1 查看数据库中存在的歌单
+    //      供用户切换，显示歌单音乐
+    var tempList = await audioDbHelper.queryLocalAudioPlaylist();
     print("^^^^^^^^^^^^^^^^^^${tempList.length}");
 
     setState(() {
@@ -106,26 +99,20 @@ class AudioPlayScreenState extends State<AudioPlayScreen> {
 
       allPlaylist = [];
       for (var e in tempList) {
-        allPlaylist.add(e.audioPlaylistName);
+        allPlaylist.add(e.playlistName);
       }
     });
 
-    print("[[[[[[[[[[[[[[[[[[[[[[${defaultAudioList.length}");
-    // db中是否有歌曲存在？有的话，就假装扫描过。（测试：如果没有就默认全盘扫描。但最佳是用户手动扫描）
-    if (defaultAudioList.isEmpty) {
-      await scanAllLocalAudio();
-    }
-
-    // 2 获取默认歌单的数据，构建歌单列表(测试：全盘扫描是，默认名字长度>40的存到了我的最爱)
-    List<LocalAudioPlaylist> list = await audioDbHelper.getLocalAudioPlaylist(
+    // 2 获取默认歌单的数据，构建歌单列表
+    //      进入播放主页面，显示我的最爱歌单
+    List<LocalPlaylistHasAudio> list =
+        await audioDbHelper.getLocalPlaylistHasAudio(
       lapId: GlobalConstants.localAudioMyFavoriteId,
     );
 
     // 初始化时，默认为我的最爱歌单
     currentPlaylistName = GlobalConstants.localAudioMyFavoriteName;
-
     print("favoriteAudioList ----------- ${list.length}");
-
     _playlist = await buildPlaylist(list);
 
     // 3 播放插件绑定播放列表
@@ -146,9 +133,7 @@ class AudioPlayScreenState extends State<AudioPlayScreen> {
   /// 这会很慢，歌单很长的话就加载巨久，而且还是每次进页面都要加载这么久。
   /// 最好的办法当然是把元数据放到db了，不过这只是个demo，不做这。
   /// 其实db缺少的栏位很多，只是个示例就不强迫了
-  buildPlaylist(List<LocalAudioPlaylist> list) async {
-    var defaultAlbumArtUrl = "images/tools_image/music-player.jpg";
-
+  buildPlaylist(List<LocalPlaylistHasAudio> list) async {
     List<AudioSource> tempChildren = [];
 
     // 1 遍历歌单歌曲地址，获取元数据信息，构建列表组件
@@ -156,23 +141,47 @@ class AudioPlayScreenState extends State<AudioPlayScreen> {
       var ele = list[i];
 
       // 如果路径为空，直接跳了
-      if (ele.audioPath == "") {
+      if (ele.audioPath == null || ele.audioPath == "") {
         continue;
       }
 
-      var metadata = await MetadataRetriever.fromFile(File(ele.audioPath));
+      // print("<<<<<<<<<>>>>>>>>>>>>>${(ele.extras!["metadata"])}");
 
-      // 音频元数据额外属性，如果有内嵌专辑图片，就用。没有，预设图篇
-      // 还需要保存音频文件在数据库的数据，例如audio的id、name、path等，供移除或者添加到其他歌单时有值可用
-      // print("-----------<<<<<<<<$metadata   ---${ele.toJson().toString()} ");
-      Map<String, dynamic> cusExtras = {
-        "playlistInfo": ele.toJson(),
-        "albumArtUrl": defaultAlbumArtUrl,
-      };
-      if (metadata.albumArt != null) {
-        cusExtras.addAll({"albumArtUint8List": metadata.albumArt});
-      }
+      /// 目前这个cusExtras保存的东西就很多了
+      ///     1 音频新增到db时的文件元数据，"metadata"
+      ///     2 本条 LocalPlaylistHasAudio 的row数据， "playlistHasAudio"
+      ///  这里不先转换json而是直接赋值的的话，会导致因为引用类型的原因，在addAll()之后修改了原本的extrax的结构，会出问题
+      Map<String, dynamic> cusExtras =
+          Map<String, dynamic>.from(jsonDecode(jsonEncode(ele.extras!)));
+      cusExtras.addAll({
+        "playlistHasAudio": ele.toJson(),
+      });
 
+      // 2022-07-22 感觉是插件源代码有问题，NoSuchMethodError: Class 'List<dynamic>' has no instance method 'split'.
+      /* 这个转json居然不行
+        {
+          metadata: {
+            trackName: 四时趣, 
+            trackArtistNames: [_阿雾_], 
+            albumName: 四时趣, 
+            albumArtistName: null, 
+            trackNumber: null, 
+            albumLength: null, 
+            year: null, 
+            genre: null, 
+            authorName: null,
+            writerName: null, 
+            discNumber: null, 
+            mimeType: audio/mpeg, 
+            trackDuration: 201587, 
+            bitrate: 320000, 
+            filePath: /storage/emulated/0/Music/test/_阿雾_ - 四时趣.mp3
+          }
+        }
+      */
+      // var metadata = Metadata.fromJson(((ele.extras!["metadata"])));
+
+      var metadata = ele.extras!["metadata"];
       // 把歌单第一首，列为正在播放的
       if (tempChildren.isEmpty) {
         tempChildren.add(
@@ -180,14 +189,13 @@ class AudioPlayScreenState extends State<AudioPlayScreen> {
             // start: const Duration(seconds: 60),
             // end: const Duration(seconds: 90),
             child: AudioSource.uri(
-              Uri.parse(metadata.filePath!),
+              Uri.parse(ele.audioPath!),
             ),
             tag: MediaItem(
-              id: metadata.trackName ??
-                  const Uuid().v1() + (metadata.albumName ?? ""),
-              artist: metadata.trackArtistNames.toString(),
-              album: metadata.albumName,
-              title: metadata.trackName ?? ele.audioName,
+              id: ele.audioId,
+              title: ele.audioName ?? metadata["trackName"] ?? "",
+              artist: metadata["authorName"] ?? "",
+              album: metadata["albumName"] ?? "",
               extras: cusExtras,
             ),
           ),
@@ -198,13 +206,12 @@ class AudioPlayScreenState extends State<AudioPlayScreen> {
       // 其他的音频，顺序加入列表组件
       tempChildren.add(
         AudioSource.uri(
-          Uri.parse(metadata.filePath!),
+          Uri.parse(ele.audioPath!),
           tag: MediaItem(
-            id: metadata.trackName ??
-                const Uuid().v1() + (metadata.albumName ?? ""),
-            artist: metadata.trackArtistNames.toString(),
-            album: metadata.albumName,
-            title: metadata.trackName ?? ele.audioName,
+            id: ele.audioId,
+            title: ele.audioName ?? metadata["trackName"] ?? "",
+            artist: metadata["authorName"],
+            album: metadata["albumName"],
             extras: cusExtras,
           ),
         ),
@@ -226,7 +233,7 @@ class AudioPlayScreenState extends State<AudioPlayScreen> {
     }
 
     var currentAudionListInfo =
-        await audioDbHelper.getLocalAudioPlaylist(lapName: playlistName);
+        await audioDbHelper.getLocalPlaylistHasAudio(lapName: playlistName);
     var temp = await buildPlaylist(currentAudionListInfo);
 
     setState(() {
@@ -252,7 +259,7 @@ class AudioPlayScreenState extends State<AudioPlayScreen> {
       return;
     }
 
-    var currentAudionListInfo = await audioDbHelper.getLocalAudioPlaylist(
+    var currentAudionListInfo = await audioDbHelper.getLocalPlaylistHasAudio(
       lapName: playlistName,
       audioName: audioName,
     );
@@ -281,7 +288,8 @@ class AudioPlayScreenState extends State<AudioPlayScreen> {
     });
 
     // 1 查询是否已有同名歌单
-    var list = await audioDbHelper.getLocalAudioPlaylist(lapName: playlistName);
+    var list =
+        await audioDbHelper.getLocalPlaylistHasAudio(lapName: playlistName);
     if (list.isNotEmpty) {
       Fluttertoast.showToast(msg: "已存在同名歌单!", toastLength: Toast.LENGTH_SHORT);
       return;
@@ -291,17 +299,14 @@ class AudioPlayScreenState extends State<AudioPlayScreen> {
     var playlistId = const Uuid().v1();
 
     var lap = LocalAudioPlaylist(
-      audioPlaylistId: playlistId,
-      audioPlaylistName: playlistName,
-      audioId: "",
-      audioName: "",
-      audioPath: "",
+      playlistId: playlistId,
+      playlistName: playlistName,
     );
 
     await audioDbHelper.insertLocalAudioPlaylist(lap);
 
     // 3 新增成功后，重新查询所有的歌单，并切换当前歌单切换为新增的歌单
-    var tempList = await audioDbHelper.getLocalAudioPlaylist(isFull: false);
+    var tempList = await audioDbHelper.queryLocalAudioPlaylist();
 
     setState(() {
       allDbPlaylist = [];
@@ -309,7 +314,7 @@ class AudioPlayScreenState extends State<AudioPlayScreen> {
 
       allPlaylist = [];
       for (var e in tempList) {
-        allPlaylist.add(e.audioPlaylistName);
+        allPlaylist.add(e.playlistName);
       }
       currentPlaylistName = playlistName;
 
@@ -324,7 +329,7 @@ class AudioPlayScreenState extends State<AudioPlayScreen> {
     await audioDbHelper.deleteLocalAudioPlaylist(name: currentPlaylistName);
 
     // 2 删除成功后，重新查询所有的歌单，并切换当前歌单切换为新增的歌单（【【【可以抽成一个函数，参数是当前要绑定的列表名称）
-    var tempList = await audioDbHelper.getLocalAudioPlaylist(isFull: false);
+    var tempList = await audioDbHelper.queryLocalAudioPlaylist();
 
     setState(() {
       allDbPlaylist = [];
@@ -332,7 +337,7 @@ class AudioPlayScreenState extends State<AudioPlayScreen> {
 
       allPlaylist = [];
       for (var e in tempList) {
-        allPlaylist.add(e.audioPlaylistName);
+        allPlaylist.add(e.playlistName);
       }
       currentPlaylistName = GlobalConstants.localAudioMyFavoriteName;
 
@@ -707,7 +712,8 @@ class AudioPlayScreenState extends State<AudioPlayScreen> {
           }
           final metadata = state!.currentSource!.tag as MediaItem;
 
-          // print(">>>>>>>>>>>.........>>>>>>>>$metadata");
+          final extrasMetadata = metadata.extras!["metadata"];
+          print(">>>>>>>>>>>.........>>>>>>>>$metadata");
 
           return Column(
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -717,9 +723,9 @@ class AudioPlayScreenState extends State<AudioPlayScreen> {
                   padding: const EdgeInsets.all(8.0),
                   child: Center(
                     // 有内嵌专辑封面信息，就显示，没有就空白占位
-                    child: ((metadata.extras)?["albumArtUint8List"] != null)
+                    child: ((extrasMetadata)?["albumArtUint8List"] != null)
                         ? Image.memory(
-                            metadata.extras!["albumArtUint8List"],
+                            extrasMetadata!["albumArtUint8List"],
                             height: MediaQuery.of(context).size.height >
                                     MediaQuery.of(context).size.width
                                 ? MediaQuery.of(context).size.width
@@ -730,7 +736,7 @@ class AudioPlayScreenState extends State<AudioPlayScreen> {
                                 : 256.0,
                           )
                         : Image.asset(
-                            metadata.extras!["albumArtUrl"],
+                            defaultAlbumArtUrl,
                             height: MediaQuery.of(context).size.height >
                                     MediaQuery.of(context).size.width
                                 ? MediaQuery.of(context).size.width
@@ -795,11 +801,11 @@ class AudioPlayScreenState extends State<AudioPlayScreen> {
 
                           // 在音频元数据的 extras属性中有存入对应其db信息，取出来，转型
                           var selectedAudioInPlaylist =
-                              LocalAudioPlaylist.fromJson(
-                                  (sequence[i].tag.extras['playlistInfo']));
+                              LocalPlaylistHasAudio.fromJson(
+                                  (sequence[i].tag.extras['playlistHasAudio']));
 
                           audioDbHelper.removeAudioFromLocalAudioPlaylist(
-                            selectedAudioInPlaylist.audioPlaylistId,
+                            selectedAudioInPlaylist.playlistId,
                             selectedAudioInPlaylist.audioId,
                           );
                         },
@@ -824,8 +830,9 @@ class AudioPlayScreenState extends State<AudioPlayScreen> {
                     //长按指定歌曲，弹窗供加入指定别的歌单
                     onLongPress: () {
                       // 在音频元数据的 extras属性中有存入对应其db信息，取出来，转型
-                      var selectedAudioInPlaylist = LocalAudioPlaylist.fromJson(
-                          (sequence[i].tag.extras['playlistInfo']));
+                      var selectedAudioInPlaylist =
+                          LocalPlaylistHasAudio.fromJson(
+                              (sequence[i].tag.extras['playlistHasAudio']));
 
                       showDialog(
                         context: context,
@@ -868,34 +875,34 @@ class AudioPlayScreenState extends State<AudioPlayScreen> {
                                   // 选择了需要添加的歌单之后，取得其歌单的id信息
                                   // 这里必然是存在的（没有bug的话），所以不做其他检查了
                                   var selectPlaylist = allDbPlaylist.where(
-                                      (row) => (row.audioPlaylistName ==
+                                      (row) => (row.playlistName ==
                                           selectedPlaylistForAudioAdd));
 
                                   //点击确定之后，
                                   //如果已存在，则不新增。否则，新增
                                   var alreadyList = await audioDbHelper
                                       .checkIsAudioInPlaylist(
-                                    selectPlaylist.first.audioPlaylistId,
+                                    selectPlaylist.first.playlistId,
                                     selectedAudioInPlaylist.audioId,
                                   );
 
                                   //如果不存在，把当前音频添加到选中的歌单去（新增db row）
                                   if (alreadyList <= 0) {
                                     await audioDbHelper
-                                        .insertLocalAudioPlaylist(
-                                            LocalAudioPlaylist(
-                                                audioPlaylistId: selectPlaylist
-                                                    .first.audioPlaylistId,
-                                                audioPlaylistName:
-                                                    selectedPlaylistForAudioAdd,
-                                                audioId: selectedAudioInPlaylist
-                                                    .audioId,
-                                                audioName:
-                                                    selectedAudioInPlaylist
-                                                        .audioName,
-                                                audioPath:
-                                                    selectedAudioInPlaylist
-                                                        .audioPath));
+                                        .insertLocalPlaylistHasAudio(
+                                            LocalPlaylistHasAudio(
+                                      localPlaylistHasAudioId:
+                                          const Uuid().v1(),
+                                      playlistId:
+                                          selectPlaylist.first.playlistId,
+                                      audioId: selectedAudioInPlaylist.audioId,
+                                      playlistName: selectedPlaylistForAudioAdd,
+                                      audioName:
+                                          selectedAudioInPlaylist.audioName,
+                                      audioPath:
+                                          selectedAudioInPlaylist.audioPath,
+                                      extras: selectedAudioInPlaylist.extras,
+                                    ));
                                   }
                                   Navigator.of(context).pop();
                                 },

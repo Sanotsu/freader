@@ -4,6 +4,7 @@ import 'dart:io';
 
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_media_metadata/flutter_media_metadata.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:freader/common/personal/constants.dart';
@@ -27,8 +28,8 @@ class _AudioScanPageState extends State<AudioScanPage> {
   final AudioDbHelper audioDbHelper = AudioDbHelper();
 
   // 要扫描的文件夹(在实机上扫不出来)
-  String rootDir = '/storage/emulated/0/Music/test';
-  // String rootDir = '/storage/emulated/0';
+  // String rootDir = '/storage/emulated/0/Music/test';
+  String rootDir = '/storage/emulated/0';
   // String rootDir = "/storage/emulated/0/netease/cloudmusic/Cache/LTBeep";
   // 其中不扫描的文件夹
   List<String> noPermissionDirList = [
@@ -65,6 +66,9 @@ class _AudioScanPageState extends State<AudioScanPage> {
   // 是否正在执行加入歌单操作
   bool isAddingToPlaylist = false;
 
+// 默认占位专辑图片地址
+  var defaultAlbumArtUrl = "images/tools_image/music-player.jpg";
+
   late Color color;
 
   @override
@@ -75,7 +79,7 @@ class _AudioScanPageState extends State<AudioScanPage> {
 
   // === 查看歌单列表
   getAllPlaylist() async {
-    var tempList = await audioDbHelper.getLocalAudioPlaylist(isFull: false);
+    var tempList = await audioDbHelper.queryLocalAudioPlaylist();
 
     setState(() {
       allDbPlaylist = [];
@@ -83,7 +87,7 @@ class _AudioScanPageState extends State<AudioScanPage> {
 
       allPlaylist = [];
       for (var e in tempList) {
-        allPlaylist.add(e.audioPlaylistName);
+        allPlaylist.add(e.playlistName);
       }
     });
   }
@@ -179,24 +183,42 @@ class _AudioScanPageState extends State<AudioScanPage> {
 
       // 如果该音频文件未加入数据库音频信息基础表，则添加进去
       if (!alreadyFlag) {
+        // 获取音频元数据
+        var metadata = await MetadataRetriever.fromFile(File(f.path));
+
+        // extras只能保存metadata，没法简单的直接加，因为sqlite不支持map类型，再加其他属性需要自己得到string结果狗自己转
+        // Metadata 类型有实现toJson()和fronJson(),就借用好了
+
+        // var extras = {
+        //   "defaultAlbumArtUrl": defaultAlbumArtUrl,
+        //   "albumArtUint8List": metadata.albumArt,
+        //   "metadata": metadata.toJson(),
+        // };
+
         // 构建数据实例
         var audioInfo = LocalAudioInfo(
           audioName: audioName,
           audioPath: f.path,
           audioId: uuid.v1(),
+          artist: metadata.authorName,
+          album: metadata.albumName,
+          displayTitle: metadata.albumArtistName,
+          extras: metadata.toJson(),
         );
         await audioDbHelper.insertLocalAudioInfo(audioInfo);
 
         // 也存到默认全局歌单去
-        var audioPlayListInfo = LocalAudioPlaylist(
+        var playlistHasAudio = LocalPlaylistHasAudio(
+          localPlaylistHasAudioId: uuid.v1(),
+          playlistId: GlobalConstants.localAudioDeaultPlaylistId,
           audioId: audioInfo.audioId,
-          audioPlaylistId: GlobalConstants.localAudioDeaultPlaylistId,
-          audioPlaylistName: GlobalConstants.localAudioDeaultPlaylistName,
+          playlistName: GlobalConstants.localAudioDeaultPlaylistName,
           audioName: audioInfo.audioName,
           audioPath: audioInfo.audioPath,
+          extras: metadata.toJson(),
         );
 
-        await audioDbHelper.insertLocalAudioPlaylist(audioPlayListInfo);
+        await audioDbHelper.insertLocalPlaylistHasAudio(playlistHasAudio);
 
         // 插入db后，也更新前端显示存入db的音频信息数量列表的状态
         setState(() {
@@ -218,53 +240,41 @@ class _AudioScanPageState extends State<AudioScanPage> {
 
     // 取得其要添加的歌单的id信息
     var selectPlaylist = allDbPlaylist
-        .where((row) => (row.audioPlaylistName == selectedPlaylistName));
+        .where((row) => (row.playlistName == selectedPlaylistName));
 
     print("----$selectPlaylist");
 
     // 遍历把歌加入歌单
     //      如果该歌曲还没有到歌曲基础表，也得加进去
-    for (var element in selectedAudioList) {
+    for (FileSystemEntity element in selectedAudioList) {
       var fileName = element.path.split("/").last;
-      //点击确定之后，
-      //如果已存在，则不新增。否则，新增
+      //点击确定之后，加入指定歌单
+      //        注意：因为在扫盘扫描时，已经把不存在db的音频加入了基础信息表，此处不必重复加入，
+      //        但需要获取该音频的基础信息，供加入歌单时使用（如果一切正常，应该只有一条了）
+
+      // 先确认 是否存在于歌曲基础表。没有就加入
+      var audioInfoAlreadyList = await audioDbHelper.queryLocalAudioInfo(
+          audioName: fileName, audioPath: element.path);
+
+      //在确认 是否已存在与歌单中。如果已存在，则不新增。否则，新增
       var alreadyList = await audioDbHelper.checkIsAudioInPlaylistByName(
         selectedPlaylistName,
         fileName,
       );
 
-      // 是否存在与歌曲基础表
-      var audioInfoAlreadyList =
-          await audioDbHelper.queryLocalAudioInfo(audioName: fileName);
-
-      var alreadyFlag = false;
-      for (var ele in audioInfoAlreadyList) {
-        if (element.path == ele.audioPath) {
-          alreadyFlag = true;
-          break;
-        }
-      }
-
-      var uid = uuid.v1();
-
-      if (!alreadyFlag) {
-        await audioDbHelper.insertLocalAudioInfo(LocalAudioInfo(
-          audioName: fileName,
-          audioPath: element.path,
-          audioId: uid,
-        ));
-      }
-
       //如果不存在，把当前音频添加到选中的歌单去（新增db row）
       if (alreadyList <= 0) {
-        var lap = LocalAudioPlaylist(
-            audioPlaylistId: selectPlaylist.first.audioPlaylistId,
-            audioPlaylistName: selectedPlaylistName,
-            audioId: uid,
-            audioName: element.path.split("/").last,
-            audioPath: element.path);
+        var lap = LocalPlaylistHasAudio(
+          localPlaylistHasAudioId: uuid.v1(),
+          playlistId: selectPlaylist.first.playlistId,
+          audioId: audioInfoAlreadyList.first.audioId,
+          playlistName: selectedPlaylistName,
+          audioName: element.path.split("/").last,
+          audioPath: element.path,
+          extras: audioInfoAlreadyList.first.extras,
+        );
 
-        await audioDbHelper.insertLocalAudioPlaylist(lap);
+        await audioDbHelper.insertLocalPlaylistHasAudio(lap);
       }
     }
 
@@ -273,141 +283,9 @@ class _AudioScanPageState extends State<AudioScanPage> {
     });
   }
 
-  // void _scanAllLocalAudio() async {
-  //   setState(() {
-  //     sacnLoading = true;
-  //     currentDir = "";
-  //     currentFile = "";
-  //   });
-  //
-  //   //1 获取存储权限
-  //   var status = await Permission.manageExternalStorage.status;
-  //   if (status.isDenied) {
-  //     await Permission.manageExternalStorage.request();
-  //   }
-  //   var storageStatus = await Permission.storage.status;
-  //   if (!storageStatus.isGranted) {
-  //     await Permission.storage.request();
-  //   }
-  //
-  //   /// 2 获取可扫描的文件夹
-  //   // 获取所有第一级文件夹(allRootFileSystemEntityList)
-  //   var allRootFSEList = Directory(rootDir).listSync();
-  //
-  //   // 临时获取所有文件夹的所有文件
-  //   List<FileSystemEntity> tempList = [];
-  //
-  //   // 因为 /storage/emulated/0/Android 没有权限掃描，所以其他的再递归掃描
-  //   for (var fse in allRootFSEList) {
-  //     // 为了方便看清楚，才延迟显示1秒
-  //     await Future.delayed(const Duration(microseconds: 100));
-  //
-  //     // 如果是根文件夹下的文件，则直接加入list
-  //     if (fse.runtimeType.toString() == "_File") {
-  //       tempList.add(fse);
-  //     }
-  //
-  //     // 如果是文件夹，且不为没权限扫描的文件夹,则递归便利其文件夹，把文件加入list，不是文件则忽略
-  //     if (fse.runtimeType.toString() == "_Directory" &&
-  //         !noPermissionDirList.contains(fse.path)) {
-  //       await Directory(fse.path).list(recursive: true).forEach((f) {
-  //         // 显示当前扫描的文件夹和文件
-  //         setState(() {
-  //           currentDir = fse.path;
-  //           currentFile = f.path;
-  //         });
-  //
-  //         if (f.runtimeType.toString() == "_File") {
-  //           tempList.add(f);
-  //
-  //           if (fileExtensionList
-  //               .contains(path.extension(f.path).toLowerCase())) {
-  //             // 构建数据实例
-  //             var audioInfo = LocalAudioInfo(
-  //               audioName: f.path.split("/").last,
-  //               audioPath: f.path,
-  //               audioId: uuid.v1(),
-  //             );
-  //             audioList.add(audioInfo);
-  //           }
-  //         }
-  //       });
-  //     }
-  //     // 其他的例如link，就不管了
-  //   }
-  //
-  //   // 重新扫描时，先清空
-  //   audioList = [];
-  //   scannedAudioList = [];
-//
-  //   // 3 筛选满足后缀条件的文件构建音乐信息实例
-  //   for (var file in tempList) {
-  //     if (fileExtensionList.contains(path.extension(file.path).toLowerCase())) {
-  //       // 构建数据实例
-  //       var audioInfo = LocalAudioInfo(
-  //         audioName: file.path.split("/").last,
-  //         audioPath: file.path,
-  //         audioId: uuid.v1(),
-  //       );
-//
-  //       // ====测试，新增到db一条，就给显示数字—+1
-  //       setState(() {
-  //         scannedAudioList.add(audioInfo);
-  //       });
-  //     }
-  //   }
-//
-  //   // 4 将满足条件的音乐信息实例添加到数据库(如果数据库中已有同名、且同位置的，则不新增)
-  //   for (var audioInfo in audioList) {
-  //     var alreadyList = await audioDbHelper.queryLocalAudioInfo(
-  //         audioName: audioInfo.audioName);
-  //
-  //     var alreadyFlag = false;
-  //     for (var ele in alreadyList) {
-  //       if (audioInfo.audioPath == ele.audioPath) {
-  //         alreadyFlag = true;
-  //         break;
-  //       }
-  //     }
-//
-  //     if (!alreadyFlag) {
-  //       await audioDbHelper.insertLocalAudioInfo(audioInfo);
-//
-  //       // 也存到默认全局歌单去
-  //       var audioPlayListInfo = LocalAudioPlaylist(
-  //         audioId: audioInfo.audioId,
-  //         audioPlaylistId: GlobalConstants.localAudioDeaultPlaylistId,
-  //         audioPlaylistName: GlobalConstants.localAudioDeaultPlaylistName,
-  //         audioName: audioInfo.audioName,
-  //         audioPath: audioInfo.audioPath,
-  //       );
-//
-  //       await audioDbHelper.insertLocalAudioPlaylist(audioPlayListInfo);
-//
-  //       // // ====测试，新增到db一条，就给显示数字—+1
-  //       // setState(() {
-  //       //   scannedAudioList.add(audioPlayListInfo);
-  //       // });
-  //     }
-  //   }
-//
-  //   // 5 新增成功后，显示当前扫描的音频总数量
-//
-  //   setState(() {
-  //     sacnLoading = false;
-  //     // scannedAudioList = audioList;
-  //   });
-  // }
-//
-  // saveAudioFileToPlaylistDB(FileSystemEntity file) {
-//
-  // }
-
   DataRow getRow(int index, [Color? color]) {
 // 将扫描到的音乐文件，配合索引，构建表格行数据
-// scannedAudioList
-// selectedAudioList
-//
+
     return DataRow(
       selected: selectedAudioList.contains(scannedAudioList[index]),
       onSelectChanged: (bool? value) {
@@ -426,7 +304,7 @@ class _AudioScanPageState extends State<AudioScanPage> {
       cells: [
         DataCell(
           Text(
-            scannedAudioList[index].path.split("/").last,
+            (scannedAudioList[index] as FileSystemEntity).path.split("/").last,
             textAlign: TextAlign.left,
             style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12.sp),
           ),
@@ -440,12 +318,15 @@ class _AudioScanPageState extends State<AudioScanPage> {
           Center(
             child: ListTile(
               title: Text(
-                scannedAudioList[index].path.split("/").last,
+                (scannedAudioList[index] as FileSystemEntity)
+                    .path
+                    .split("/")
+                    .last,
                 textAlign: TextAlign.left,
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12.sp),
               ),
               subtitle: Text(
-                scannedAudioList[index].path,
+                (scannedAudioList[index] as FileSystemEntity).path,
                 textAlign: TextAlign.left,
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12.sp),
               ),

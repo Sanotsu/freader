@@ -1,6 +1,7 @@
 // ignore_for_file: avoid_print
 
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:freader/common/personal/constants.dart';
@@ -42,21 +43,16 @@ class AudioDbHelper {
   void _createDb(Database db, int newVersion) async {
     await db.execute(SqliteSqlStatements.createTable4LocalAudioInfo);
     await db.execute(SqliteSqlStatements.createTable4LocalAudioPlaylist);
+    await db.execute(SqliteSqlStatements.createTable4LocalPlaylistHasAudio);
 // 在新建歌单表时，一并初始化几条默认歌单数据，用于扫描结果默认放置的位置
     var initDefaultLapRow = LocalAudioPlaylist(
-      audioPlaylistId: GlobalConstants.localAudioDeaultPlaylistId,
-      audioPlaylistName: GlobalConstants.localAudioDeaultPlaylistName,
-      audioId: "",
-      audioName: "",
-      audioPath: "",
+      playlistId: GlobalConstants.localAudioDeaultPlaylistId,
+      playlistName: GlobalConstants.localAudioDeaultPlaylistName,
     );
 
     var initMyFavoriteLapRow = LocalAudioPlaylist(
-      audioPlaylistId: GlobalConstants.localAudioMyFavoriteId,
-      audioPlaylistName: GlobalConstants.localAudioMyFavoriteName,
-      audioId: "",
-      audioName: "",
-      audioPath: "",
+      playlistId: GlobalConstants.localAudioMyFavoriteId,
+      playlistName: GlobalConstants.localAudioMyFavoriteName,
     );
 
     // 插入多条
@@ -101,7 +97,7 @@ class AudioDbHelper {
 
   // 删除sqlite的db文件（初始化数据库操作中那个path的值）
   void deleteDb() async {
-    print("开始删除內嵌的sqlite db文件");
+    print("开始删除內嵌的sqlite db文件 ${SqliteSqlStatements.audioDbName}");
 
     // 删除db或者关闭db都需要重置db为null，
     // 否则后续会保留之前的连接，以致出现类似错误：Unhandled Exception: DatabaseException(database_closed 5)
@@ -153,11 +149,12 @@ class AudioDbHelper {
     return result;
   }
 
-  /// 查询音频信息---？？？？？？？？也有问题，每次只能传一个参数，也需要查path，常用
-  // 如果有传id，用id精确查；有传name，用name模糊查；都没有，查所有。
+  /// 查询音频信息
+  // 如果有传id\name\path,只有name为可模糊查询
   Future<List<LocalAudioInfo>> queryLocalAudioInfo({
     String? audioId,
     String? audioName,
+    String? audioPath,
   }) async {
     Database db = await database;
 
@@ -165,20 +162,29 @@ class AudioDbHelper {
     var where = "";
     var whereArgs = [];
     if (audioId != null) {
-      where = "audioId = ?";
-      whereArgs = [audioId];
-    } else if (audioName != null) {
-      where = "audioName = ?";
-      whereArgs = [audioName];
-    } else {
-      where = "audioId != ?";
-      whereArgs = ["!0"];
+      where += " audioId = ? and";
+      whereArgs.add(audioId);
+    }
+    if (audioName != null) {
+      where += " audioName like ? and";
+      whereArgs.add('%$audioName%');
+    }
+
+    if (audioPath != null) {
+      where += " audioPath = ? and";
+      whereArgs.add(audioPath);
+    }
+
+    // 因为不知道传入的id是都有还是只有一个，先传的那个，所以 where 最后都有个and,作为条件是，要先去掉
+    var realWhere = where;
+    if (where.endsWith("and")) {
+      realWhere = where.substring(0, where.length - 4);
     }
 
     List<Map<String, dynamic>> maps = await db.query(
       SqliteSqlStatements.tableNameOfLocalAudioInfo,
-      where: where,
-      whereArgs: whereArgs,
+      where: realWhere != "" ? realWhere : null, // null查询所有
+      whereArgs: whereArgs.isNotEmpty ? whereArgs : null, // null 返回所有行
     );
 
     return List.generate(maps.length, (i) {
@@ -186,6 +192,10 @@ class AudioDbHelper {
         audioId: maps[i]['audioId'],
         audioName: maps[i]['audioName'],
         audioPath: maps[i]['audioPath'],
+        artist: maps[i]['artist'],
+        album: maps[i]['album'],
+        displayTitle: maps[i]['displayTitle'],
+        extras: {"metadata": jsonDecode(maps[i]['extras'])},
       );
     });
   }
@@ -203,22 +213,67 @@ class AudioDbHelper {
     return result;
   }
 
+  // 查询歌单基本信息
+  // 如果有传id\name和音频name，有name为可模糊查询
+  Future<List<LocalAudioPlaylist>> queryLocalAudioPlaylist({
+    String? lapId,
+    String? lapName,
+  }) async {
+    Database db = await database;
+
+    // 根据传入参数，构建查询条件
+    var where = "";
+    var whereArgs = [];
+    if (lapId != null) {
+      where += " playlistId = ? and";
+      whereArgs.add(lapId);
+    }
+    if (lapName != null) {
+      where += " playlistName like ? and";
+      whereArgs.add('%$lapName%');
+    }
+
+    // 因为不知道传入的id是都有还是只有一个，先传的那个，所以 where 最后都有个and,作为条件是，要先去掉
+    var realWhere = where;
+    if (where.endsWith("and")) {
+      realWhere = where.substring(0, where.length - 4);
+    }
+
+    List<Map<String, dynamic>> maps = await db.query(
+      SqliteSqlStatements.tableNameOfLocalAudioPlaylist,
+      where: realWhere != "" ? realWhere : null, // null查询所有
+      whereArgs: whereArgs.isNotEmpty ? whereArgs : null, // null 返回所有行
+    );
+
+    return List.generate(maps.length, (i) {
+      return LocalAudioPlaylist(
+        playlistId: maps[i]['playlistId'],
+        playlistName: maps[i]['playlistName'],
+        playlistDescription: maps[i]['playlistDescription'],
+        playlistTag: maps[i]['playlistTag'],
+        extras: {
+          "cusExtras": jsonDecode(maps[i]['extras'] ?? "{}")
+        }, // 2022-07-22 歌单的额外信息，现在还不知道放啥
+      );
+    });
+  }
+
   // 删除歌单
   Future<int> deleteLocalAudioPlaylist({String? id, String? name}) async {
     // 根据传入参数，构建查询条件
     var where = "";
     var whereArgs = [];
     if (id != null) {
-      where += " audioPlaylistId = ? and";
+      where += " playlistId = ? and";
       whereArgs.add(id);
     }
     if (name != null) {
-      where += " audioPlaylistName = ? and";
+      where += " playlistName = ? and";
       whereArgs.add(name);
     }
 
     if (name == null && id == null) {
-      where = " audioPlaylistId = ? and";
+      where = " playlistId = ? and";
       whereArgs = ["无效删除"];
     }
 
@@ -237,6 +292,85 @@ class AudioDbHelper {
     return result;
   }
 
+  //========================歌单音频管理 (新增删除都是row级别))
+
+  // 新增歌单(已经包含新增歌单本身，和指定歌单新增指定歌曲)
+  Future<int> insertLocalPlaylistHasAudio(LocalPlaylistHasAudio lpha) async {
+    Database db = await database;
+    // insert返回最后插入行的id
+    var result = await db.insert(
+      SqliteSqlStatements.tableNameOfLocalPlaylistHasAudio,
+      lpha.toMap(),
+    );
+    return result;
+  }
+
+  /*
+{metadata: {
+  trackName: 他一定很爱你, trackArtistNames: [阿杜], 
+  albumName: 天黑, albumArtistName: null, trackNumber: null, 
+  albumLength: null, year: null, genre: null, authorName: null, writerName: null, discNumber: null, 
+  mimeType: audio/mpeg, trackDuration: 214805, bitrate: 320000, filePath: /storage/emulated/0/Music/test/阿杜 - 他一定很爱你.mp3},
+   playlistHasAudio: {
+    localPlaylistHasAudioId: 719b78f0-09d2-11ed-9e34-f5c4eebf42fd, playlistId: deaultPlaylist, 
+    audioId: 719b03c0-09d2-11ed-9e34-f5c4eebf42fd, playlistName: 默认全盘歌单, 
+audioName: 阿杜 - 他一定很爱你.mp3, audioPath: /storage/emulated/0/Music/test/阿杜 - 他一定很爱你.mp3,
+ extras: {...}}}
+  */
+
+  /// 获取指定歌单的音频信息列表
+  /// 指定歌单编号、模糊歌单名称、模糊查询歌曲存在于哪些歌单中
+  Future<List<LocalPlaylistHasAudio>> getLocalPlaylistHasAudio({
+    String? lapId,
+    String? lapName,
+    String? audioName,
+  }) async {
+    final db = await database;
+    // 根据传入参数，构建查询条件
+    var where = "";
+    var whereArgs = [];
+
+    // 有传id或者name，或者两者都传，拼好条件
+    if (lapId != null) {
+      where += " playlistId = ? and";
+      whereArgs.add(lapId);
+    }
+    if (lapName != null) {
+      where += " playlistName = ? and";
+      whereArgs.add(lapName);
+    }
+    if (audioName != null) {
+      where += " audioName like ? and";
+      whereArgs.add('%$audioName%');
+    }
+
+    // 因为不知道传入的id是都有还是只有一个，先传的那个，所以 where 最后都有个and,作为条件是，要先去掉
+    var realWhere = where;
+    if (where.endsWith("and")) {
+      realWhere = where.substring(0, where.length - 4);
+    }
+
+    final List<Map<String, dynamic>> maps = await db.query(
+      SqliteSqlStatements.tableNameOfLocalPlaylistHasAudio,
+      distinct: true,
+      where: realWhere != "" ? realWhere : null,
+      whereArgs: whereArgs.isNotEmpty ? whereArgs : null,
+    );
+
+    //将 List<Map<String, dynamic> 转换成 List<> 数据类型
+    return List.generate(maps.length, (i) {
+      return LocalPlaylistHasAudio(
+        localPlaylistHasAudioId: maps[i]['localPlaylistHasAudioId'],
+        playlistId: maps[i]['playlistId'],
+        audioId: maps[i]['audioId'] ?? "",
+        playlistName: maps[i]['playlistName'],
+        audioName: maps[i]['audioName'] ?? "",
+        audioPath: maps[i]['audioPath'] ?? "",
+        extras: {"metadata": jsonDecode(maps[i]['extras'])},
+      );
+    });
+  }
+
   // 删除指定歌单指定歌曲（通过audioId）
   Future<int> removeAudioFromLocalAudioPlaylist(
     String lapId,
@@ -244,8 +378,8 @@ class AudioDbHelper {
   ) async {
     Database db = await database;
     var result = await db.delete(
-      SqliteSqlStatements.tableNameOfLocalAudioPlaylist,
-      where: "audioPlaylistId=? and audioId=?",
+      SqliteSqlStatements.tableNameOfLocalPlaylistHasAudio,
+      where: "playlistId=? and audioId=?",
       whereArgs: [lapId, audioId],
     );
     return result;
@@ -258,8 +392,8 @@ class AudioDbHelper {
   ) async {
     Database db = await database;
     var result = await db.query(
-      SqliteSqlStatements.tableNameOfLocalAudioPlaylist,
-      where: "audioPlaylistId=? and audioId=?",
+      SqliteSqlStatements.tableNameOfLocalPlaylistHasAudio,
+      where: "playlistId=? and audioId=?",
       whereArgs: [lapId, audioId],
     );
     return result.length;
@@ -274,90 +408,10 @@ class AudioDbHelper {
   ) async {
     Database db = await database;
     var result = await db.query(
-      SqliteSqlStatements.tableNameOfLocalAudioPlaylist,
-      where: "audioPlaylistName=? and audioName=?",
+      SqliteSqlStatements.tableNameOfLocalPlaylistHasAudio,
+      where: "playlistName=? and audioName=?",
       whereArgs: [lapName, audioName],
     );
     return result.length;
-  }
-
-  /// 获取歌单信息
-  // 有歌单id、歌单name或者不传，都查询符合条件的含歌曲的完整歌单
-  // 如果isFull为false，则不需要歌单里面的歌曲，只是查有几张歌单，获取id之类的，用于添加歌曲等
-  // 如果有传audioName，说明查询符合该关键字的歌曲有哪些，并且在哪些歌单里（2022-07-18目前应该是和name一起，查询指定歌单中的歌曲）
-  Future<List<LocalAudioPlaylist>> getLocalAudioPlaylist({
-    String? lapId,
-    String? lapName,
-    String? audioName,
-    bool? isFull,
-  }) async {
-    final db = await database;
-
-    // 根据传入参数，构建查询条件
-    var where = "";
-    var whereArgs = [];
-    // 默认查询歌单带其中音频的所有栏位
-    var columns = [
-      "audioPlaylistId",
-      "audioPlaylistName",
-      "audioId",
-      "audioName",
-      "audioPath",
-    ];
-
-    // 有传id或者name，或者两者都传，拼好条件
-    if (lapId != null) {
-      where += " audioPlaylistId = ? and";
-      whereArgs.add(lapId);
-    }
-    if (lapName != null) {
-      where += " audioPlaylistName = ? and";
-      whereArgs.add(lapName);
-    }
-    if (audioName != null) {
-      where += " audioName like ? and";
-      whereArgs.add('%$audioName%');
-    }
-    // 但如果两者都没传，则为查询全部，条件重新拼
-    if (lapId == null && lapName == null) {
-      where = " audioPlaylistId != ? and";
-      whereArgs = [""];
-    }
-
-    // 如果不是查询所有栏位，则只查询播放列表基本信息，不含其中音频
-    if (isFull == false) {
-      columns = ["audioPlaylistId", "audioPlaylistName"];
-    }
-
-    // 因为不知道传入的id是都有还是只有一个，先传的那个，所以 where 最后都有个and,作为条件是，要先去掉
-    var realWhere = where;
-    if (where.endsWith("and")) {
-      realWhere = where.substring(0, where.length - 4);
-    }
-
-    print(
-        "000---------$realWhere--$columns--$whereArgs--$lapId--$lapName--$isFull");
-
-    final List<Map<String, dynamic>> maps = await db.query(
-      SqliteSqlStatements.tableNameOfLocalAudioPlaylist,
-      columns: columns,
-      distinct: true,
-      where: realWhere,
-      whereArgs: whereArgs,
-    );
-
-    print("9999999999999999999---${maps.length}");
-    print("$maps");
-
-    //将 List<Map<String, dynamic> 转换成 List<> 数据类型
-    return List.generate(maps.length, (i) {
-      return LocalAudioPlaylist(
-        audioPlaylistId: maps[i]['audioPlaylistId'],
-        audioPlaylistName: maps[i]['audioPlaylistName'],
-        audioId: maps[i]['audioId'] ?? "",
-        audioName: maps[i]['audioName'] ?? "",
-        audioPath: maps[i]['audioPath'] ?? "",
-      );
-    });
   }
 }
