@@ -23,7 +23,7 @@ class _MyAppState extends State<MyApp> {
         child: LayoutBuilder(
           builder: (context, constraints) {
             WidgetsBinding.instance
-                ?.addPostFrameCallback((_) => _insertOverlay(context));
+                .addPostFrameCallback((_) => _insertOverlay(context));
             return Navigator(
               key: _navigatorKey,
               onGenerateRoute: (RouteSettings settings) {
@@ -43,7 +43,7 @@ class _MyAppState extends State<MyApp> {
   }
 
   void _insertOverlay(BuildContext context) {
-    return Overlay.of(context)!.insert(
+    return Overlay.of(context).insert(
       OverlayEntry(builder: (context) {
         final size = MediaQuery.of(context).size;
         print(size.width);
@@ -71,7 +71,7 @@ class _MyAppState extends State<MyApp> {
 class Page1 extends StatelessWidget {
   final GlobalKey<NavigatorState> navigatorKey;
 
-   const Page1(this.navigatorKey, {Key? key}) : super(key: key);
+  const Page1(this.navigatorKey, {Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -80,7 +80,7 @@ class Page1 extends StatelessWidget {
       appBar: AppBar(title: const Text('Page1')),
       body: Container(
         alignment: Alignment.center,
-        child: RaisedButton(
+        child: ElevatedButton(
           child: const Text('go to Page2'),
           onPressed: () => navigatorKey.currentState!.pushNamed('/page2'),
         ),

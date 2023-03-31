@@ -261,7 +261,7 @@ class _ItemCardBottomAreaWidgetState extends State<ItemCardBottomAreaWidget> {
             ///浏览器...显示异常
             overflow:
                 PlatformUtil.isWeb ? TextOverflow.fade : TextOverflow.ellipsis,
-            style: Theme.of(context).textTheme.caption!.copyWith(
+            style: Theme.of(context).textTheme.bodySmall!.copyWith(
                   fontSize: sizeContent4,
                 ),
           ),
@@ -353,17 +353,17 @@ Widget buildNewsAggList(context, ItemsData newsItem) {
               // 先关闭_showNewsDialog中创建的 ModalBottomSheet
               Navigator.pop(context);
               // 再在应用內打开url
-              var url = "${newsAggList[i].url}";
+              var url = Uri.parse("${newsAggList[i].url}");
               // 应用内打开ok，但原文章没有自适应手机的话，看起來就很別扭。
-              if (await canLaunch(url)) {
-                await launch(
-                  url,
-                  forceSafariVC: false,
-                  forceWebView: false,
-                  // enableJavaScript: false,
-                );
-              } else {
-                throw 'Could not launch $url';
+              if (!await launchUrl(
+                url,
+                mode: LaunchMode.inAppWebView,
+                webViewConfiguration: const WebViewConfiguration(
+                  enableDomStorage: false,
+                  enableJavaScript: false,
+                ),
+              )) {
+                throw Exception('Could not launch $url');
               }
             },
             child: SizedBox(
@@ -464,19 +464,18 @@ class _ItemCardWidgetState extends State<ItemCardWidget> {
                     recognizer: TapGestureRecognizer()
                       ..onTap = () async {
                         // 如果有直接的url属性，则是非热门话题，直接取得；否则就是热门话题，从关联新闻中取第一个
-                        var url =
-                            newsItem.url ?? "${newsItem.newsAggList![0].url}";
+                        var url = Uri.parse(
+                            newsItem.url ?? "${newsItem.newsAggList![0].url}");
                         // 应用内打开ok，但原文章没有自适应手机的话，看起來就很別扭。
-                        if (await canLaunch(url)) {
-                          await launch(
-                            url,
-                            forceSafariVC: false,
-                            forceWebView: false,
-                            // enableDomStorage: true,
-                            // enableJavaScript: true
-                          );
-                        } else {
-                          throw 'Could not launch $url';
+                        if (!await launchUrl(
+                          url,
+                          mode: LaunchMode.inAppWebView,
+                          webViewConfiguration: const WebViewConfiguration(
+                            enableDomStorage: false,
+                            enableJavaScript: false,
+                          ),
+                        )) {
+                          throw Exception('Could not launch $url');
                         }
                       }),
               ]),
@@ -502,12 +501,12 @@ class _ItemCardWidgetState extends State<ItemCardWidget> {
                   height: 0.1.sp,
                   leading: 1,
                 ),
-                style: Theme.of(context).textTheme.caption!.copyWith(
+                style: Theme.of(context).textTheme.bodySmall!.copyWith(
                     letterSpacing: 1.0,
                     fontSize: sizeContent3,
                     color: Theme.of(context)
                         .textTheme
-                        .headline6!
+                        .titleLarge!
                         .color!
                         .withOpacity(0.8)),
               ),

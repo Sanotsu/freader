@@ -249,6 +249,7 @@ class _MyAppState extends State<MyApp> {
             }
 
             print(error);
+            return "fail";
           }).timeout(const Duration(seconds: 10), onTimeout: () {
             print("timeout");
             return;

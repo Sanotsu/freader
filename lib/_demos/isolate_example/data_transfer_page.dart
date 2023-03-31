@@ -45,7 +45,7 @@ class DataTransferPage extends StatelessWidget {
           Container(
             child: Text(
               'Number Generator Progress',
-              style: Theme.of(context).textTheme.headline6,
+              style: Theme.of(context).textTheme.titleLarge,
             ),
             padding: const EdgeInsets.all(8),
           ),
@@ -61,7 +61,7 @@ class DataTransferPage extends StatelessWidget {
               ElevatedButton(
                 child: const Text('Transfer Data to 2nd Isolate'),
                 style: ElevatedButton.styleFrom(
-                    primary: (controller.runningTest == 1)
+                    foregroundColor: (controller.runningTest == 1)
                         ? Colors.blueAccent
                         : Colors.grey[300]),
                 onPressed: () => controller.generateRandomNumbers(false),
@@ -69,7 +69,7 @@ class DataTransferPage extends StatelessWidget {
               ElevatedButton(
                 child: const Text('Transfer Data with TransferableTypedData'),
                 style: ElevatedButton.styleFrom(
-                    primary: (controller.runningTest == 2)
+                    foregroundColor: (controller.runningTest == 2)
                         ? Colors.blueAccent
                         : Colors.grey[300]),
                 onPressed: () => controller.generateRandomNumbers(true),
@@ -77,7 +77,7 @@ class DataTransferPage extends StatelessWidget {
               ElevatedButton(
                 child: const Text('Generate on 2nd Isolate'),
                 style: ElevatedButton.styleFrom(
-                    primary: (controller.runningTest == 3)
+                    foregroundColor: (controller.runningTest == 3)
                         ? Colors.blueAccent
                         : Colors.grey[300]),
                 onPressed: controller.generateOnSecondaryIsolate,

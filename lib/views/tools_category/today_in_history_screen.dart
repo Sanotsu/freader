@@ -162,18 +162,17 @@ Widget _buildItemCard(TodayInHistoryResultData item) {
                         recognizer: TapGestureRecognizer()
                           ..onTap = () async {
                             // 如果有直接的url属性，则是非热门话题，直接取得；否则就是热门话题，从关联新闻中取第一个
-                            var url = item.link;
+                            var url = Uri.parse(item.link);
                             // 应用内打开ok，但原文章没有自适应手机的话，看起來就很別扭。
-                            if (await canLaunch(url)) {
-                              await launch(
-                                url,
-                                forceSafariVC: false,
-                                forceWebView: false,
-                                // enableDomStorage: true,
-                                // enableJavaScript: true
-                              );
-                            } else {
-                              throw 'Could not launch $url';
+                            if (!await launchUrl(
+                              url,
+                              mode: LaunchMode.inAppWebView,
+                              webViewConfiguration: const WebViewConfiguration(
+                                enableDomStorage: false,
+                                enableJavaScript: false,
+                              ),
+                            )) {
+                              throw Exception('Could not launch $url');
                             }
                           },
                       ),

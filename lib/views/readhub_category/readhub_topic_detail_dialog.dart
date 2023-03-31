@@ -99,17 +99,17 @@ Widget buildNewsAggListInDialog(List<NewsArrayData>? topicDetailNewsArray) {
                   // 先关闭_showNewsDialog中创建的 ModalBottomSheet
                   Navigator.pop(context);
                   // 再在应用內打开url
-                  var url = "${newsArray[index].url}";
+                  var url = Uri.parse("${newsArray[index].url}");
                   // 应用内打开ok，但原文章没有自适应手机的话，看起來就很別扭。
-                  if (await canLaunch(url)) {
-                    await launch(
-                      url,
-                      forceSafariVC: true,
-                      forceWebView: true,
+                  if (!await launchUrl(
+                    url,
+                    mode: LaunchMode.inAppWebView,
+                    webViewConfiguration: const WebViewConfiguration(
+                      enableDomStorage: true,
                       enableJavaScript: true,
-                    );
-                  } else {
-                    throw 'Could not launch $url';
+                    ),
+                  )) {
+                    throw Exception('Could not launch $url');
                   }
                 },
                 child: SizedBox(
@@ -174,17 +174,17 @@ Widget buildTimelineInDialog(topicDetailNewsArray) {
                 child: GestureDetector(
                   onTap: () async {
                     // 再在应用內打开url
-                    var url = "${newsArray[index].url}";
+                    var url = Uri.parse("${newsArray[index].url}");
                     // 应用内打开ok，但原文章没有自适应手机的话，看起來就很別扭。
-                    if (await canLaunch(url)) {
-                      await launch(
-                        url,
-                        forceSafariVC: true,
-                        forceWebView: true,
+                    if (!await launchUrl(
+                      url,
+                      mode: LaunchMode.inAppWebView,
+                      webViewConfiguration: const WebViewConfiguration(
+                        enableDomStorage: true,
                         enableJavaScript: true,
-                      );
-                    } else {
-                      throw 'Could not launch $url';
+                      ),
+                    )) {
+                      throw Exception('Could not launch $url');
                     }
                   },
                   child: SizedBox(
@@ -270,17 +270,17 @@ Widget buildTimelineInDialog2(topicDetailNewsArray) {
             child: GestureDetector(
               onTap: () async {
                 // 再在应用內打开url
-                var url = "${newsArray[i].url}";
+                var url = Uri.parse("${newsArray[i].url}");
                 // 应用内打开ok，但原文章没有自适应手机的话，看起來就很別扭。
-                if (await canLaunch(url)) {
-                  await launch(
-                    url,
-                    forceSafariVC: true,
-                    forceWebView: true,
+                if (!await launchUrl(
+                  url,
+                  mode: LaunchMode.inAppWebView,
+                  webViewConfiguration: const WebViewConfiguration(
+                    enableDomStorage: true,
                     enableJavaScript: true,
-                  );
-                } else {
-                  throw 'Could not launch $url';
+                  ),
+                )) {
+                  throw Exception('Could not launch $url');
                 }
               },
               child: SizedBox(

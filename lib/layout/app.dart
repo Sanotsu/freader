@@ -16,7 +16,7 @@ class FreaderApp extends StatelessWidget {
       designSize: const Size(360, 640), // 1080p / 3 ,单位dp
       minTextAdapt: true,
       splitScreenMode: true,
-      builder: (_) {
+      builder: (_, child) {
         return MaterialApp(
           title: 'freader',
           localizationsDelegates: const [

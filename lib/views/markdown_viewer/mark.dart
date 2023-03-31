@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:markdown_widget/markdown_widget.dart';
 import 'package:flutter/services.dart' show rootBundle;
-import 'package:markdown_widget/config/highlight_themes.dart' as theme;
+// import 'package:markdown_widget/config/highlight_themes.dart' as theme;
+// 代码高亮等使用的样式
+import 'package:flutter_highlight/themes/a11y-light.dart';
 
 class MarkdownPageScreen extends StatefulWidget {
   const MarkdownPageScreen({Key? key}) : super(key: key);
@@ -22,7 +24,7 @@ class _MarkdownPageScreenState extends State<MarkdownPageScreen> {
 
   final TocController tocController = TocController();
 
-  Widget buildTocWidget() => TocListWidget(controller: tocController);
+  Widget buildTocWidget() => TocWidget(controller: tocController);
 
   @override
   Widget build(BuildContext context) {
@@ -55,33 +57,44 @@ class _MarkdownPageScreenState extends State<MarkdownPageScreen> {
                 builder: (BuildContext context, AsyncSnapshot snapshot) {
                   if (snapshot.hasData) {
                     return MarkdownWidget(
-                      data: snapshot.data,
-                      controller: tocController,
-                      styleConfig: StyleConfig(
-                        // 正文的样式配置
-                        pConfig: PConfig(
-                          textStyle: TextStyle(fontSize: 10.sp),
-                          selectable: true,
-                        ),
-                        // 无序列表的样式配置（有序列表是olConfig）
-                        ulConfig: UlConfig(
-                          textStyle: TextStyle(fontSize: 10.sp),
-                        ),
-                        // 各级标题的样式配置
-                        titleConfig: TitleConfig(
-                          h1: TextStyle(fontSize: 16.sp),
-                          h2: TextStyle(fontSize: 14.sp),
-                          h3: TextStyle(fontSize: 12.sp),
-                          h4: TextStyle(fontSize: 10.sp),
-                        ),
-                        // 代码的样式配置（实测必须```定行，没有缩进才能识别）
-                        preConfig: PreConfig(
-                          language: 'ts',
-                          textStyle: TextStyle(fontSize: 10.sp),
-                          theme: theme.a11yLightTheme,
-                        ),
-                      ),
-                    );
+                        data: snapshot.data,
+                        tocController: tocController,
+                        config: MarkdownConfig(configs: [
+                          const PreConfig(
+                              theme: a11yLightTheme, language: 'dart'),
+                          PConfig(
+                            textStyle: TextStyle(fontSize: 10.sp),
+                          ),
+                          H1Config(style: TextStyle(fontSize: 16.sp)),
+                          H2Config(style: TextStyle(fontSize: 14.sp)),
+                          H3Config(style: TextStyle(fontSize: 12.sp)),
+                          H4Config(style: TextStyle(fontSize: 10.sp)),
+                        ])
+                        // config: MarkdownConfig(
+                        //   // 正文的样式配置
+                        //   pConfig: PConfig(
+                        //     textStyle: TextStyle(fontSize: 10.sp),
+                        //     selectable: true,
+                        //   ),
+                        //   // 无序列表的样式配置（有序列表是olConfig）
+                        //   ulConfig: UlConfig(
+                        //     textStyle: TextStyle(fontSize: 10.sp),
+                        //   ),
+                        //   // 各级标题的样式配置
+                        //   titleConfig: TitleConfig(
+                        //     h1: TextStyle(fontSize: 16.sp),
+                        //     h2: TextStyle(fontSize: 14.sp),
+                        //     h3: TextStyle(fontSize: 12.sp),
+                        //     h4: TextStyle(fontSize: 10.sp),
+                        //   ),
+                        //   // 代码的样式配置（实测必须```定行，没有缩进才能识别）
+                        //   preConfig: PreConfig(
+                        //     language: 'ts',
+                        //     textStyle: TextStyle(fontSize: 10.sp),
+                        //     theme: theme.a11yLightTheme,
+                        //   ),
+                        // ),
+                        );
                   } else {
                     return const Center(
                       child: Text("加载中..."),
