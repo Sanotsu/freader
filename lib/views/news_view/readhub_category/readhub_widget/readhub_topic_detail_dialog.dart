@@ -346,7 +346,7 @@ Widget buildTimelineInDialog2(topicDetailNewsArray) {
   }
 
   return Timeline(
-    children: childrenList,
     indicators: indicatorsList,
+    children: childrenList,
   );
 }

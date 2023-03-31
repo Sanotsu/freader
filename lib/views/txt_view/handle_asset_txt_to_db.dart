@@ -75,7 +75,7 @@ handleAssetTxt2Db(fileName) async {
       }
     } else {
       // 如果是正文内容行，累加该行到章节正文中(加入换行符)
-      content += line + "\n";
+      content += "$line\n";
     }
     // 最后一行读完后，最后一章的标题和内容还在外面，没有存入db
     if (i == lines.length - 1) {
@@ -104,7 +104,7 @@ savechapterToDB(
   String chapterNameCopy,
   String cloneCopy,
 ) async {
-  final DatabaseHelper _databaseHelper = DatabaseHelper();
+  final DatabaseHelper databaseHelper = DatabaseHelper();
 
   var tempTxtState = TxtState(
       txtId: txtId,
@@ -117,5 +117,5 @@ savechapterToDB(
 
   // print(tempTxtState.toString());
 
-  await _databaseHelper.insertTxtState(tempTxtState);
+  await databaseHelper.insertTxtState(tempTxtState);
 }

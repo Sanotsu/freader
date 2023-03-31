@@ -36,123 +36,92 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
 
-  # 2022-07-02 因为sdk更新到3.0.4，一下包也一并更新到最新,但有些包可能有问题
-  # cupertino_icons: ^1.0.5
-  # # 网络请求
-  # http: ^0.13.4
-  # # 打开url链接
-  # url_launcher: ^6.1.4
-  # # json序列化
-  # json_serializable: ^6.1.6
-  # json_annotation: ^4.5.0
-  # # 布局尺寸分析
-  # flutter_screenutil: ^5.4.0+1
-  # # InheritedWidget的包装器 ，使它们更易于使用和更可重用。
-  # provider: ^6.0.3
-  # # 国际化
-  # intl: ^0.17.0
-  # # 获取设备信息
-  # device_info_plus: ^4.0.0
-  # # 获取flutter包信息
-  # package_info_plus: ^1.4.2
-  # # http client
-  # dio: ^4.0.6
-  # # 查找文件系统上常用位置
-  # path_provider: ^2.0.11
-  # # 显示来自互联网的图像并将它们保存在缓存目录中。
-  # cached_network_image: ^3.2.1
-  # # 跨平台（iOS、Android）API 来请求权限并检查其状态。
-  # permission_handler: ^10.0.0
-  # # 保存图片到相册
-  # image_gallery_saver: "^1.7.1"
-  # # 保存图片到相册
-  # gallery_saver: ^2.3.2
-  # # 提供了一个手势敏感的可缩放小部件
-  # photo_view: ^0.14.0
-  # # 显示浮空提示信息
-  # fluttertoast: ^8.0.9
-  # # 时间格式化
-  # date_format: ^2.0.6
-  # # datetime选择器
-  # flutter_datetime_picker: ^1.5.1
-  # # pdf阅读器
-  # syncfusion_flutter_pdfviewer: ^20.2.36-beta
-  # # 文件选择器
-  # file_picker: ^4.6.1
-  # # sqlite
-  # sqflite: ^2.0.2+1
-  # # 基于字符串的路径操作库。
-  # path: ^1.8.1 # 2022-07-02 如果使用1.8.2,flutter_test会有问题
-  # # uuid生成器
-  # uuid: ^3.0.6
-  # # PageViews 的可定制进度指标
-  # page_view_indicators: ^2.0.0
-  # # flutter_markdown: 0.6.10 #0.6.10以上版本，需要flutter3.0以上
-  # # Flutter 的 Markdown 渲染器（flutter官方的，但是功能很少，没有toc）
-  # flutter_markdown: ^0.6.10+2
-  # # md 部件（支持toc等，但是渲染什么的有bug）
-  # markdown_widget: ^1.2.9
+  ## 2023-03-31 flutter sdk更新到3.7.8，以下包也一并更新到此时最新,但有些包可能有问题
 
-  # 2.10.5 时的依赖版本
-  cupertino_icons: ^1.0.2
-  http: ^0.13.4
-  url_launcher: ^6.0.20
-  json_serializable: ^6.1.6
-  json_annotation: ^4.5.0
-  flutter_screenutil: ^5.4.0+1
-  provider: ^6.0.2
+  # 包含 Flutter 的Cupertino 小部件使用的默认图标资产集。
+  cupertino_icons: ^1.0.5
+  # 网络请求
+  http: ^0.13.5
+  # 打开url链接
+  url_launcher: ^6.1.10
+  # json序列化
+  json_serializable: ^6.6.1
+  json_annotation: ^4.8.0
+  # 布局尺寸分析
+  flutter_screenutil: ^5.7.0
+  # InheritedWidget的包装器 ，使它们更易于使用和更可重用。
+  provider: ^6.0.5
+  # 国际化
   intl: ^0.17.0
-  device_info_plus: ^3.2.3
-  package_info_plus: ^1.4.2
-  dio: ^4.0.6
-  path_provider: ^2.0.9
-  cached_network_image: ^3.2.0
-  permission_handler: ^9.2.0
+  # 获取设备信息
+  device_info_plus: ^8.1.0
+  # 获取flutter包信息
+  package_info_plus: ^3.0.3
+  # http client
+  dio: ^5.1.1
+  # 查找文件系统上常用位置
+  path_provider: ^2.0.14
+  # 显示来自互联网的图像并将它们保存在缓存目录中。
+  cached_network_image: ^3.2.3
+  # 跨平台（iOS、Android）API 来请求权限并检查其状态。
+  permission_handler: ^10.2.0
+  # 保存图片到相册
   image_gallery_saver: "^1.7.1"
+  # 保存图片到相册
   gallery_saver: ^2.3.2
-  fluttertoast: ^8.0.9
-  date_format: ^2.0.6
+  # 显示浮空提示信息
+  fluttertoast: ^8.2.1
+  # 时间格式化
+  date_format: ^2.0.7
+  # datetime选择器
   flutter_datetime_picker: ^1.5.1
-  syncfusion_flutter_pdfviewer: ^20.1.52-beta
-  file_picker: 4.5.1
-  sqflite: ^2.0.2+1
-  path: ^1.8.0
-  uuid: ^3.0.6
+  # pdf阅读器
+  syncfusion_flutter_pdfviewer: ^21.1.37
+  # 文件选择器
+  file_picker: ^5.2.6
+  # sqlite
+  sqflite: ^2.2.6
+  # 基于字符串的路径操作库。
+  path: ^1.8.2
+  # uuid生成器
+  uuid: ^3.0.7
+  # PageViews 的可定制进度指标
   page_view_indicators: ^2.0.0
+  # 使图像能够通过捏、旋转和拖动等用户手势进行缩放和平移。
   photo_view: ^0.14.0
   # Flutter 的 Markdown 渲染器（flutter官方的，但是功能很少，没有toc）
-  flutter_markdown: ^0.6.10+2
+  flutter_markdown: ^0.6.14
   # md 部件（支持toc等，但是渲染什么的有bug）
-  markdown_widget: ^1.2.9
-
-  # 上面3.0.4 没有更新,但这里有更新
+  markdown_widget: ^2.1.0
   # 分组列表
   grouped_list: ^5.1.2
   # 获取网络连接信息等
-  connectivity_plus: ^2.3.5
+  connectivity_plus: ^3.0.3
   # 加密库
   crypto: ^3.0.2
   # 登陆页组件,丰富多样\动画不少
-  flutter_login: ^4.0.0
+  flutter_login: ^4.1.1
   # 用于读取和写入简单键值对的 Flutter 插件。（简单用于存入登入）
-  shared_preferences: ^2.0.15
+  shared_preferences: ^2.0.20
   # 蓝牙插件（需要java11及以上。旧版本flutter_blue已经不维护了）
   # 修改gradle.properties文件,添加org.gradle.java.home=your jdk path
-  flutter_blue_plus: ^1.1.3
+  flutter_blue_plus: ^1.4.0
   # 音频播放插件
-  just_audio: ^0.9.27
+  just_audio: ^0.9.32
   # 配合上一个实现后台播放(其他高级音频背景播放，使用audio_service)
-  just_audio_background: ^0.0.1-beta.7
+  just_audio_background: ^0.0.1-beta.9
   # 同上配合使用，此插件会告知操作系统您的音频应用程序的性质（例如游戏、媒体播放器、助手等）以及您的应用程序将如何处理和启动音频中断（例如电话中断）
-  audio_session: ^0.1.9
+  audio_session: ^0.1.13
   # 另一个音乐播放插件
-  assets_audio_player: ^3.0.5
+  assets_audio_player: ^3.0.6
   # 查询本地音乐信息(不能用，我都直接可以下载他需要的kotlin-compiler-embeddable-1.4.32.jar,但gradle build的时候，死活下不动，卡住)
   # on_audio_query: ^2.6.1
   # 用于获取音频的元数据信息
-  flutter_media_metadata: ^1.0.0+1
+  # flutter_media_metadata: ^1.0.0+1
   # 可搜索下拉选择框插件
-  dropdown_search: ^5.0.2
+  dropdown_search: ^5.0.6
+  # 包含用于在不同数据表示之间进行转换的编码器和解码器。dart:convert的补充
+  convert: ^3.1.1
 
 dev_dependencies:
   flutter_test:
@@ -163,8 +132,8 @@ dev_dependencies:
   # activated in the `analysis_options.yaml` file located at the root of your
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
-  flutter_lints: ^1.0.0
-  build_runner: ^2.1.10
+  flutter_lints: ^2.0.1
+  build_runner: ^2.3.3
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -191,6 +160,9 @@ flutter:
     - assets/txts/
     - assets/mds/
     - assets/mds/javascript/
+    # md 中使用的图片路径，也要加入进来，不然找不到
+    - assets/mds/javascript/pictures-vue/
+    - assets/mds/javascript/pictures-vue/angular/
     - assets/mds/typescript/
     - assets/mds/nodejs/
     - assets/mds/nodejs/assets/

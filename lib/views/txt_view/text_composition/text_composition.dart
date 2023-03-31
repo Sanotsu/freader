@@ -121,33 +121,34 @@ class TextComposition {
     final tp = TextPainter(textDirection: TextDirection.ltr, maxLines: 1);
     final offset = Offset(columnWidth, 1);
     final size = style.fontSize ?? 14;
-    final _dx = padding?.left ?? 0;
-    final _dy = padding?.top ?? 0;
-    final _width = columnWidth;
-    final _width2 = _width - size;
-    final _height = this.boxSize.height - (padding?.vertical ?? 0);
-    final _height2 = _height - size * (style.height ?? 1.0);
+    // 之前命名为_xx，改为dashXx了
+    final dashDx = padding?.left ?? 0;
+    final dashDy = padding?.top ?? 0;
+    final dashWidth = columnWidth;
+    final dashWidth2 = dashWidth - size;
+    final dashHeight = this.boxSize.height - (padding?.vertical ?? 0);
+    final dashHeight2 = dashHeight - size * (style.height ?? 1.0);
 
     var lines = <TextLine>[];
     var columnNum = 1;
-    var dx = _dx;
-    var dy = _dy;
+    var dx = dashDx;
+    var dy = dashDy;
     var startLine = 0;
 
     if (title != null && title!.isNotEmpty) {
       String t = title!;
       while (true) {
         tp.text = TextSpan(text: title, style: titleStyle);
-        tp.layout(maxWidth: _width);
+        tp.layout(maxWidth: dashWidth);
         final textCount = tp.getPositionForOffset(offset).offset;
         final text = t.substring(0, textCount);
         double? spacing;
-        if (tp.width > _width2) {
+        if (tp.width > dashWidth2) {
           tp.text = TextSpan(text: text, style: titleStyle);
           tp.layout();
-          double _spacing = (_width - tp.width) / textCount;
-          if (_spacing < -0.1 || _spacing > 0.1) {
-            spacing = _spacing;
+          double dashSpacing = (dashWidth - tp.width) / textCount;
+          if (dashSpacing < -0.1 || dashSpacing > 0.1) {
+            spacing = dashSpacing;
           }
         }
         lines.add(TextLine(text, dx, dy, spacing, true));
@@ -164,7 +165,7 @@ class TextComposition {
     void newPage([bool shouldJustifyHeight = true, bool lastPage = false]) {
       if (shouldJustifyHeight && this.shouldJustifyHeight) {
         final len = lines.length - startLine;
-        double justify = (_height - dy) / (len - 1);
+        double justify = (dashHeight - dy) / (len - 1);
         for (var i = 0; i < len; i++) {
           lines[i + startLine].justifyDy(justify * i);
         }
@@ -173,18 +174,18 @@ class TextComposition {
         this.pages.add(TextPage(lines, dy));
         lines = <TextLine>[];
         columnNum = 1;
-        dx = _dx;
+        dx = dashDx;
       } else {
         columnNum++;
         dx += columnWidth + columnGap;
       }
-      dy = _dy;
+      dy = dashDy;
       startLine = lines.length;
     }
 
     /// 新段落
     void newParagraph() {
-      if (dy > _height2) {
+      if (dy > dashHeight2) {
         newPage();
       } else {
         dy += paragraph;
@@ -198,10 +199,10 @@ class TextComposition {
         final textCount = tp.getPositionForOffset(offset).offset;
         double? spacing;
         final text = p.substring(0, textCount);
-        if (tp.width > _width2) {
+        if (tp.width > dashWidth2) {
           tp.text = TextSpan(text: text, style: style);
           tp.layout();
-          spacing = (_width - tp.width) / textCount;
+          spacing = (dashWidth - tp.width) / textCount;
         }
         lines.add(TextLine(text, dx, dy, spacing));
         dy += tp.height;
@@ -210,7 +211,7 @@ class TextComposition {
           break;
         } else {
           p = p.substring(textCount);
-          if (dy > _height2) {
+          if (dy > dashHeight2) {
             newPage();
           }
         }

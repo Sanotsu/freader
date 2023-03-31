@@ -23,7 +23,7 @@ Future<List<PhotosData>> fetchPexelsApiImageCuratedResult(int page) async {
   // 1 响应成功，获取到返回的json字符串
   if (response.statusCode == 200) {
     // 原始的json字符串没有大括号包裹
-    final jsonString = "[" + response.body + "]";
+    final jsonString = "[${response.body}]";
 
     // 2.转成 List<PexelsApiImagesResult>
     List jsonResult = jsonDecode(jsonString);
@@ -59,7 +59,7 @@ Future<List<PhotosData>> fetchPexelsApiImageQueryResult(
   // 1 响应成功，获取到返回的json字符串
   if (response.statusCode == 200) {
     // 原始的json字符串没有大括号包裹
-    final jsonString = "[" + response.body + "]";
+    final jsonString = "[${response.body}]";
 
     // 2.转成 List<PexelsApiImagesResult>
     List jsonResult = jsonDecode(jsonString);
@@ -85,7 +85,7 @@ Future<List<PhotosData>?> getLocalPexelsApiImageJson(int index) async {
 // print(jsonString);
 
   //2.转成 List<PexelsApiImagesResult>
-  List jsonResult = json.decode("[" + jsonString + "]");
+  List jsonResult = json.decode("[$jsonString]");
 
 // 本地测试数据，只需要 pexels_api_images.json 中 photos 数组的值就好了，jsonResult就1个值而已
   var temp =

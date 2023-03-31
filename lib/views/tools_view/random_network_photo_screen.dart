@@ -43,8 +43,8 @@ class _RandomNetworkPhotoScreenState extends State<RandomNetworkPhotoScreen> {
 
   getRondomUrl() async {
     print("开始获取随机地址");
-    final _random = Random();
-    int next(int min, int max) => min + _random.nextInt(max - min);
+    final random = Random();
+    int next(int min, int max) => min + random.nextInt(max - min);
 
     // 地址列表中随机一个地址
     var rondonInt = next(1, networkPhotoUrlList.length - 1);

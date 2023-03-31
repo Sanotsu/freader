@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:markdown_widget/markdown_widget.dart';
 import 'package:flutter/services.dart' show rootBundle;
-import 'package:markdown_widget/config/highlight_themes.dart' as theme;
 import 'package:url_launcher/url_launcher.dart';
 import 'dart:convert';
 
@@ -31,7 +30,7 @@ class _MarkdownWidgetScreenState extends State<MarkdownWidgetScreen> {
 
   final TocController tocController = TocController();
 
-  Widget buildTocWidget() => TocListWidget(controller: tocController);
+  Widget buildTocWidget() => TocWidget(controller: tocController);
 
   @override
   void dispose() {
@@ -108,17 +107,24 @@ class _MarkdownWidgetScreenState extends State<MarkdownWidgetScreen> {
                   if (snapshot.hasData) {
                     return MarkdownWidget(
                       data: snapshot.data,
-                      controller: tocController,
-                      styleConfig: StyleConfig(
-                        // 正文的样式配置
-                        pConfig: PConfig(
+                      tocController: tocController,
+                      config: MarkdownConfig(configs: [
+                        // 代码的样式配置（实测必须```定行，没有缩进才能识别）
+                        PreConfig(
+                          language: 'ts',
                           textStyle: TextStyle(fontSize: 10.sp),
-                          linkStyle: TextStyle(
-                            fontSize: 10.sp,
-                            color: Colors.blue,
+                        ),
+                        // 正文的样式配置
+                        PConfig(
+                          textStyle: TextStyle(fontSize: 10.sp),
+                        ),
+                        LinkConfig(
+                          style: const TextStyle(
+                            color: Colors.red,
+                            decoration: TextDecoration.underline,
                           ),
-                          onLinkTap: (url) async {
-                            var tempUrl = Uri.parse(url ?? "");
+                          onTap: (url) async {
+                            var tempUrl = Uri.parse(url);
                             if (await canLaunchUrl(tempUrl)) {
                               await launchUrl(
                                 tempUrl,
@@ -133,40 +139,25 @@ class _MarkdownWidgetScreenState extends State<MarkdownWidgetScreen> {
                               throw 'Could not launch $url';
                             }
                           },
-                          selectable: true,
-                        ),
-                        // 有序列表的样式配置 实测,必须严格4个空格,且子列表中间没有正文的格式才能正确显示.
-                        olConfig: OlConfig(
-                          textStyle: TextStyle(fontSize: 10.sp),
-                        ),
-                        // 无序列表的样式配置
-                        ulConfig: UlConfig(
-                          textStyle: TextStyle(fontSize: 10.sp),
                         ),
                         // 各级标题的样式配置
-                        titleConfig: TitleConfig(
-                          h1: TextStyle(fontSize: 16.sp),
-                          h2: TextStyle(fontSize: 14.sp),
-                          h3: TextStyle(fontSize: 12.sp),
-                          h4: TextStyle(fontSize: 10.sp),
-                          h5: TextStyle(fontSize: 10.sp),
-                        ),
-                        // 代码的样式配置（实测必须```定行，没有缩进才能识别）
-                        preConfig: PreConfig(
-                          language: 'ts',
-                          textStyle: TextStyle(fontSize: 10.sp),
-                          theme: theme.a11yLightTheme,
-                        ),
+                        H1Config(style: TextStyle(fontSize: 16.sp)),
+                        H2Config(style: TextStyle(fontSize: 14.sp)),
+                        H3Config(style: TextStyle(fontSize: 12.sp)),
+                        H4Config(style: TextStyle(fontSize: 10.sp)),
                         // 使用`code`包装的代码的样式设置
-                        codeConfig: CodeConfig(
-                          codeStyle: TextStyle(fontSize: 10.sp),
-                        ),
-                        imgBuilder: (String url, attributes) {
-                          // print("============");
-                          // print("$imagesPath/$url");
-                          return Image.asset("$imagesPath/$url");
-                        },
-                      ),
+                        CodeConfig(style: TextStyle(fontSize: 10.sp)),
+                        // 列表样式配置
+                        ListConfig(marginLeft: 32.sp),
+                        // 图片配置
+                        ImgConfig(
+                          builder: (String url, attributes) {
+                            // print("============");
+                            // print("$imagesPath/$url");
+                            return Image.asset("$imagesPath/$url");
+                          },
+                        )
+                      ]),
                     );
                   } else {
                     return const Center(

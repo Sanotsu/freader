@@ -66,11 +66,11 @@ class Timeline extends StatelessWidget {
       primary: primary,
       itemBuilder: (context, index) {
         final child = children[index];
-        final _indicators = indicators;
+        final privateIndicators = indicators;
 
         Widget? indicator;
-        if (_indicators != null) {
-          indicator = _indicators[index];
+        if (privateIndicators != null) {
+          indicator = privateIndicators[index];
         }
 
         final isFirst = index == 0;

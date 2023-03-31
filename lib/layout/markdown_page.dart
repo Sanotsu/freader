@@ -53,7 +53,7 @@ class _MarkdownPageState extends State<MarkdownPage> {
 
     for (String e in mdList) {
       var tempArr = e.split("/");
-      print(tempArr.length);
+      print("tempArr[tempArr.length - 1]${tempArr[tempArr.length - 1]}");
 
       // 2022-07-05 理论上，md的文章在 assets/mds/<类别>/xxx.md，也就是4层，
       // 所以大于4层的应该是文章的附件，例如图片等，就不显示了。
@@ -63,10 +63,12 @@ class _MarkdownPageState extends State<MarkdownPage> {
       }
       tempGroupList.add(
         GroupListObject(
-          // 路径中文是转码后的，所以要转码回来才能看懂是什么
-          Uri.decodeComponent(tempArr[tempArr.length - 1]), // 文章标题
+          // 路径中文是转码后的，所以要转码回来才能看懂是什么（2023-3-31新版本转了还会报错）
+          tempArr[tempArr.length - 1],
+          // Uri.decodeComponent(tempArr[tempArr.length - 1]), // 文章标题
           tempArr[tempArr.length - 2], // 分类
-          Uri.decodeComponent(e), // asset完整路径
+          e,
+          // Uri.decodeComponent(e), // asset完整路径
         ),
       );
     }

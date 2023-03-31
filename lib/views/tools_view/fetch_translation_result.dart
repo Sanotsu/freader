@@ -99,8 +99,8 @@ Future<BaiduFanyiResult> fetchBaiduTranslateResult(
   /// 2022-07-08 文档说可以用post，但用post会报错：52003 未授权的用户。
   /// 但改为get请求就没问题了，真奇怪
   ///
-  var finalUrl = commonUrl +
-      "?q=$text&from=$source&to=zh&appid=${GlobalConstants.baiduFanyiApiAppId}&salt=$salt&sign=$sign";
+  var finalUrl =
+      "$commonUrl?q=$text&from=$source&to=zh&appid=${GlobalConstants.baiduFanyiApiAppId}&salt=$salt&sign=$sign";
   final response = await http.get(Uri.parse(finalUrl));
 
   cusPrintAll(finalUrl);
@@ -149,7 +149,7 @@ Future<Map<String, String>> fetchTranslationResultDemo(
     // If the server did return a 200 OK response,
     // then parse the JSON.
 
-    var rst = jsonDecode("[" + response.data.toString() + "]");
+    var rst = jsonDecode("[${response.data}]");
 
     return rst;
   } else {

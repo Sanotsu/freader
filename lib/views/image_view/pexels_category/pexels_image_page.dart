@@ -183,7 +183,7 @@ class _PexelsImagePageState extends State<PexelsImagePage> {
     );
 
     /// 搜素查询行
-    Widget _buildQueryRow() {
+    Widget buildQueryRow() {
       return Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -246,7 +246,7 @@ class _PexelsImagePageState extends State<PexelsImagePage> {
       ),
       body: Column(
         children: <Widget>[
-          _buildQueryRow(),
+          buildQueryRow(),
           Expanded(child: fb),
         ],
       ),

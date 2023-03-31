@@ -204,7 +204,7 @@ class _ItemCardBottomAreaWidgetState extends State<ItemCardBottomAreaWidget> {
     }
 
     /// 如果是热门话题，则可以底部弹出其它媒体报道
-    Future<void> _showNewsDialog(BuildContext context) async {
+    Future<void> showNewsDialog(BuildContext context) async {
       await showModalBottomSheet<int>(
           context: context,
           isScrollControlled: true,
@@ -220,18 +220,19 @@ class _ItemCardBottomAreaWidgetState extends State<ItemCardBottomAreaWidget> {
     }
 
     /// 如果是热门话题，则可以弹窗显示其新闻细节
-    Future<void> _showTopicDetailDialog(BuildContext context, topicId) async {
-      _genUrl() {
+    Future<void> showTopicDetailDialog(BuildContext context, topicId) async {
+      genUrl() {
         return "https://api.readhub.cn/topic/$topicId";
       }
 
-      print("开始获取详情...${_genUrl()}");
-      var response = await fetchReadhubTopicDetailResult(_genUrl());
+      print("开始获取详情...${genUrl()}");
+      var response = await fetchReadhubTopicDetailResult(genUrl());
 
       /// 如果出现 type 'null' is not a subtype of type 'int' in type cast 然后 无法直接打印response，可能就是
       /// model中设置了 required 的属性，实际取得为null。
       ReadhubApiTopicDetailData topicDetail = response[0];
 
+      // ignore: use_build_context_synchronously
       await showDialog(
           context: context,
           builder: (BuildContext context) {
@@ -250,16 +251,14 @@ class _ItemCardBottomAreaWidgetState extends State<ItemCardBottomAreaWidget> {
           flex: 1,
           // 发布时间格式化，加上发布的网站名称
           child: Text(
-            DateFormat('yyyy-MM-dd HH:mm:ss').format(createdTime) +
-                "    " +
-                "${widget.newsItem.siteNameDisplay} ",
+            "${DateFormat('yyyy-MM-dd HH:mm:ss').format(createdTime)}   ${widget.newsItem.siteNameDisplay} ",
             textScaleFactor: 1.0,
             maxLines: 1,
 
             ///浏览器...显示异常
             overflow:
                 PlatformUtil.isWeb ? TextOverflow.fade : TextOverflow.ellipsis,
-            style: Theme.of(context).textTheme.caption!.copyWith(
+            style: Theme.of(context).textTheme.bodySmall!.copyWith(
                   fontSize: sizeContent4,
                 ),
           ),
@@ -290,7 +289,7 @@ class _ItemCardBottomAreaWidgetState extends State<ItemCardBottomAreaWidget> {
         // 热门话题有更多链接，其他的就没有
         widget.newsItem.newsAggList != null
             ? SmallButtonWidget(
-                onTap: () => _showNewsDialog(context),
+                onTap: () => showNewsDialog(context),
                 tooltip: 'news agg list',
                 child: Icon(
                   Icons.link,
@@ -314,7 +313,7 @@ class _ItemCardBottomAreaWidgetState extends State<ItemCardBottomAreaWidget> {
                 //   );
                 // },
                 onTap: () =>
-                    _showTopicDetailDialog(context, widget.newsItem.uid),
+                    showTopicDetailDialog(context, widget.newsItem.uid),
                 tooltip: "detail",
                 child: Icon(
                   Icons.details,
@@ -503,12 +502,12 @@ class _ItemCardWidgetState extends State<ItemCardWidget> {
                   height: 0.1.sp,
                   leading: 1,
                 ),
-                style: Theme.of(context).textTheme.caption!.copyWith(
+                style: Theme.of(context).textTheme.bodySmall!.copyWith(
                     letterSpacing: 1.0,
                     fontSize: sizeContent3,
                     color: Theme.of(context)
                         .textTheme
-                        .headline6!
+                        .titleLarge!
                         .color!
                         .withOpacity(0.8)),
               ),

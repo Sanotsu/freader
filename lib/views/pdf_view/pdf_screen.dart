@@ -22,6 +22,7 @@ class PDFScreen extends StatefulWidget {
   const PDFScreen({Key? key, required this.pdfState}) : super(key: key);
 
   @override
+  // ignore: library_private_types_in_public_api
   _PDFScreenState createState() => _PDFScreenState();
 }
 
@@ -124,6 +125,7 @@ class _PDFScreenState extends State<PDFScreen> with WidgetsBindingObserver {
         onWillPop: () async {
           // 点击appbar返回按钮或者返回键时，先保持已读的进度
           await saveReadProgress();
+          // ignore: use_build_context_synchronously
           Navigator.pop(context);
           // Navigator.pop(context, "data you want return");
           return false;
@@ -176,6 +178,7 @@ class _PDFScreenState extends State<PDFScreen> with WidgetsBindingObserver {
         height: 40.sp,
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
             // 书签
             IconButton(
@@ -241,8 +244,7 @@ class _PDFScreenState extends State<PDFScreen> with WidgetsBindingObserver {
                 _pdfViewerController.nextPage();
               },
             )
-          ],
-          mainAxisAlignment: MainAxisAlignment.spaceAround, //均分底部导航栏横向空间
+          ], //均分底部导航栏横向空间
         ),
       ),
     );

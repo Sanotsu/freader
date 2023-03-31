@@ -71,15 +71,15 @@ class _ToolsPageState extends State<ToolsPage> {
                 child: Card(
                   semanticContainer: true,
                   clipBehavior: Clip.antiAliasWithSaveLayer,
-                  child: Image.asset(
-                    bgImages[index],
-                    fit: BoxFit.fill,
-                  ),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10.0),
                   ),
                   elevation: 5,
                   margin: EdgeInsets.all(10.sp),
+                  child: Image.asset(
+                    bgImages[index],
+                    fit: BoxFit.fill,
+                  ),
                 ),
                 // Card(
                 //   color: const Color.fromARGB(255, 197, 204, 202),
@@ -113,7 +113,7 @@ _onCardTap(BuildContext context, int index) {
     //   screen = const SimpleBlueScreen();
     //   break;
     case 3:
-      screen = const AudioPlayScreen();
+      screen = const NewsPageDemo();
       break;
     default:
       screen = const NewsPageDemo();

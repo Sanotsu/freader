@@ -20,7 +20,7 @@ Future<List<ReadhubApiResult>> fetchReadhubApiCommonResult(String url) async {
     // then parse the JSON.
 
     // 原始的json字符串没有大括号包裹
-    final json = "[" + response.body + "]";
+    final json = "[${response.body}]";
 
     List resp = jsonDecode(json);
 
@@ -48,7 +48,7 @@ Future<List<ReadhubApiTopicDetailData>> fetchReadhubTopicDetailResult(
 
     // 原始的json字符串没有大括号包裹
     // 因为这里返回的就是 ReadhubApiTopicDetail 中 ReadhubApiTopicDetailData 的数据了
-    final json = "[" + response.body + "]";
+    final json = "[${response.body}]";
 
     List resp = jsonDecode(json);
 

@@ -8,7 +8,7 @@ import 'package:permission_handler/permission_handler.dart';
 Future<String> createAlbumCacheDirectory(String url) async {
   requestPermission();
   final filepath = await getApplicationDocumentsDirectory();
-  var file = Directory(filepath.path + "/" + url);
+  var file = Directory("${filepath.path}/$url");
   try {
     bool exists = await file.exists();
     if (!exists) {

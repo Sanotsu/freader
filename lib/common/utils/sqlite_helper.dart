@@ -28,7 +28,7 @@ class DatabaseHelper {
   Future<Database> initializeDatabase() async {
     // Get the directory path for both Android and iOS to store database.
     Directory directory = await getApplicationDocumentsDirectory();
-    String path = directory.path + "/" + SqliteSqlStatements.databaseName;
+    String path = "${directory.path}/${SqliteSqlStatements.databaseName}";
 
     print("00000000000000000000000$path");
 

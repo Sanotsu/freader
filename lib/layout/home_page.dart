@@ -338,6 +338,7 @@ class _HomeDrawerState extends State<HomeDrawer> {
                     onTap: () async {
                       // 点击退出按钮后，清除登入状态为false，并跳转到登陆页
                       await saveLoginState();
+                      // ignore: use_build_context_synchronously
                       Navigator.of(context).pushReplacement(
                         MaterialPageRoute(
                           builder: (context) => const LoginScreen(),
@@ -406,6 +407,7 @@ class _HomeBottomAppBarState extends State<HomeBottomAppBar> {
       child: SizedBox(
         height: 40.sp,
         child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
             IconButton(
               icon: Icon(
@@ -424,8 +426,7 @@ class _HomeBottomAppBarState extends State<HomeBottomAppBar> {
               ),
               onPressed: _onItemPressed,
             ),
-          ],
-          mainAxisAlignment: MainAxisAlignment.spaceAround, //均分底部导航栏横向空间
+          ], //均分底部导航栏横向空间
         ),
       ),
     );

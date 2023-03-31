@@ -169,14 +169,14 @@ class LocalPlaylistHasAudio {
   }
 
   Map<String, dynamic> toJson() {
-    final _data = <String, dynamic>{};
-    _data['localPlaylistHasAudioId'] = localPlaylistHasAudioId;
-    _data['playlistId'] = playlistId;
-    _data['audioId'] = audioId;
-    _data['playlistName'] = playlistName;
-    _data['audioName'] = audioName;
-    _data['audioPath'] = audioPath;
-    _data['extras'] = extras;
-    return _data;
+    final data = <String, dynamic>{};
+    data['localPlaylistHasAudioId'] = localPlaylistHasAudioId;
+    data['playlistId'] = playlistId;
+    data['audioId'] = audioId;
+    data['playlistName'] = playlistName;
+    data['audioName'] = audioName;
+    data['audioPath'] = audioPath;
+    data['extras'] = extras;
+    return data;
   }
 }

@@ -254,12 +254,12 @@ class _NewsItemCardWidgetState extends State<NewsItemCardWidget> {
                   height: 0.1.sp,
                   leading: 1,
                 ),
-                style: Theme.of(context).textTheme.caption!.copyWith(
+                style: Theme.of(context).textTheme.bodySmall!.copyWith(
                     letterSpacing: 1.0,
                     fontSize: sizeContent3,
                     color: Theme.of(context)
                         .textTheme
-                        .headline6!
+                        .titleLarge!
                         .color!
                         .withOpacity(0.8)),
               ),
@@ -280,7 +280,7 @@ class _NewsItemCardWidgetState extends State<NewsItemCardWidget> {
                   //     overflow: PlatformUtil.isWeb
                   //         ? TextOverflow.fade
                   //         : TextOverflow.ellipsis,
-                  //     style: Theme.of(context).textTheme.caption!.copyWith(
+                  //     style: Theme.of(context).textTheme.bodySmall!.copyWith(
                   //           fontSize: sizeContent4,
                   //         ),
                   //   ),
@@ -291,7 +291,7 @@ class _NewsItemCardWidgetState extends State<NewsItemCardWidget> {
                     child: RichText(
                       text: TextSpan(
                         text: '更新时间: ',
-                        style: Theme.of(context).textTheme.caption!.copyWith(
+                        style: Theme.of(context).textTheme.bodySmall!.copyWith(
                               fontSize: sizeContent4,
                             ),
                         children: <TextSpan>[
@@ -312,7 +312,7 @@ class _NewsItemCardWidgetState extends State<NewsItemCardWidget> {
                     child: RichText(
                       text: TextSpan(
                         text: '来源媒体: ',
-                        style: Theme.of(context).textTheme.caption!.copyWith(
+                        style: Theme.of(context).textTheme.bodySmall!.copyWith(
                               fontSize: sizeContent4,
                             ),
                         children: <TextSpan>[

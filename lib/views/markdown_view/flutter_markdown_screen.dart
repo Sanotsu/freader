@@ -116,6 +116,7 @@ Widget _buildBottomNavigationBar() {
       height: 40.sp,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
           // 书签
           IconButton(
@@ -135,8 +136,7 @@ Widget _buildBottomNavigationBar() {
             ),
             onPressed: () {},
           ),
-        ],
-        mainAxisAlignment: MainAxisAlignment.spaceAround, //均分底部导航栏横向空间
+        ], //均分底部导航栏横向空间
       ),
     ),
   );

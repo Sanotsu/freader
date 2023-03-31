@@ -275,6 +275,7 @@ class _TxtScreenPageViewState extends State<TxtScreenPageView> {
         onWillPop: () async {
           // 点击appbar返回按钮或者返回键时，先保持已读的进度
           await saveReadProgress();
+          // ignore: use_build_context_synchronously
           Navigator.pop(context);
           // Navigator.pop(context, "data you want return");
           return false;
@@ -312,7 +313,7 @@ class _TxtScreenPageViewState extends State<TxtScreenPageView> {
 
 // pageview当前页码（页码是从0开始的）
   _onPageViewChange(int page) {
-    print("Current Page: " + page.toString());
+    print("Current Page: $page");
     setState(() {
       currentPage = page;
       _currentPageNotifier.value = page;
@@ -344,6 +345,7 @@ class _TxtScreenPageViewState extends State<TxtScreenPageView> {
         height: 40.sp,
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
             // 书签
             //  通过调用上层Scaffold的key，去打开drawer，以显示书签
@@ -429,8 +431,7 @@ class _TxtScreenPageViewState extends State<TxtScreenPageView> {
                 }
               },
             )
-          ],
-          mainAxisAlignment: MainAxisAlignment.spaceAround, //均分底部导航栏横向空间
+          ], //均分底部导航栏横向空间
         ),
       ),
     );

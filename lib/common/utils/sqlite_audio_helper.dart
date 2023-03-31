@@ -29,7 +29,7 @@ class AudioDbHelper {
   Future<Database> initializeDatabase() async {
     // Get the directory path for both Android and iOS to store database.
     Directory directory = await getApplicationDocumentsDirectory();
-    String path = directory.path + "/" + SqliteSqlStatements.audioDbName;
+    String path = "${directory.path}/${SqliteSqlStatements.audioDbName}";
 
     print("111111111111111111111$path");
 

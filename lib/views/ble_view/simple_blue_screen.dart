@@ -54,14 +54,14 @@ class BluetoothOffScreen extends StatelessWidget {
               'Bluetooth Adapter is ${state != null ? state.toString().substring(15) : 'not available'}.',
               style: Theme.of(context)
                   .primaryTextTheme
-                  .subtitle2
+                  .titleSmall
                   ?.copyWith(color: Colors.white),
             ),
             ElevatedButton(
-              child: const Text('TURN ON'),
               onPressed: Platform.isAndroid
                   ? () => FlutterBluePlus.instance.turnOn()
                   : null,
+              child: const Text('TURN ON'),
             ),
           ],
         ),
@@ -80,14 +80,14 @@ class FindDevicesScreen extends StatelessWidget {
         title: const Text('Find Devices'),
         actions: [
           ElevatedButton(
-            child: const Text('TURN OFF'),
             style: ElevatedButton.styleFrom(
-              primary: Colors.black,
-              onPrimary: Colors.white,
+              foregroundColor: Colors.black,
+              disabledForegroundColor: Colors.white,
             ),
             onPressed: Platform.isAndroid
                 ? () => FlutterBluePlus.instance.turnOff()
                 : null,
+            child: const Text('TURN OFF'),
           ),
         ],
       ),
@@ -155,9 +155,9 @@ class FindDevicesScreen extends StatelessWidget {
         builder: (c, snapshot) {
           if (snapshot.data!) {
             return FloatingActionButton(
-              child: const Icon(Icons.stop),
               onPressed: () => FlutterBluePlus.instance.stopScan(),
               backgroundColor: Colors.red,
+              child: const Icon(Icons.stop),
             );
           } else {
             return FloatingActionButton(
@@ -253,7 +253,7 @@ class DeviceScreen extends StatelessWidget {
                     text,
                     style: Theme.of(context)
                         .primaryTextTheme
-                        .button
+                        .labelLarge
                         ?.copyWith(color: Colors.white),
                   ));
             },
@@ -279,9 +279,9 @@ class DeviceScreen extends StatelessWidget {
                             builder: (context, snapshot) {
                               return Text(
                                   snapshot.hasData ? '${snapshot.data}dBm' : '',
-                                  style: Theme.of(context).textTheme.caption);
+                                  style: Theme.of(context).textTheme.bodySmall);
                             })
-                        : Text('', style: Theme.of(context).textTheme.caption),
+                        : Text('', style: Theme.of(context).textTheme.bodySmall),
                   ],
                 ),
                 title: Text(
@@ -299,11 +299,11 @@ class DeviceScreen extends StatelessWidget {
                       ),
                       const IconButton(
                         icon: SizedBox(
+                          width: 18.0,
+                          height: 18.0,
                           child: CircularProgressIndicator(
                             valueColor: AlwaysStoppedAnimation(Colors.grey),
                           ),
-                          width: 18.0,
-                          height: 18.0,
                         ),
                         onPressed: null,
                       )

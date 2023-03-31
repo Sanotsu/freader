@@ -14,6 +14,7 @@ class Setting extends StatefulWidget {
   const Setting({Key? key}) : super(key: key);
 
   @override
+  // ignore: library_private_types_in_public_api
   _SettingState createState() => _SettingState();
 }
 
@@ -101,7 +102,7 @@ class _SettingState extends State<Setting> {
   Widget build(BuildContext context) {
     physicalSize = window.physicalSize;
     ratio = window.devicePixelRatio;
-    final _size = physicalSize / ratio;
+    final privateSize = physicalSize / ratio;
     return Scaffold(
       body: Stack(
         children: [
@@ -110,8 +111,8 @@ class _SettingState extends State<Setting> {
             child: InkWell(
               child: Container(
                 color: Colors.indigo.withOpacity(0.1),
-                width: _size.width / 3,
-                height: _size.height / 3,
+                width: privateSize.width / 3,
+                height: privateSize.height / 3,
                 child: const Center(
                   child: Text(
                     "切\n换\n菜\n单\n显\n示",

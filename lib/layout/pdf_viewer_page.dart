@@ -186,10 +186,10 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
 
     /// 2 获取自选的文件
     // file picker选取放到缓存中的文件
-    List<PlatformFile>? _filePickerResultList;
+    List<PlatformFile>? filePickerResultList;
     try {
       // 加载选择的文件
-      _filePickerResultList = (await FilePicker.platform.pickFiles(
+      filePickerResultList = (await FilePicker.platform.pickFiles(
         // 文件的类型
         type: FileType.custom,
         // 允许选择的文件类型
@@ -199,7 +199,7 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
       ))
           ?.files;
     } on PlatformException catch (e) {
-      print('Unsupported operation' + e.toString());
+      print('Unsupported operation$e');
     } catch (e) {
       print(e.toString());
     }
@@ -220,14 +220,14 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
     var appSupDir = (await getExternalStorageDirectory())!.path;
 
     // 目标文件夹，不存在要创建
-    var appSupPdfDir = appSupDir + "/pdfs";
+    var appSupPdfDir = "$appSupDir/pdfs";
     if (!(await Directory(appSupPdfDir).exists())) {
       await Directory(appSupPdfDir).create(recursive: true);
     }
 
     // 如果有选择的文件，则複製到应用指定路径
-    if (_filePickerResultList != null) {
-      for (var pfFile in _filePickerResultList) {
+    if (filePickerResultList != null) {
+      for (var pfFile in filePickerResultList) {
         // 因为pef viewer可以打开缓存文件，所以不用移动到指定文件夹了
         // var tempNewFile =
         //     await copyFile(File(pfFile.path!), "$appSupPdfDir/${pfFile.name}");
@@ -298,8 +298,8 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
     // 过滤其下指定文件夹
     final embeddedPdfPathList = manifestMap.keys
         .where((String key) => key.contains('assets/pdfs'))
-        .toList()
-        .map((e) => Uri.decodeComponent(e))
+        // .toList()
+        // .map((e) => Uri.decodeComponent(e)) // 2023-03-31新版本转码后会报错，不能识别
         .toList();
 
     setState(() {
@@ -452,8 +452,8 @@ _onPdfCardTap(
 }
 
 // 构建pdf griw列表
-_buildPdfGriwView(List<PdfState> pdfStateList, Function _getAllPdfs) {
-  var _mainTextSize = TextStyle(fontSize: 7.sp);
+_buildPdfGriwView(List<PdfState> pdfStateList, Function getAllPdfs) {
+  var mainTextSize = TextStyle(fontSize: 7.sp);
   return Expanded(
     child: GridView.builder(
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -463,7 +463,7 @@ _buildPdfGriwView(List<PdfState> pdfStateList, Function _getAllPdfs) {
       itemCount: pdfStateList.length, // 文件的数量
       itemBuilder: (BuildContext context, int index) {
         return GestureDetector(
-          onTap: () => _onPdfCardTap(pdfStateList[index], context, _getAllPdfs),
+          onTap: () => _onPdfCardTap(pdfStateList[index], context, getAllPdfs),
           child: SizedBox(
             child: Card(
               color: Colors.lightGreen,
@@ -478,7 +478,7 @@ _buildPdfGriwView(List<PdfState> pdfStateList, Function _getAllPdfs) {
                         flex: 1,
                         child: Text(
                           "文件名称",
-                          style: _mainTextSize,
+                          style: mainTextSize,
                         ),
                       ),
                       Expanded(
@@ -501,7 +501,7 @@ _buildPdfGriwView(List<PdfState> pdfStateList, Function _getAllPdfs) {
                         flex: 1,
                         child: Text(
                           "文件路径",
-                          style: _mainTextSize,
+                          style: mainTextSize,
                         ),
                       ),
                       Expanded(
@@ -509,7 +509,7 @@ _buildPdfGriwView(List<PdfState> pdfStateList, Function _getAllPdfs) {
                         child: Text(
                           pdfStateList[index].filepath,
                           maxLines: 3,
-                          style: _mainTextSize,
+                          style: mainTextSize,
                         ),
                       ),
                     ],
@@ -524,14 +524,14 @@ _buildPdfGriwView(List<PdfState> pdfStateList, Function _getAllPdfs) {
                         flex: 1,
                         child: Text(
                           "文件来源",
-                          style: _mainTextSize,
+                          style: mainTextSize,
                         ),
                       ),
                       Expanded(
                         flex: 4,
                         child: Text(
                           pdfStateList[index].source,
-                          style: _mainTextSize,
+                          style: mainTextSize,
                         ),
                       ),
                     ],
@@ -543,14 +543,14 @@ _buildPdfGriwView(List<PdfState> pdfStateList, Function _getAllPdfs) {
                         flex: 1,
                         child: Text(
                           "阅读进度",
-                          style: _mainTextSize,
+                          style: mainTextSize,
                         ),
                       ),
                       Expanded(
                         flex: 4,
                         child: Text(
                           "${pdfStateList[index].readProgress}%",
-                          style: _mainTextSize,
+                          style: mainTextSize,
                         ),
                       ),
                     ],
@@ -562,14 +562,14 @@ _buildPdfGriwView(List<PdfState> pdfStateList, Function _getAllPdfs) {
                         flex: 1,
                         child: Text(
                           "上次阅读",
-                          style: _mainTextSize,
+                          style: mainTextSize,
                         ),
                       ),
                       Expanded(
                         flex: 4,
                         child: Text(
                           pdfStateList[index].lastReadDatetime,
-                          style: _mainTextSize,
+                          style: mainTextSize,
                         ),
                       ),
                     ],

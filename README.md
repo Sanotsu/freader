@@ -18,12 +18,12 @@ A new Flutter project.
 ├─routes        存放所有路由页面类
 ├─states        保存APP中需要跨组件共享的状态类
 ├─views         页面
-│  ├─image_view       开源图片tab        
+│  ├─image_view       开源图片tab
 │  ├─markdown_view    科技博文tab
 │  ├─news_view        各式新闻tab
 │  ├─pdf_view         pdf阅读器tab
 │  ├─tools_view       实用工具tab
-│  └─txt_view         内置小说tab  
+│  └─txt_view         内置小说tab
 └─widgets       APP内封装的一些Widget组件都在该目录下
 ```
 
@@ -107,12 +107,22 @@ app
 或者[loop_page_view](https://pub.dev/packages/loop_page_view)
 
 2022-06-04 txt reader 要改进点:
+
 - 关于使用 pageview 用章节总数/每页显示数量=章节数量 这个设计:
-  - 数据库的设计有点问题。关于txt信息的本身 和用户txt阅读的进度之间的查询和关联，不太好，需要改进。
+
+  - 数据库的设计有点问题。关于 txt 信息的本身 和用户 txt 阅读的进度之间的查询和关联，不太好，需要改进。
   - 每页显示的数量并不一致，有的最后一行不显示完整，有的只显示上面一半。毕竟不能填满。
   - 只测试了一本小说，其他几部还没弄，测试的输出还有很多。
 
-- 后续可使用canvas的方法。目前可参考`lib\views\txt_viewer\text_composition`的内容
+- 后续可使用 canvas 的方法。目前可参考`lib\views\txt_viewer\text_composition`的内容
 
-pdf和txt中删除db再重建好像有点问题，不是这么搞的。
-加载txt章节时，没有转圈圈提示
+pdf 和 txt 中删除 db 再重建好像有点问题，不是这么搞的。
+加载 txt 章节时，没有转圈圈提示
+
+# 2023-03-31 更新依赖到当前最新
+
+此时 flutter sdk 为 3.7.8，相关依赖也是最新，但有几个问题：
+
+- 1 md 阅读器不能正常显示
+  - 一些组件使用方法的更新，修复报错信息就正常能用了
+2 音频播放使用获取音频信息的依赖自身报错，整个组件更换工具库的话需要重写。
