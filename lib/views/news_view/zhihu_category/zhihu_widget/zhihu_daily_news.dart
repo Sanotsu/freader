@@ -150,14 +150,18 @@ class _ZhihuDailyNewsState extends State<ZhihuDailyNews> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                dailyDate,
-                style: Theme.of(context).textTheme.headlineSmall, // 使用预设主题的一些样式
-                // style: TextStyle(
-                //   fontSize: 14.sp,
-                //   fontWeight: FontWeight.bold,
-                //   color: Colors.blue,
-                // ),
+              Padding(
+                padding: EdgeInsets.only(left: 25.sp),
+                child: Text(
+                  dailyDate,
+                  style:
+                      Theme.of(context).textTheme.headlineSmall, // 使用预设主题的一些样式
+                  // style: TextStyle(
+                  //   fontSize: 14.sp,
+                  //   fontWeight: FontWeight.bold,
+                  //   color: Colors.blue,
+                  // ),
+                ),
               ),
 
               /// 2022-05-07 使用 flutter_datetime_picker 其库本身会报 Warning:

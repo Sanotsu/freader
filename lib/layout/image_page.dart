@@ -1,5 +1,7 @@
 // ignore_for_file: deprecated_member_use, avoid_print, prefer_typing_uninitialized_variables
 
+import 'dart:async';
+
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -16,27 +18,29 @@ class ImagePage extends StatefulWidget {
 
 class _ImagePageState extends State<ImagePage> with TickerProviderStateMixin {
   // 新闻站点
-  final titles = ["demo image page", "Pexels", "Unsplash", "So on"];
+  final titles = [
+    "Pexels",
+    // "Unsplash",
+    "Asset的图片示例",
+  ];
   // 站点简述
   final subtitles = [
-    "demo image page",
     "Free stock photos & videos you can use everywhere.",
-    "Here is list 2 subtitle",
-    "Here is list 3 subtitle"
+    // "Here is list 2 subtitle",
+    "demo image page",
   ];
 
   // 站点图标
   final siteLogos = [
-    "images/avatar.png",
     "images/site_logos/pexels_logo.png",
-    "images/avatar.png",
+    // "images/avatar.png",
     "images/avatar.png"
   ];
 
   // 分类图标
   final icons = [Icons.image, Icons.image, Icons.image, Icons.image];
 
-  var subscription;
+  late StreamSubscription<ConnectivityResult> subscription;
   //用来显示网络状态的字符串
   String networkStateString = "";
 
@@ -62,6 +66,12 @@ class _ImagePageState extends State<ImagePage> with TickerProviderStateMixin {
         networkStateString = result.toString();
       });
     });
+  }
+
+  @override
+  dispose() {
+    subscription.cancel();
+    super.dispose();
   }
 
   @override
@@ -93,22 +103,16 @@ _onCardTap(BuildContext context, int index, String networkStateString) {
   Widget screen;
 
   switch (index) {
-    case 0:
-      screen = const ImagePageDemo();
-      break;
-    // 如果是点击第二个，为跳转到pexels页面，
+    // 如果是点击第1个，为跳转到pexels页面，
     //    如果网络不是wifi环境，先弹窗提醒，用户确定，才跳转；取消则不跳转。
     //    如果是wifi环境，直接跳转，不弹窗。
-    case 1:
+    case 0:
       if (networkStateString != "ConnectivityResult.wifi") {
         return showConfirmDialog(context, const PexelsImagePage());
       } else {
         screen = const PexelsImagePage();
         break;
       }
-    case 2:
-      screen = const ImagePageDemo();
-      break;
     default:
       screen = const ImagePageDemo();
   }

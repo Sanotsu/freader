@@ -38,35 +38,6 @@ class _MarkdownWidgetScreenState extends State<MarkdownWidgetScreen> {
     super.dispose();
   }
 
-  // Widget _buildToc() {
-  //   return GestureDetector(
-  //     child: SizedBox(
-  //       child: TocListWidget(controller: tocController),
-  //     ),
-  //     onTap: () {
-  //       print("11111111");
-  //       // Navigator.pop(context);
-  //       // 再在应用內打开url
-  //     },
-  //     onDoubleTap: () {
-  //       print("GestureDetector:双击了");
-  //     },
-  //     onLongPress: () {
-  //       print("GestureDetector:长按了");
-  //     },
-  //     onTapUp: (tagUp) {
-  //       print("GestureDetector:单击抬起:$tagUp");
-  //     },
-  //     onTapDown: (tapDown) {
-  //       print("GestureDetector:单击按下$tapDown");
-  //       Navigator.pop(context);
-  //     },
-  //     onTapCancel: () {
-  //       print("GestureDetector:取消了");
-  //     },
-  //   );
-  // }
-
   @override
   Widget build(BuildContext context) {
     // 拆取路劲中的文件名称，'assets/mds/demo.md' 中取 demo

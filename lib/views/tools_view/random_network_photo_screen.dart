@@ -143,8 +143,10 @@ class _RandomNetworkPhotoScreenState extends State<RandomNetworkPhotoScreen> {
                           (context, url, downloadProgress) => SizedBox(
                         width: 30.sp,
                         height: 30.sp,
-                        child: CircularProgressIndicator(
-                          value: downloadProgress.progress,
+                        child: Center(
+                          child: CircularProgressIndicator(
+                            value: downloadProgress.progress,
+                          ),
                         ),
                       ),
                       // 图片加载时的占位

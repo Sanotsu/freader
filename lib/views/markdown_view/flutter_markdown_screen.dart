@@ -5,8 +5,6 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import 'package:http/http.dart' as http;
-
 // 2022-07-02 flutter_markdown是flutter官方的，但是没有toc，没有目录
 
 class FlutterMarkdownScreen extends StatefulWidget {
@@ -75,32 +73,7 @@ class _FlutterMarkdownScreenState extends State<FlutterMarkdownScreen> {
     );
   }
 
-  // @override
-  // Widget build(BuildContext context) {
-  //   return FutureBuilder(
-  //     // future: getLocalPexelsApiImageJson(),
-  //     future: DefaultAssetBundle.of(context).loadString(widget.mdAssetPath),
-  //     builder: (BuildContext context, AsyncSnapshot snapshot) {
-  //       if (snapshot.hasData) {
-  //         return Markdown(data: snapshot.data);
-  //       } else {
-  //         return const Center(
-  //           child: Text("加载中..."),
-  //         );
-  //       }
-  //     },
-  //   );
-  // }
-
-// 从网络加载的示例
-  Future<String> getTextData() async {
-    String url =
-        '''https://raw.githubusercontent.com/mxstbr/markdown-test-file/master/TEST.md''';
-
-    final response = await http.get(Uri.parse(url));
-    return response.body;
-  }
-
+// 获取内置的md文件
   Future<String> getLocalPexelsApiImageJson() async {
     String mdString = await rootBundle.loadString('assets/mds/demo.md');
     return mdString;

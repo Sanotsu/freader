@@ -17,31 +17,19 @@ class ToolsPage extends StatefulWidget {
 }
 
 class _ToolsPageState extends State<ToolsPage> {
-  // 新闻站点
+  // 各个区块功能名称
   final titles = [
     "历史上的今天",
-    "随机笑话段子",
-    "随机静动图片",
-    "近期天气预报",
-    // "近期天气预报",
-    "近期天气预报",
-  ];
-  // 站点简述
-  final subtitles = [
-    "历史上今天发生地一些大事情.",
-    "随机获取并浏览一张网络图片.",
-    "Here is list 2 subtitle",
-    "Here is list 2 subtitle",
-    // "Here is list 2 subtitle",
-    "Here is list 3 subtitle"
+    "随机网络图片",
+    "多国语言翻译",
+    "低功蓝牙示例",
   ];
 
+// 这个背景 图的长度，要和下面gridview的builder中 itemCount 一致
   final bgImages = [
     "images/tools_image/历史上的今天.png",
     "images/tools_image/随机网络图片.png",
     "images/tools_image/多国语言翻译.png",
-    // "images/tools_image/简单音乐播放.png",
-    "images/tools_image/music-player.jpg",
     "images/tools_image/ToBeContinue.png"
   ];
 
@@ -49,15 +37,6 @@ class _ToolsPageState extends State<ToolsPage> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        // SizedBox(
-        //   height: 50.sp,
-        //   child: Center(
-        //     child: Text(
-        //       "实用工具主页",
-        //       style: TextStyle(fontSize: 20.sp),
-        //     ),
-        //   ),
-        // ),
         Expanded(
           child: GridView.builder(
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -76,18 +55,19 @@ class _ToolsPageState extends State<ToolsPage> {
                   ),
                   elevation: 5,
                   margin: EdgeInsets.all(10.sp),
-                  child: Image.asset(
-                    bgImages[index],
-                    fit: BoxFit.fill,
+                  color: Colors.green[300],
+                  shadowColor: Colors.blue,
+                  // child: Image.asset(
+                  //   bgImages[index],
+                  //   fit: BoxFit.fill,
+                  // ),
+                  child: Center(
+                    child: Text(
+                      titles[index],
+                      style: TextStyle(fontSize: 20.sp),
+                    ),
                   ),
                 ),
-                // Card(
-                //   color: const Color.fromARGB(255, 197, 204, 202),
-                //   child: ListTile(
-                //     title: Text(titles[index]),
-                //     subtitle: Text(subtitles[index]),
-                //   ),
-                // ),
               );
             },
           ),

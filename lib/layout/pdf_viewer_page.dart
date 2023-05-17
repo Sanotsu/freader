@@ -429,7 +429,6 @@ pdf viwer使用的是 syncfusion_flutter_pdfviewer 库,内置功能很多,但加
   }
 
   /// 模拟异步获取数据
-
 }
 
 /// 点击卡片，进行页面跳转
@@ -457,7 +456,7 @@ _buildPdfGriwView(List<PdfState> pdfStateList, Function getAllPdfs) {
   return Expanded(
     child: GridView.builder(
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        childAspectRatio: 4 / 2, // item的宽高比
+        childAspectRatio: 16 / 9, // item的宽高比
         crossAxisCount: 2,
       ),
       itemCount: pdfStateList.length, // 文件的数量
@@ -476,10 +475,7 @@ _buildPdfGriwView(List<PdfState> pdfStateList, Function getAllPdfs) {
                       // 2022-05-10 注意，这里都只是按鈕点击了一次之后就无法使用了，因为setState都固定
                       Expanded(
                         flex: 1,
-                        child: Text(
-                          "文件名称",
-                          style: mainTextSize,
-                        ),
+                        child: Text("文件名称", style: mainTextSize),
                       ),
                       Expanded(
                         flex: 4,
@@ -491,18 +487,13 @@ _buildPdfGriwView(List<PdfState> pdfStateList, Function getAllPdfs) {
                       ),
                     ],
                   ),
-                  Divider(
-                    height: 5.sp,
-                  ),
+                  Divider(height: 5.sp),
                   Row(
                     children: [
                       // 2022-05-10 注意，这里都只是按鈕点击了一次之后就无法使用了，因为setState都固定
                       Expanded(
                         flex: 1,
-                        child: Text(
-                          "文件路径",
-                          style: mainTextSize,
-                        ),
+                        child: Text("文件路径", style: mainTextSize),
                       ),
                       Expanded(
                         flex: 4,
@@ -514,18 +505,13 @@ _buildPdfGriwView(List<PdfState> pdfStateList, Function getAllPdfs) {
                       ),
                     ],
                   ),
-                  Divider(
-                    height: 5.sp,
-                  ),
+                  Divider(height: 5.sp),
                   Row(
                     children: [
                       // 2022-05-10 注意，这里都只是按鈕点击了一次之后就无法使用了，因为setState都固定
                       Expanded(
                         flex: 1,
-                        child: Text(
-                          "文件来源",
-                          style: mainTextSize,
-                        ),
+                        child: Text("文件来源", style: mainTextSize),
                       ),
                       Expanded(
                         flex: 4,
@@ -541,10 +527,7 @@ _buildPdfGriwView(List<PdfState> pdfStateList, Function getAllPdfs) {
                       // 2022-05-10 注意，这里都只是按鈕点击了一次之后就无法使用了，因为setState都固定
                       Expanded(
                         flex: 1,
-                        child: Text(
-                          "阅读进度",
-                          style: mainTextSize,
-                        ),
+                        child: Text("阅读进度", style: mainTextSize),
                       ),
                       Expanded(
                         flex: 4,
@@ -560,10 +543,7 @@ _buildPdfGriwView(List<PdfState> pdfStateList, Function getAllPdfs) {
                       // 2022-05-10 注意，这里都只是按鈕点击了一次之后就无法使用了，因为setState都固定
                       Expanded(
                         flex: 1,
-                        child: Text(
-                          "上次阅读",
-                          style: mainTextSize,
-                        ),
+                        child: Text("上次阅读", style: mainTextSize),
                       ),
                       Expanded(
                         flex: 4,

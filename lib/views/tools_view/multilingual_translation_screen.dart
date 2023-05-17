@@ -34,7 +34,10 @@ class _MultilingualTranslationScreenState
         appBar: AppBar(
           title: const Text("多国语言翻译"),
         ),
-        body: const CustomerForm());
+        resizeToAvoidBottomInset: false,
+        body: const Material(
+          child: CustomerForm(),
+        ));
   }
 }
 
@@ -185,9 +188,10 @@ class _CustomerFormState extends State<CustomerForm> {
   @override
   Widget build(BuildContext context) {
     return Column(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        SizedBox(
-          height: 50.sp,
+        Expanded(
+          flex: 1,
           child: Row(
             children: <Widget>[
               // 翻译引擎选择
@@ -309,8 +313,8 @@ class _CustomerFormState extends State<CustomerForm> {
           ),
         ),
         // 间隔高度(预留文字转语音)
-        SizedBox(
-          height: 30.sp,
+        Expanded(
+          flex: 1,
           child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
@@ -339,6 +343,7 @@ class _CustomerFormState extends State<CustomerForm> {
         ),
         // 输入框占屏幕1/3
         Expanded(
+          flex: 3,
           child: SizedBox(
             height: 0.3.sh,
             child: TextField(
@@ -378,8 +383,8 @@ class _CustomerFormState extends State<CustomerForm> {
           ),
         ),
         // 间隔高度(预留文字转语音)
-        SizedBox(
-          height: 30.sp,
+        Expanded(
+          flex: 1,
           child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
@@ -407,6 +412,7 @@ class _CustomerFormState extends State<CustomerForm> {
               ]),
         ),
         Expanded(
+          flex: 3,
           child: SizedBox(
             height: 0.3.sh,
             child: TextField(

@@ -141,20 +141,15 @@ flutter:
     - images/site_logos/
     - images/tools_image/
     - assets/
-    - assets/jsons/
+    # - assets/jsons/
     # - assets/jsons/pexels_api_images.json
     - assets/pdfs/
     - assets/txts/
     - assets/mds/
-    - assets/mds/javascript/
+    - assets/mds/中文分组/
     # md 中使用的图片路径，也要加入进来，不然找不到
-    - assets/mds/javascript/pictures-vue/
-    - assets/mds/javascript/pictures-vue/angular/
-    - assets/mds/typescript/
-    - assets/mds/nodejs/
-    - assets/mds/nodejs/assets/
-    - assets/mds/dsa/
-    - assets/mds/dsa/pictures/
+    - assets/mds/with-pictures/images/
+    - assets/mds/with-pictures/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.

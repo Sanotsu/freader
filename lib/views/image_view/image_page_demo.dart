@@ -22,6 +22,7 @@ class _ImagePageDemoState extends State<ImagePageDemo> {
             iconSize: 20.sp,
             icon: const Icon(
               Icons.search,
+              color: Colors.black,
               semanticLabel: 'search', // icon的语义标签。
             ),
             onPressed: () {},

@@ -61,8 +61,8 @@ class _ContextLocalState extends State<ContextLocal> {
               Expanded(
                 child: TabBarView(
                   children: <Widget>[
-                    MarkdownPage(),
                     PdfViewerPage(),
+                    MarkdownPage(),
                     TxtViewerPage(),
                   ],
                 ),
@@ -110,23 +110,14 @@ _buildAppBar(String networkState) {
       indicatorSize: TabBarIndicatorSize.label,
       isScrollable: true,
       tabs: [
-        SizedBox(
-          width: tabWidth,
-          child: Tab(
-            child: Text("技术文章", style: blackHeadTextStyle),
-          ),
+        Tab(
+          child: Text("PDF阅读器", style: blackHeadTextStyle),
         ),
-        SizedBox(
-          width: tabWidth,
-          child: Tab(
-            child: Text("PDF阅读器", style: blackHeadTextStyle),
-          ),
+        Tab(
+          child: Text("内置.md文字", style: blackHeadTextStyle),
         ),
-        SizedBox(
-          width: tabWidth,
-          child: Tab(
-            child: Text("内置小说", style: blackHeadTextStyle),
-          ),
+        Tab(
+          child: Text("内置TXT小说", style: blackHeadTextStyle),
         ),
       ],
     ),
