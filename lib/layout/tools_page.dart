@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:freader/views/ble_view/simple_blue_screen.dart';
 import 'package:freader/views/news_view/news_page_demo.dart';
-import 'package:freader/views/tools_view/audio_player_category/audio_player_screen.dart';
 import 'package:freader/views/tools_view/random_network_photo_screen.dart';
 import 'package:freader/views/tools_view/today_in_history_screen.dart';
 import 'package:freader/views/tools_view/multilingual_translation_screen.dart';
@@ -109,11 +109,8 @@ _onCardTap(BuildContext context, int index) {
     case 2:
       screen = const MultilingualTranslationScreen();
       break;
-    // case 3:
-    //   screen = const SimpleBlueScreen();
-    //   break;
     case 3:
-      screen = const NewsPageDemo();
+      screen = const SimpleBlueScreen();
       break;
     default:
       screen = const NewsPageDemo();

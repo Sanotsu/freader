@@ -125,9 +125,10 @@ class _PDFScreenState extends State<PDFScreen> with WidgetsBindingObserver {
         onWillPop: () async {
           // 点击appbar返回按钮或者返回键时，先保持已读的进度
           await saveReadProgress();
-          // ignore: use_build_context_synchronously
-          Navigator.pop(context);
-          // Navigator.pop(context, "data you want return");
+          if (mounted) {
+            Navigator.pop(context);
+            // Navigator.pop(context, "data you want return");
+          }
           return false;
         },
         // 如果是内嵌的要用asset，否则读文件

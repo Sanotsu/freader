@@ -232,7 +232,7 @@ class _ItemCardBottomAreaWidgetState extends State<ItemCardBottomAreaWidget> {
       /// model中设置了 required 的属性，实际取得为null。
       ReadhubApiTopicDetailData topicDetail = response[0];
 
-      // ignore: use_build_context_synchronously
+      if (!mounted) return;
       await showDialog(
           context: context,
           builder: (BuildContext context) {

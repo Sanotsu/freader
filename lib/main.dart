@@ -1,5 +1,7 @@
+import 'dart:async';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-// import 'package:just_audio_background/just_audio_background.dart';
 
 import 'layout/app.dart';
 
@@ -7,11 +9,15 @@ import 'layout/app.dart';
 //   runApp(const FreaderApp());
 // }
 Future<void> main() async {
-  // 这一堆是为了能够背景播放音乐
-  // await JustAudioBackground.init(
-  //   androidNotificationChannelId: 'com.ryanheise.bg_demo.channel.audio',
-  //   androidNotificationChannelName: 'Audio playback',
-  //   androidNotificationOngoing: true,
-  // );
+  FlutterError.onError = (details) async {
+    if (kDebugMode) {
+      /// 将错误输出到控制台
+      FlutterError.dumpErrorToConsole(details);
+    } else {
+      /// 将Framework的异常转发到当前Zone的onError回调中
+      Zone.current.handleUncaughtError(details.exception, details.stack!);
+    }
+  };
+
   runApp(const FreaderApp());
 }

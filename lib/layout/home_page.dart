@@ -28,15 +28,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 class HomePage extends StatefulWidget {
   const HomePage({Key? key, required this.title}) : super(key: key);
 
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
   final String title;
 
   @override
@@ -338,7 +329,7 @@ class _HomeDrawerState extends State<HomeDrawer> {
                     onTap: () async {
                       // 点击退出按钮后，清除登入状态为false，并跳转到登陆页
                       await saveLoginState();
-                      // ignore: use_build_context_synchronously
+                      if (!mounted) return;
                       Navigator.of(context).pushReplacement(
                         MaterialPageRoute(
                           builder: (context) => const LoginScreen(),

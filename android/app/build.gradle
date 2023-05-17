@@ -53,7 +53,8 @@ android {
         // minSdkVersion flutter.minSdkVersion
         // minSdkVersion 20
         // advance_pdf_viewer 插件要求最低21
-        minSdkVersion 21
+        // minSdkVersion 21
+        minSdkVersion 23
         targetSdkVersion flutter.targetSdkVersion
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName

@@ -8,10 +8,4 @@ class GlobalConstants {
   /// 记录登入账号、状态的字符串key
   static String loginState = "loginState";
   static String loginAccount = "loginAccount";
-
-  /// audio模块中，默认播放列表的id和name的值
-  static String localAudioDeaultPlaylistId = "deaultPlaylist";
-  static String localAudioDeaultPlaylistName = "默认全盘歌单";
-  static String localAudioMyFavoriteId = "myFavorite";
-  static String localAudioMyFavoriteName = "我的最爱";
 }

@@ -125,4 +125,15 @@ pdf 和 txt 中删除 db 再重建好像有点问题，不是这么搞的。
 
 - 1 md 阅读器不能正常显示
   - 一些组件使用方法的更新，修复报错信息就正常能用了
-2 音频播放使用获取音频信息的依赖自身报错，整个组件更换工具库的话需要重写。
+- 2 音频播放使用获取音频信息的依赖自身报错，整个组件更换工具库的话需要重写。
+
+**考虑本地音乐播放器单独做一个 app，这个原本的 tool 其实也很不完善，也很多问题**
+
+**2023-05-17 取消音频播放模块功能，构建单独的项目 freader_musci_player**
+
+---
+
+- 大量的`Don't use 'BuildContext's across async gaps.Try rewriting the code to not reference the 'BuildContext'`警告。
+  [参看](https://stackoverflow.com/questions/68871880/do-not-use-buildcontexts-across-async-gaps)
+
+- 出现很多类似警告：`Warning: Mapping new ns http://schemas.android.com/repository/android/common/02 to old ns http://schemas.android.com/repository/android/common/01`
