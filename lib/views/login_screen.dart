@@ -115,11 +115,7 @@ class LoginScreen extends StatelessWidget {
         // 登入成功，保存登入成功信息之后，再跳转到主页
         saveLoginState();
         Navigator.of(context).pushReplacement(
-          MaterialPageRoute(
-            builder: (context) => const HomePage(
-              title: 'FReader',
-            ),
-          ),
+          MaterialPageRoute(builder: (context) => const HomePage()),
         );
       },
       // 点击重置密码按钮的回调函数

@@ -10,6 +10,12 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:freader/views/login_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+/// app 先看是否登录，没有，跳转到 login_screen；已登录，则到home_page。
+/// home_page 展示两个底部导航栏在线内容context_online，本地内容context_local，默认展示第一个
+///    context_online 的tab显示的page有 news、image、tools
+///    context_local 的tab显示的page有 markdown、pdf、txt
+///       这两者还带上同一个drawer抽屉组件，也在appbar中显示网络状态
+
 class FreaderApp extends StatelessWidget {
   const FreaderApp({Key? key}) : super(key: key);
 
@@ -36,9 +42,7 @@ class FreaderApp extends StatelessWidget {
           theme: ThemeData(
             primarySwatch: Colors.blue,
           ),
-          home: const MyHomePage(
-            title: '"freader',
-          ),
+          home: const MyHomePage(),
         );
       },
     );
@@ -46,13 +50,10 @@ class FreaderApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key, required this.title}) : super(key: key);
-
-  final String title;
+  const MyHomePage({Key? key}) : super(key: key);
 
   @override
-  // ignore: library_private_types_in_public_api
-  _MyHomePageState createState() => _MyHomePageState();
+  State<MyHomePage> createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
@@ -78,8 +79,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return isLogin
-        ? const HomePage(title: 'Flutter Demo Home Page')
-        : const LoginScreen();
+    return isLogin ? const HomePage() : const LoginScreen();
   }
 }

@@ -40,44 +40,54 @@ class _HitokotoSentenceState extends State<HitokotoSentence> {
                 textWidget = Text(snapshot.error.toString());
               }
 
-              // 获取hitokoto 一言 对象
-              var data = snapshot.data;
+              if (snapshot.hasData) {
+                // 获取hitokoto 一言 对象
+                var data = snapshot.data;
 
-              textWidget = Card(
-                margin:
-                    EdgeInsets.only(left: 30.0.sp, top: 30.sp, right: 30.sp),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Text("每日一言",
-                        maxLines: 20,
+                textWidget = Card(
+                  margin:
+                      EdgeInsets.only(left: 30.0.sp, top: 30.sp, right: 30.sp),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Text("一言",
+                          maxLines: 20,
+                          style: TextStyle(
+                              fontSize: 12.0.sp,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.green)),
+                      Divider(
+                        thickness: 1.sp, // 分割线厚度
+                        indent: 20.sp, // 分割线前方空白长度
+                        color: Colors.red, // 分割线颜色
+                      ),
+                      Text(
+                        "${data!.hitokoto}",
+                        style: TextStyle(fontSize: 12.sp),
+                        textAlign: TextAlign.start,
+                      ),
+                      Text(
+                        "《${data.from}》- ${data.from_who}",
                         style: TextStyle(
-                            fontSize: 12.0.sp,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.green)),
-                    Divider(
-                      thickness: 1.sp, // 分割线厚度
-                      indent: 20.sp, // 分割线前方空白长度
-                      color: Colors.red, // 分割线颜色
-                    ),
-                    Text(
-                      "${data!.hitokoto}",
-                      style: TextStyle(fontSize: 12.sp),
-                      textAlign: TextAlign.start,
-                    ),
-                    Text(
-                      "《${data.from}》- ${data.from_who}",
-                      style: TextStyle(
-                          fontSize: 10.sp, height: 3.sp), // 字体的height，是字体大小的倍数。
-                      textAlign: TextAlign.end,
-                    ),
-                  ],
-                ),
-              );
+                            fontSize: 10.sp,
+                            height: 3.sp), // 字体的height，是字体大小的倍数。
+                        textAlign: TextAlign.end,
+                      ),
+                    ],
+                  ),
+                );
 
+                return Column(
+                  children: [
+                    textWidget,
+                  ],
+                );
+              }
+
+              // 发生错误或者有数据会显示对应内容，其他情况则只显示一个占位的组件
               return Column(
                 children: [
-                  textWidget,
+                  Container(),
                 ],
               );
             }
