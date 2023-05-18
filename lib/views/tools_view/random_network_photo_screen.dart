@@ -1,16 +1,17 @@
 // ignore_for_file: avoid_print
 
+import 'dart:io';
 import 'dart:math';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:freader/common/personal/constants.dart';
 
 import 'package:permission_handler/permission_handler.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 // import 'package:photo_view/photo_view.dart';
-import 'package:gallery_saver/gallery_saver.dart';
 
 class RandomNetworkPhotoScreen extends StatefulWidget {
   const RandomNetworkPhotoScreen({Key? key}) : super(key: key);
@@ -24,15 +25,15 @@ class _RandomNetworkPhotoScreenState extends State<RandomNetworkPhotoScreen> {
 // 2022-06-07 在https://www.hlapi.cn/中，还有效的随机图片地址
   var networkPhotoUrlList = [
     "https://www.hlapi.cn/api/ecy3", // 随机二次元图片③
-    "https://www.hlapi.cn/api/sjmm1", // 随机手机美女图片①
     "https://www.hlapi.cn/api/gqbz", // 随机高清风景壁纸
-    "https://www.hlapi.cn/api/mm2", // 随机美女图片②
     "https:/www.hlapi.cn/api/ecy1", // 随机二次元图片①
     "https://www.hlapi.cn/api/mcj", // 随机mc酱动漫图片
-    // "https://www.hlapi.cn/api/mjx", // 买家秀
     "https://www.hlapi.cn/api/bjt", // 网站随机背景图
-    "https://www.hlapi.cn/api/mm1", // 随机美女图片①
     "https://www.hlapi.cn/api/sjdm1", // 随机手机动漫图片①
+    // "https://www.hlapi.cn/api/mm1", // 随机美女图片①
+    // "https://www.hlapi.cn/api/mm2", // 随机美女图片②
+    // "https://www.hlapi.cn/api/mjx", // 买家秀
+    // "https://www.hlapi.cn/api/sjmm1", // 随机手机美女图片①
     // "https://www.hlapi.cn/api/gxdt", // 搞笑动态图片
   ];
 
@@ -121,7 +122,7 @@ class _RandomNetworkPhotoScreenState extends State<RandomNetworkPhotoScreen> {
               // 长按结束触发下载
               onLongPressEnd: (details) {
                 print("onVerticalDragEnd--- $details");
-                _saveImage(rondomPhotoUrl);
+                _downloadImage(rondomPhotoUrl);
               },
               // 设定子组件宽高比为1：1
               child: AspectRatio(
@@ -193,9 +194,9 @@ class _RandomNetworkPhotoScreenState extends State<RandomNetworkPhotoScreen> {
     );
   }
 
-// 使用 GallerySaver 的图片下载
-// 这里传入保存的，就需要是图片的真实地址
-  _saveImage(url) async {
+  // 下载图片到相册（默认Download文件夹）
+  // 这里传入保存的，就需要是图片的真实地址
+  _downloadImage(String url) async {
     if (downloading) {
       _toastInfo("图片下载中，请先等待下载完成。");
       return;
@@ -206,14 +207,24 @@ class _RandomNetworkPhotoScreenState extends State<RandomNetworkPhotoScreen> {
       downloading = true;
     });
 
-    GallerySaver.saveImage(url).then((value) {
-      print("GallerySaver 下载的结果：$value");
-      if (value != null) {
-        _toastInfo("下载完成，请到相册查看");
-        setState(() {
-          downloading = false;
-        });
-      }
+    // 直接存入相册根目录，这样可以在自带的相册工具中查看
+    // var savePath = await createFolderInDCIM();
+    var savePath = GlobalConstants.androidPicturesPath;
+    var filename = "$savePath/${url.split("/").last}";
+
+    // 获取网络图片数据
+    var response = await Dio().get(
+      url,
+      options: Options(responseType: ResponseType.bytes),
+    );
+
+    // 存入文件系统
+    final file = File(filename);
+    await file.writeAsBytes(response.data);
+
+    _toastInfo("下载完成，请到相册查看");
+    setState(() {
+      downloading = false;
     });
   }
 

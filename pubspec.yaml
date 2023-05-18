@@ -65,10 +65,6 @@ dependencies:
   cached_network_image: ^3.2.3
   # 跨平台（iOS、Android）API 来请求权限并检查其状态。
   permission_handler: ^10.2.0
-  # 保存图片到相册
-  image_gallery_saver: "^1.7.1"
-  # 保存图片到相册
-  gallery_saver: ^2.3.2
   # 显示浮空提示信息
   fluttertoast: ^8.2.1
   # 时间格式化

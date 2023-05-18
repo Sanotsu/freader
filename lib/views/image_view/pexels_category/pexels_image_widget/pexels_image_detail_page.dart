@@ -1,14 +1,15 @@
 // ignore_for_file: avoid_print
 
-import 'dart:typed_data';
+import 'dart:io';
+// import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:freader/common/personal/constants.dart';
 import 'package:freader/models/pexels_api_images_result.dart';
 import 'package:freader/widgets/common_widgets.dart';
-import 'package:image_gallery_saver/image_gallery_saver.dart';
 
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -43,6 +44,10 @@ class _PexelsImageDetailPageState extends State<PexelsImageDetailPage> {
     // 下载使用原图途径和pexels的该图片id作为名称
     var downloadSrcList = [pd.src?.original, pd.src?.large2x, pd.src?.large];
     var photoName = "pexels_${pd.id}";
+    // 文件后缀
+    var fileSuffix = pd.src?.original?.split(".").last ?? "jpeg";
+
+    print("传入的widget.photoData 后缀$fileSuffix--${widget.photoData.toJson()}");
 
     return Scaffold(
       appBar: AppBar(
@@ -130,7 +135,9 @@ class _PexelsImageDetailPageState extends State<PexelsImageDetailPage> {
                     ),
                     SmallButtonWidget(
                       onTap: () => _downloadImage(
-                          downloadSrcList[0] ?? "", "${photoName}_origin"),
+                        downloadSrcList[0] ?? "",
+                        "${photoName}_origin.$fileSuffix",
+                      ),
                       tooltip: "download",
                       child: Icon(
                         Icons.download,
@@ -151,7 +158,9 @@ class _PexelsImageDetailPageState extends State<PexelsImageDetailPage> {
                     ),
                     SmallButtonWidget(
                       onTap: () => _downloadImage(
-                          downloadSrcList[1] ?? "", "${photoName}_large2x"),
+                        downloadSrcList[1] ?? "",
+                        "${photoName}_large2x.$fileSuffix",
+                      ),
                       tooltip: "download",
                       child: Icon(
                         Icons.download,
@@ -172,7 +181,9 @@ class _PexelsImageDetailPageState extends State<PexelsImageDetailPage> {
                     ),
                     SmallButtonWidget(
                       onTap: () => _downloadImage(
-                          downloadSrcList[2] ?? "", "${photoName}_large"),
+                        downloadSrcList[2] ?? "",
+                        "${photoName}_large.$fileSuffix",
+                      ),
                       tooltip: "download",
                       child: Icon(
                         Icons.download,
@@ -209,22 +220,21 @@ class _PexelsImageDetailPageState extends State<PexelsImageDetailPage> {
       downloading = true;
     });
 
-    var appDocDir = await getTemporaryDirectory();
-    String savePath = appDocDir.path;
+    // 直接存入相册根目录，这样可以在自带的相册工具中查看
+    // var savePath = await createFolderInDCIM();
+    var savePath = GlobalConstants.androidPicturesPath;
+    var filename = '$savePath/$name';
 
-    print("savePath $savePath");
-
+    // 获取网络图片数据
     var response = await Dio().get(
       url,
       options: Options(responseType: ResponseType.bytes),
     );
-    final result = await ImageGallerySaver.saveImage(
-      Uint8List.fromList(response.data),
-      quality: 100,
-      name: name,
-    );
-    print(result);
-    // _toastInfo("$result");
+
+    // 存入文件系统
+    final file = File(filename);
+    await file.writeAsBytes(response.data);
+
     _toastInfo("下载完成，请到相册查看");
     setState(() {
       downloading = false;
@@ -246,5 +256,31 @@ class _PexelsImageDetailPageState extends State<PexelsImageDetailPage> {
   _toastInfo(String info) {
     // Fluttertoast.showToast(msg: info, toastLength: Toast.LENGTH_LONG);
     Fluttertoast.showToast(msg: info, toastLength: Toast.LENGTH_SHORT);
+  }
+}
+
+// 注意，在安卓中，这在相册DCIM文件夹中的图片，在能在自带的相册应用中打开。
+// 所以以下方案在DCIM中新增了文件夹，则无法直接在相册看到，需要找到指定文件夹才看得到。
+Future<String> createFolderInDCIM() async {
+// 这里是解决插件不能用的临时非方案，所以直接找到安卓下的DCIM地址(没有找到获取相册路径的工具库)，
+// 创建项目名文件夹，然后用于保存下载的图片
+  try {
+    var temp = "${GlobalConstants.androidPicturesPath}freader/";
+    final Directory appDocDirFolder = Directory(temp);
+    if (await appDocDirFolder.exists()) {
+      // 如果文件夹存在，返回地址
+      return appDocDirFolder.path;
+    } else {
+      // 如果不存在，则创建该文件夹，然后返回
+      final Directory appDocDirNewFolder =
+          await appDocDirFolder.create(recursive: true);
+      return appDocDirNewFolder.path;
+    }
+  } catch (e) {
+    // 如果指定的DCIM位置出错，也给一个能存图片的地址，就应用内部的地址
+    print("指定文件夹地址创建失败$e,"
+        "返回临时地址。");
+    var addDir = await getApplicationDocumentsDirectory();
+    return addDir.path;
   }
 }
