@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:freader/models/readhub_api_result.dart';
 import 'package:freader/models/readhub_api_topic_detail.dart';
-import 'package:freader/utils/global_styles.dart';
+import 'package:freader/widgets/global_styles.dart';
 import 'package:freader/utils/platform_util.dart';
 import 'package:freader/views/news_view/readhub_category/readhub_widget/fetch_readhub_api_result.dart';
 import 'package:freader/views/news_view/readhub_category/readhub_widget/readhub_topic_detail_dialog.dart';
@@ -243,7 +243,7 @@ class _ItemCardBottomAreaWidgetState extends State<ItemCardBottomAreaWidget> {
     }
 
     /// 已收藏的文章，用于下面图标标星
-    var staredArticleList = ["111", "8fBKiuLOUyn"];
+    // var staredArticleList = ["111", "8fBKiuLOUyn"];
 
     return Row(
       children: <Widget>[
@@ -265,27 +265,27 @@ class _ItemCardBottomAreaWidgetState extends State<ItemCardBottomAreaWidget> {
         ),
 
         /// 都是預留而已
-        // 分享
-        SmallButtonWidget(
-          onTap: () => {},
-          tooltip: "share",
-          child: Icon(
-            Icons.share,
-            size: bottomIconButtonSize2,
-          ),
-        ),
-        // 收藏
-        SmallButtonWidget(
-          onTap: () => {},
-          tooltip: "star",
-          child: staredArticleList.contains(widget.newsItem.uid)
-              ? Icon(
-                  Icons.star,
-                  size: bottomIconButtonSize2,
-                  color: Colors.lightBlue,
-                )
-              : Icon(Icons.star, size: bottomIconButtonSize2),
-        ),
+        // // 分享
+        // SmallButtonWidget(
+        //   onTap: () => {},
+        //   tooltip: "share",
+        //   child: Icon(
+        //     Icons.share,
+        //     size: bottomIconButtonSize2,
+        //   ),
+        // ),
+        // // 收藏
+        // SmallButtonWidget(
+        //   onTap: () => {},
+        //   tooltip: "star",
+        //   child: staredArticleList.contains(widget.newsItem.uid)
+        //       ? Icon(
+        //           Icons.star,
+        //           size: bottomIconButtonSize2,
+        //           color: Colors.lightBlue,
+        //         )
+        //       : Icon(Icons.star, size: bottomIconButtonSize2),
+        // ),
         // 热门话题有更多链接，其他的就没有
         widget.newsItem.newsAggList != null
             ? SmallButtonWidget(

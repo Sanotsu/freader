@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:freader/models/pexels_api_images_result.dart';
-import 'package:freader/utils/global_styles.dart';
+import 'package:freader/widgets/global_styles.dart';
 import 'package:freader/views/image_view/pexels_category/pexels_image_widget/fetch_pexels_api_result.dart';
 import 'package:freader/views/image_view/pexels_category/pexels_image_widget/pexels_image_detail_page.dart';
 
@@ -233,16 +233,16 @@ class _PexelsImagePageState extends State<PexelsImagePage> {
       appBar: AppBar(
         title: const Text("Pexels"),
         // 2022-05-06 后续可参看 lib\_demos\search_on_app_bar.dart 做readhub的新闻查询。
-        actions: <Widget>[
-          IconButton(
-            iconSize: 20,
-            icon: const Icon(
-              Icons.search,
-              semanticLabel: 'search', // icon的语义标签。
-            ),
-            onPressed: () {},
-          ),
-        ],
+        // actions: <Widget>[
+        //   IconButton(
+        //     iconSize: 20,
+        //     icon: const Icon(
+        //       Icons.search,
+        //       semanticLabel: 'search', // icon的语义标签。
+        //     ),
+        //     onPressed: () {},
+        //   ),
+        // ],
       ),
       body: Column(
         children: <Widget>[

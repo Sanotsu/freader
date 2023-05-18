@@ -58,7 +58,7 @@ class _TxtViewerPageState extends State<TxtViewerPage> {
       await handleAssetTxt2Db("三国演义");
       await handleAssetTxt2Db("水浒传");
       await handleAssetTxt2Db("西游记");
-      await handleAssetTxt2Db("阿Q正传");
+      // await handleAssetTxt2Db("阿Q正传");
     } else {
       print("数据都已经存在数据库了,全db章节数量: ${tempList.length}");
 

@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:freader/models/readhub_api_topic_detail.dart';
-import 'package:freader/utils/customized_timeline.dart';
+import 'package:freader/widgets/customized_timeline.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class ReadhubTopicDetailDialog extends StatefulWidget {

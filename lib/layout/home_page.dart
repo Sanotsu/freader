@@ -3,7 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:freader/common/personal/constants.dart';
 import 'package:freader/layout/context_local.dart';
 import 'package:freader/layout/context_online.dart';
-import 'package:freader/utils/global_styles.dart';
+import 'package:freader/widgets/global_styles.dart';
 import 'package:freader/views/login_screen.dart';
 import 'package:freader/widgets/hitokoto_sentence.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -37,7 +37,7 @@ class _HomePageState extends State<HomePage> {
       body: Center(child: _widgetOptions.elementAt(_selectedIndex)),
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(icon: Icon(Icons.newspaper), label: '在线新闻'),
+          BottomNavigationBarItem(icon: Icon(Icons.newspaper), label: '联网资源'),
           BottomNavigationBarItem(icon: Icon(Icons.text_fields), label: '本地资源'),
         ],
         currentIndex: _selectedIndex,

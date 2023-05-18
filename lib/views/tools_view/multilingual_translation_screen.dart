@@ -2,7 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:freader/utils/global_styles.dart';
+import 'package:freader/widgets/global_styles.dart';
 import 'package:freader/views/tools_view/fetch_translation_result.dart';
 
 // 翻译语言选择下拉框对象

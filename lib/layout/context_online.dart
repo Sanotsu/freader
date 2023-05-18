@@ -7,7 +7,7 @@ import 'package:freader/layout/home_page.dart';
 import 'package:freader/layout/image_page.dart';
 import 'package:freader/layout/news_page.dart';
 import 'package:freader/layout/tools_page.dart';
-import 'package:freader/utils/global_styles.dart';
+import 'package:freader/widgets/global_styles.dart';
 
 class ContextOnline extends StatefulWidget {
   const ContextOnline({super.key});
@@ -128,7 +128,7 @@ _buildAppBar(String networkState) {
         SizedBox(
           width: tabWidth,
           child: Tab(
-            child: Text("各式新闻", style: blackHeadTextStyle),
+            child: Text("聚合新闻", style: blackHeadTextStyle),
           ),
         ),
         SizedBox(

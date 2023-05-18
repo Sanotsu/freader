@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:freader/utils/global_styles.dart';
+import 'package:freader/widgets/global_styles.dart';
 import 'package:freader/views/news_view/readhub_category/readhub_widget/readhub_typed_news.dart';
 
 class ReadhubPage extends StatefulWidget {

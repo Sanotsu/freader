@@ -90,10 +90,10 @@ handleAssetTxt2Db(fileName) async {
     }
   }
 
-  for (var e in titleList) {
-    print(e);
-  }
-  print(titleList.length);
+  // for (var e in titleList) {
+  //   print(e);
+  // }
+  // print(titleList.length);
 }
 
 // 把章节内容存到db

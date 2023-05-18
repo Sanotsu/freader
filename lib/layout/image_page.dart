@@ -5,7 +5,7 @@ import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:freader/utils/global_styles.dart';
+import 'package:freader/widgets/global_styles.dart';
 import 'package:freader/views/image_view/image_page_demo.dart';
 import 'package:freader/views/image_view/pexels_category/pexels_image_page.dart';
 

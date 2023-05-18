@@ -4,7 +4,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:freader/models/sina_roll_news_result.dart';
-import 'package:freader/utils/global_styles.dart';
+import 'package:freader/widgets/global_styles.dart';
 import 'package:freader/utils/platform_util.dart';
 import 'package:freader/views/news_view/sina_roll_news_category/sina_roll_news_widget/fetch_sina_roll_news_result.dart';
 import 'package:freader/widgets/common_widgets.dart';

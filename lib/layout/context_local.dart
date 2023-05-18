@@ -5,7 +5,7 @@ import 'package:freader/layout/context_online.dart';
 import 'package:freader/layout/markdown_page.dart';
 import 'package:freader/layout/pdf_viewer_page.dart';
 import 'package:freader/layout/txt_viewer_page.dart';
-import 'package:freader/utils/global_styles.dart';
+import 'package:freader/widgets/global_styles.dart';
 
 class ContextLocal extends StatefulWidget {
   const ContextLocal({super.key});
@@ -114,7 +114,7 @@ _buildAppBar(String networkState) {
           child: Text("PDF阅读器", style: blackHeadTextStyle),
         ),
         Tab(
-          child: Text("内置.md文字", style: blackHeadTextStyle),
+          child: Text("内置.MD文档", style: blackHeadTextStyle),
         ),
         Tab(
           child: Text("内置TXT小说", style: blackHeadTextStyle),
