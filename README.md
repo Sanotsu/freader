@@ -13,6 +13,23 @@
 
 ![screenshot-freader](_screenshots/screenshot-freader.jpg)
 
+展示的功能基本能用：
+
+- 在线新闻
+  - readhub、知乎日报、新浪滚动新闻
+- 实用工具
+  - 历史上的今天、随机网络图片、多国语言翻译
+- 开源图片
+  - 浏览下载 pexels 的图片
+- pdf 阅读器
+  - 阅读内置或手机中自选的 pdf
+- 内置 markdown 文档
+  - 阅读内置 markdown 文档
+- 内置 txt 小说
+  - 阅读内置 txt 小说
+- 抽屉
+  - 随机一言
+
 ## 很多问题
 
 因为这是零基础情况下，一边看 flutter 官方教程一边看 flutter api 开发的第一个应用，属于新手试错阶段，可能存在低级错误。
