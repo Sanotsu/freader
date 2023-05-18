@@ -55,8 +55,7 @@
 
 注意 layout 中内容算是比较重要了。
 
-app -> context_local -> news/tools/image  
-app -> context_online -> pdf/markdown/txt
+app -> homepage -> 根据底部导航栏索引切换 (news/tools/image) 或者 (pdf/markdown/txt)
 
 ## 实现逻辑
 
